@@ -2,10 +2,11 @@
 
 ServHandle::ServHandle(void) {}
 
-ServHandle::~ServHandle(void);
+ServHandle::~ServHandle(void) {}
 
-void	servCreate(std::string const & confFile) {
-	// open file config
+void	ServHandle::servCreate(char const * configFile) {
+	std::cout << YEL << "Serv Create" << reset << std::endl;
+	this->_configFileServer.readConfigFile(configFile);
 }
 
 void	ServHandle::servStart(void) {}
