@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 
-#include "ConfigFile.hpp"
+#include "ConfigFileHandle.hpp"
 
 class ServHandle
 {
@@ -20,7 +20,7 @@ class ServHandle
 		ServHandle(ServHandle const & r);
 		ServHandle &operator=(ServHandle const & r);
 
-		ConfigFile	_configServ;
+		ConfigFileHandle	_configServ;
 };
 
 #endif

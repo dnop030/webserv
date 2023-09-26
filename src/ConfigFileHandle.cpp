@@ -1,10 +1,10 @@
-#include "ConfigFile.hpp"
+#include "ConfigFileHandle.hpp"
 
-ConfigFile::ConfigFile(void) {}
+ConfigFileHandle::ConfigFileHandle(void) {}
 
-ConfigFile::~ConfigFile(void) {}
+ConfigFileHandle::~ConfigFileHandle(void) {}
 
-void	ConfigFile::readConfigFile(char const * fileName) {
+void	ConfigFileHandle::readConfigFile(char const * fileName) {
 	// std::cout << MAG << "read Server Config File" << reset << std::endl;
 	std::ifstream	ifs;
 
