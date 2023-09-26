@@ -14,7 +14,7 @@ int	main(int argc, char ** argv) {
 		}
 		else {
 			std::cout << YEL << "Config file name Default config file" << reset << std::endl;
-			servManager.servCreate(argv[1]);
+			servManager.servCreate("config/webserv.conf");
 		}
 		servManager.servStart();
 	}

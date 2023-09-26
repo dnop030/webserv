@@ -13,7 +13,7 @@ void	ConfigFile::readConfigFile(char const * fileName) {
 	ifs.open(fileName, std::ifstream::in);
 	if (ifs.good() == false) {
 		ifs.close();
-		std::cout << RED << "file not found or no permission. please input valid filename" << reset << std::endl;
+		std::cout << RED << fileName << " file not found or no permission. please input valid filename" << reset << std::endl;
 		// throw !!!!!!!!!!!!!!!!!!!!!!1
 		exit(1);
 	}
