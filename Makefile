@@ -7,6 +7,7 @@ HDR			:= $(wildcard $(HDRDIR)/*.hpp)
 INC			:= -I./include
 
 CXX			:= g++
+# CXX			:= clang
 # CXXFLAGS	:= -Wall -Wextra -Werror -std=c++98
 
 SRCS		:= $(wildcard $(SRCDIR)/*.cpp)
