@@ -5,6 +5,8 @@
 #include <string>
 #include <fstream>
 #include "color.hpp"
+#include <map>
+#include "ServConfigDetail.hpp"
 
 class ConfigFileHandle
 {
@@ -13,10 +15,16 @@ class ConfigFileHandle
 		~ConfigFileHandle(void);
 
 		void	readConfigFile(char const * fileName);
+		void	showDetailConfigFile(void);
+		unsigned int		getAmountServConfig(void);
 
 	private:
 		ConfigFileHandle(ConfigFileHandle const & r);
 		ConfigFileHandle &operator=(ConfigFileHandle const & r);
+
+		std::map<unsigned int, ServConfigDetail *>	_servConfig;
+		unsigned int					_amountServConfigDetail;
+		ServConfigDetail				*_tmpServConfigDetail;
 };
 
 #endif

@@ -1,8 +1,17 @@
 #include "ConfigFileHandle.hpp"
 
-ConfigFileHandle::ConfigFileHandle(void) {}
+ConfigFileHandle::ConfigFileHandle(void) {
+	this->_tmpServConfigDetail = NULL;
+	this->_amountServConfigDetail = 0;
+}
 
-ConfigFileHandle::~ConfigFileHandle(void) {}
+ConfigFileHandle::~ConfigFileHandle(void) {
+	std::map<unsigned int, ServConfigDetail *>::iterator	iter = this->_servConfig.begin();
+	while (iter != this->_servConfig.end()) {
+		delete	iter->second;
+		iter++;
+	}
+}
 
 void	ConfigFileHandle::readConfigFile(char const * fileName) {
 	// std::cout << MAG << "read Server Config File" << reset << std::endl;
@@ -19,9 +28,40 @@ void	ConfigFileHandle::readConfigFile(char const * fileName) {
 	}
 	else {
 		while (std::getline(ifs, tmpRd)) {
-			std::cout << tmpRd;
-			std::cout << std::endl;
+			// std::cout << tmpRd;
+			// std::cout << std::endl;
+			if ((tmpRd.find("{") != std::string::npos) && (tmpRd.length() == 1)) {
+				this->_servConfig[this->_amountServConfigDetail] = new ServConfigDetail();
+
+				// std::cout << YEL << "Add of ServConfigDetai " << this->_amountServConfigDetail << " ";
+				// std::cout << this->_servConfig[this->_amountServConfigDetail] << reset << std::endl;
+
+				// std::cout << "Create New ServerConfigDetail" << std::endl;
+				this->_amountServConfigDetail++;
+			}
+			else if ((tmpRd.length() > 1) && (tmpRd.find(";") != std::string::npos)) {
+				// std::cout << tmpRd;
+				// std::cout << std::endl;
+				this->_tmpServConfigDetail = this->_servConfig[this->_amountServConfigDetail - 1];
+
+				// std::cout << MAG << "Add of ServConfigDetai " << this->_amountServConfigDetail - 1 << " ";
+				// std::cout << this->_tmpServConfigDetail << reset << std::endl;
+
+				this->_tmpServConfigDetail->storeConfig(tmpRd);
+			}
 		}
 		ifs.close();
 	}
 }
+
+void	ConfigFileHandle::showDetailConfigFile(void) {
+	for (int i = 0; i < this->_amountServConfigDetail; i++) {
+		this->_servConfig[i]->showDetail();
+		std::cout << std::endl;
+	}
+}
+
+unsigned int	ConfigFileHandle::getAmountServConfig(void) {
+	return (this->_amountServConfigDetail);
+}
+
