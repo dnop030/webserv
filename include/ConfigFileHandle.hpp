@@ -17,6 +17,7 @@ class ConfigFileHandle
 		void	readConfigFile(char const * fileName);
 		void	showDetailConfigFile(void);
 		unsigned int		getAmountServConfig(void);
+		std::string const &	getServConfigVal(int servNum, std::string const & key);
 
 	private:
 		ConfigFileHandle(ConfigFileHandle const & r);

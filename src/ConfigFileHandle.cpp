@@ -61,7 +61,17 @@ void	ConfigFileHandle::showDetailConfigFile(void) {
 	}
 }
 
-unsigned int	ConfigFileHandle::getAmountServConfig(void) {
+unsigned int		ConfigFileHandle::getAmountServConfig(void) {
 	return (this->_amountServConfigDetail);
+}
+
+std::string const &	ConfigFileHandle::getServConfigVal(int servNum, std::string const & key) {
+	std::map<unsigned int, ServConfigDetail *>::iterator	it;
+
+	std::cout << MAG << "[INFO]configFileHandle getServConfigVal" << reset << std::endl;
+	it = this->_servConfig.find(servNum);
+	if (it != this->_servConfig.end()) {
+		return (it->second->getVal(key));
+	}
 }
 

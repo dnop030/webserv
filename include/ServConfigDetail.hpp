@@ -16,6 +16,7 @@ class ServConfigDetail
 
 		void	storeConfig(std::string const & config);
 		void	showDetail(void);
+		std::string const &	getVal(std::string const & val);
 
 	private:
 		ServConfigDetail(ServConfigDetail const & r);

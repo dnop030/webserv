@@ -46,3 +46,18 @@ void	ServConfigDetail::showDetail(void) {
 		it++;
 	}
 }
+
+std::string const &	ServConfigDetail::getVal(std::string const & val) {
+	std::multimap<std::string, std::string>::iterator	it;
+
+	std::cout << MAG << "[INFO]ServConfigDetail getVal" << reset << std::endl;
+	it = this->_detail.find(val);
+	if (it != this->_detail.end()) {
+		std::cout << MAG << "[INFO]Found key" << reset << std::endl;
+		return (it->second);
+	}
+	// else {
+	// 	std::cout << MAG << "[INFO]NOT Found key" << reset << std::endl;
+	// 	return ("test");
+	// }
+}
