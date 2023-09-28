@@ -16,6 +16,7 @@ void	ServHandle::servCreate(char const * configFile) {
 
 	tmpStr = this->_configServ.getServConfigVal(0, "listen ");
 	std::cout << MAG << "[INFO]output \"listen \" 0 " << tmpStr << reset << std::endl;
+	// std::cout << MAG << "[INFO]output length " << tmpStr.length() << reset << std::endl;
 }
 
 void	ServHandle::servStart(void) {}
