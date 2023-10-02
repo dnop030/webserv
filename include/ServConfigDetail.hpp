@@ -23,7 +23,7 @@ class ServConfigDetail
 		ServConfigDetail &operator=(ServConfigDetail const & r);
 
 		std::multimap<std::string, std::string>	_detail;
-		std::string							tmpStr;
+		std::string							_tmpStr;
 };
 
 #endif

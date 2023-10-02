@@ -26,6 +26,7 @@ class ConfigFileHandle
 		std::map<unsigned int, ServConfigDetail *>	_servConfig;
 		unsigned int					_amountServConfigDetail;
 		ServConfigDetail				*_tmpServConfigDetail;
+		std::string						_tmpStr;
 };
 
 #endif

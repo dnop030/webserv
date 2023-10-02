@@ -3,6 +3,7 @@
 ConfigFileHandle::ConfigFileHandle(void) {
 	this->_tmpServConfigDetail = NULL;
 	this->_amountServConfigDetail = 0;
+	this->_tmpStr.clear();
 }
 
 ConfigFileHandle::~ConfigFileHandle(void) {
@@ -73,5 +74,8 @@ std::string const &	ConfigFileHandle::getServConfigVal(int servNum, std::string 
 	if (it != this->_servConfig.end()) {
 		return (it->second->getVal(key));
 	}
+	else {
+		this->_tmpStr.clear();
+		return (this->_tmpStr);
+	}
 }
-

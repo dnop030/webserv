@@ -57,8 +57,8 @@ std::string const &	ServConfigDetail::getVal(std::string const & val) {
 		return (it->second);
 	}
 	else {
-		tmpStr.clear();
-		std::cout << MAG << "[INFO]NOT Found key:" << tmpStr << reset << std::endl;
-		return (tmpStr);
+		this->_tmpStr.clear();
+		std::cout << MAG << "[INFO]NOT Found key:" << this->_tmpStr << reset << std::endl;
+		return (this->_tmpStr);
 	}
 }
