@@ -4,7 +4,10 @@
 #include <iostream>
 #include <string>
 
+#include <vector>
+
 #include "ConfigFileHandle.hpp"
+#include "Server.hpp"
 
 class ServHandle
 {
@@ -20,7 +23,9 @@ class ServHandle
 		ServHandle(ServHandle const & r);
 		ServHandle &operator=(ServHandle const & r);
 
-		ConfigFileHandle	_configServ;
+		ConfigFileHandle		_configServ;
+		std::vector<Server *>	_serv;
+		Server 					*_tmpServer;
 };
 
 #endif
