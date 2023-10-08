@@ -85,6 +85,7 @@ void	ServHandle::servStart(void) {
 	while (1) {
 		int	numEvent, i;
 
+		std::cout << std::endl << YEL << "Wait for Event" << reset << std::endl;
 		numEvent = epoll_wait (this->_epoll_fd, this->_event_ret, MAXEVENTS, -1);
 		std::cout << std::endl << MAG << "[INFO]found " << numEvent << " event(s)" << reset << std::endl;
 
@@ -106,17 +107,19 @@ void	ServHandle::servStart(void) {
 						if (it->second == 's') {
 							// go to server Rd Accept
 							this->sockServRd(it->first);
+							std::cout << std::endl << YEL << "End sockSerRd" << reset << std::endl;
 						}
 						else {
 							// go to Rd Request
 							this->sockCliRd(it->first);
+							std::cout << std::endl << YEL << "End sockCliRd" << reset << std::endl;
 						}
 					}
 					else {
 						std::cout << RED << "[ERROR] fake fd num " << this->_event_ret[i].data.fd << reset << std::endl;
 					}
 				}
-				else if (this->_event_ret[i].events & EPOLLOUT) {
+				if ((this->_event_ret[i].events & EPOLLOUT) && (this->_httpRespose.size() > 0)) {
 					std::cout << MAG << "[INFO] Found Wr on " << this->_event_ret[i].data.fd << reset << std::endl;
 					std::map<int, char>::iterator	it;
 
@@ -124,18 +127,62 @@ void	ServHandle::servStart(void) {
 					if (it != this->_mapFd.end()) {
 						if (it->second == 's') {
 							// go to server Wr What???
+							this->sockServWr(it->first);
 						}
 						else {
 							// go to Wr Response
+							this->sockCliWr(it->second);
 						}
 					}
 					else {
 						std::cout << RED << "[ERROR] fake fd num " << this->_event_ret[i].data.fd << reset << std::endl;
 					}
 				}
-				else {
-					std::cout << RED << "[WARNING] found flag not rd and wr on " << this->_event_ret[i].data.fd << " with flag " << this->_event_ret[i].events << std::endl;
-				}
+
+				// if (this->_event_ret[i].events & EPOLLIN) {
+				// 	std::cout << MAG << "[INFO] Found Rd on " << this->_event_ret[i].data.fd << reset << std::endl;
+				// 	std::map<int, char>::iterator	it;
+
+				// 	it = this->_mapFd.find(this->_event_ret[i].data.fd);
+				// 	if (it != this->_mapFd.end()) {
+				// 		if (it->second == 's') {
+				// 			// go to server Rd Accept
+				// 			this->sockServRd(it->first);
+				// 			std::cout << std::endl << YEL << "End sockSerRd" << reset << std::endl;
+				// 		}
+				// 		else {
+				// 			// go to Rd Request
+				// 			this->sockCliRd(it->first);
+				// 			std::cout << std::endl << YEL << "End sockCliRd" << reset << std::endl;
+				// 		}
+				// 	}
+				// 	else {
+				// 		std::cout << RED << "[ERROR] fake fd num " << this->_event_ret[i].data.fd << reset << std::endl;
+				// 	}
+				// }
+				// // else if (this->_event_ret[i].events & EPOLLOUT) {
+				// else if ((this->_event_ret[i].events & EPOLLOUT) && (this->_httpRespose.size() > 0)) {
+				// 	std::cout << MAG << "[INFO] Found Wr on " << this->_event_ret[i].data.fd << reset << std::endl;
+				// 	std::map<int, char>::iterator	it;
+
+				// 	it = this->_mapFd.find(this->_event_ret[i].data.fd);
+				// 	if (it != this->_mapFd.end()) {
+				// 		if (it->second == 's') {
+				// 			// go to server Wr What???
+				// 			this->sockServWr(it->first);
+				// 		}
+				// 		else {
+				// 			// go to Wr Response
+				// 			this->sockCliWr(it->second);
+				// 		}
+				// 	}
+				// 	else {
+				// 		std::cout << RED << "[ERROR] fake fd num " << this->_event_ret[i].data.fd << reset << std::endl;
+				// 	}
+				// }
+				// else {
+				// 	std::cout << YEL << "[WARNING] found flag not rd and wr on " << this->_event_ret[i].data.fd << " with flag " << this->_event_ret[i].events << std::endl;
+				// }
 			}
 		}
 	}
@@ -274,25 +321,40 @@ void	ServHandle::sockServRd(int const & servFd) {
 	this->showMapFd();
 }
 
-void	ServHandle::sockServWr(void) {}
+void	ServHandle::sockServWr(int const & servFd) {
+	std::cout << YEL << "[WARNING] Found some package on Server socket Need to send back" << reset << std::endl;
+}
 
 void	ServHandle::sockCliRd(int const & cliFd) {
 	this->_bufferPack.clear();
+	this->_tmpStdStr.clear();
+	this->_buffRd[0] = '\0';
 	do {
-		// this->_valRd = recv(this->_infd, this->_buffRd, sizeof(this->_buffRd), 0);
-		// this->_valRd = read(this->_infd, this->_buffRd, sizeof(this->_buffRd));
+		// Recv Work but no Wr Event
+		// // this->_valRd = recv(this->_infd, this->_buffRd, sizeof(this->_buffRd), 0);
+		// // this->_valRd = read(this->_infd, this->_buffRd, sizeof(this->_buffRd));
+		// this->_valRd = recv(this->_infd, this->_buffRd, BUFFPACK, 0);
+		// std::cout << "Recv " << this->_valRd << std::endl;
+		// if (this->_valRd > 0) {
+		// 	// printf("\n\n%s\n\n", this->_buffRd);
+		// 	// std::cout << this->_buffRd << std::endl;
+		// 	this->_tmpStdStr = this->_buffRd;
+		// 	this->_bufferPack += this->_tmpStdStr;
+		// 	// this->_bufferPack.append(this->_buffRd, this->_valRd);
+		// }
+
 		this->_valRd = recv(this->_infd, this->_buffRd, BUFFPACK, 0);
 		std::cout << "Recv " << this->_valRd << std::endl;
 		if (this->_valRd > 0) {
 			// printf("\n\n%s\n\n", this->_buffRd);
 			// std::cout << this->_buffRd << std::endl;
 			this->_tmpStdStr = this->_buffRd;
-			this->_bufferPack += this->_tmpStdStr;
-			// this->_bufferPack.append(this->_buffRd, this->_valRd);
+			// this->_bufferPack += this->_tmpStdStr;
+			this->_bufferPack.append(this->_tmpStdStr, this->_valRd);
 		}
 	}
 	while (this->_valRd > 0);
-	std::cout << YEL << "valRd " << this->_valRd << reset << std::endl;
+	std::cout << CYN << "valRd " << this->_valRd << reset << std::endl;
 
 	// if (this->_valRd == -1) {
 	// 	// Handle error if needed
@@ -300,11 +362,34 @@ void	ServHandle::sockCliRd(int const & cliFd) {
 	// }
 
 	std::cout << CYN << "Data in Package" << reset << std::endl;
-	std::cout << CYN << this->_bufferPack << reset << std::endl;
-	std::cout << YEL << this->_tmpStdStr << reset << std::endl;
+	// std::cout << CYN << this->_bufferPack << reset << std::endl;
+	std::cout << CYN << this->_tmpStdStr << reset << std::endl;
+
+	// prepare the response and tie with client Fd
+	if (this->_httpRespose.find(cliFd) == this->_httpRespose.end()) {
+		this->_httpRespose.insert(std::pair<int, std::string>(cliFd, this->generateHttpResponse(200, "Ok", "Hello from server")) );
+	}
+	else {
+		std::cout << YEL << "[WARNING] Need to handle Fd receive multiple request" << reset << std::endl;
+	}
+
+	// std::cout << CYN << "call from Rd" << reset << std::endl;
+	// this->sockCliWr(cliFd);
 }
 
-void	ServHandle::sockCliWr(void) {}
+void	ServHandle::sockCliWr(int const & cliFd) {
+	std::cout << CYN << "In sockCliWr" << reset << std::endl;
+	std::map<int, std::string>::iterator	it = this->_httpRespose.end();
+
+	it = this->_httpRespose.find(cliFd);
+	if (it != this->_httpRespose.end()) {
+		// send(int fd, const void *buf, size_t n, int flags)
+		send(cliFd, it->second.c_str(), it->second.size(), 0);
+	}
+	else {
+		std::cout << YEL << "[WARNING] Not found response for " << cliFd << reset << std::endl;
+	}
+}
 
 std::string	ServHandle::generateHttpResponse(int statusCode, std::string const & statusMessage, std::string const & content) {
 	// Create an output stream to build the response

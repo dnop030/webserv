@@ -47,38 +47,39 @@ class ServHandle
 		void	showMapFd(void);
 
 		void	sockServRd(int const & servFd);
-		void	sockServWr(void);
+		void	sockServWr(int const & servFd);
 		void	sockCliRd(int const & cliFd);
-		void	sockCliWr(void);
+		void	sockCliWr(int const & cliFd);
 
 		std::string	generateHttpResponse(int statusCode, std::string const & statusMessage, std::string const & content);
 
-		ConfigFileHandle		_configServ;
+		ConfigFileHandle			_configServ;
 		// std::vector<Server *>	_serv;
 		// Server 					*_tmpServer;
 
 		// using only when create socket server
 		// std::vector<int>		_servFd;
-		std::map<int, char>		_mapFd;
+		std::map<int, char>			_mapFd;
 
-		struct sockaddr_in		_address;
-		int						_fd;
+		struct sockaddr_in			_address;
+		int							_fd;
 
-		int						_epoll_fd;
-		struct epoll_event		_event;
-		struct epoll_event		*_event_ret;
+		int							_epoll_fd;
+		struct epoll_event			_event;
+		struct epoll_event			*_event_ret;
 
 		// std::vector<int>		_cliFd;
-		struct sockaddr			_inAddr;
-		socklen_t				_inLen;
-		int						_infd;
-		char					_buffRd[BUFFPACK];
-		std::string				_bufferPack;
-		int						_valRd;
-		std::string				_bufferSend;
+		struct sockaddr				_inAddr;
+		socklen_t					_inLen;
+		int							_infd;
+		char						_buffRd[BUFFPACK];
+		std::string					_bufferPack;
+		int							_valRd;
+		std::string					_bufferSend;
+		std::map<int, std::string>	_httpRespose;
 
-		int						_tmpInt;
-		std::string				_tmpStdStr;
+		int							_tmpInt;
+		std::string					_tmpStdStr;
 };
 
 #endif
