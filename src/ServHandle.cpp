@@ -90,11 +90,25 @@ void	ServHandle::servStart(void) {
 		std::cout << std::endl << MAG << "[INFO]found " << numEvent << " event(s)" << reset << std::endl;
 
 		for (i=0; i<numEvent; i++) {
+			std::cout << MAG << "[INFO]flag " << this->_event_ret[i].events << " to handle" << reset << std::endl;
 			if ((this->_event_ret[i].events & EPOLLERR) || (this->_event_ret[i].events & EPOLLHUP)) {
 				/* An error has occured on this fd, or the socket is not
 					ready for reading (why were we notified then?) */
 				std::cerr << RED << "[ERROR] epoll error" << reset << std::endl;
 				std::cerr << RED << "[ERROR] error @ fd " << this->_event_ret[i].data.fd << reset << std::endl;
+
+				//forget to clear fd _mapFd
+				std::map<int, char>::iterator	it = this->_mapFd.find(this->_event_ret[i].data.fd);
+				if (it != this->_mapFd.end()) {
+					this->_mapFd.erase(it);
+				}
+
+				// del Fd from EPOLL instance
+				this->_tmpInt = epoll_ctl(this->_epoll_fd, EPOLL_CTL_DEL, this->_event_ret[i].data.fd, NULL);
+				if (this->_tmpInt != 0) {
+					perror("epoll_ctl(EPOLL_CTL_DEL)");
+				}
+
 				close(this->_event_ret[i].data.fd);
 			}
 			else {
@@ -108,11 +122,13 @@ void	ServHandle::servStart(void) {
 							// go to server Rd Accept
 							this->sockServRd(it->first);
 							std::cout << std::endl << YEL << "End sockSerRd" << reset << std::endl;
+							// continue();
 						}
 						else {
 							// go to Rd Request
 							this->sockCliRd(it->first);
 							std::cout << std::endl << YEL << "End sockCliRd" << reset << std::endl;
+							// continue();
 						}
 					}
 					else {
@@ -124,14 +140,26 @@ void	ServHandle::servStart(void) {
 					std::map<int, char>::iterator	it;
 
 					it = this->_mapFd.find(this->_event_ret[i].data.fd);
+					std::cout << std::endl << YEL << "Result Fd for Wr is " << it->first << std::endl;
 					if (it != this->_mapFd.end()) {
+						std::cout << std::endl << YEL << "Fd Bef Wr is " << it->first << std::endl;
 						if (it->second == 's') {
 							// go to server Wr What???
 							this->sockServWr(it->first);
+							std::cout << std::endl << YEL << "End sockSerWr" << reset << std::endl;
+							// continue();
 						}
 						else {
 							// go to Wr Response
-							this->sockCliWr(it->second);
+							this->sockCliWr(it->first);
+							std::cout << std::endl << YEL << "End sockCliWr" << reset << std::endl;
+							// continue();
+						}
+
+						// forget to del response after Wr ?????????????????????????????????????
+						std::map<int, std::string>::iterator	itHttpResponse = this->_httpRespose.find(it->first);
+						if (itHttpResponse != this->_httpRespose.end()) {
+							std::cout << YEL << "Del Response" << std::endl << itHttpResponse->second << reset << std::endl << std::endl;
 						}
 					}
 					else {
@@ -375,10 +403,23 @@ void	ServHandle::sockCliRd(int const & cliFd) {
 
 	// std::cout << CYN << "call from Rd" << reset << std::endl;
 	// this->sockCliWr(cliFd);
+
+	// show response after receive request
+	std::cout << std::endl << "Show Response" << std::endl;
+	{
+		std::map<int, std::string>::iterator	iterResponse = this->_httpRespose.begin();
+
+		while (iterResponse != this->_httpRespose.end()) {
+			std::cout << iterResponse->first << " " << iterResponse->second << std::endl;
+			iterResponse++;
+		}
+		std::cout << "-------------" << std::endl << std::endl;
+	}
 }
 
 void	ServHandle::sockCliWr(int const & cliFd) {
-	std::cout << CYN << "In sockCliWr" << reset << std::endl;
+	std::cout << std::endl << CYN << "In sockCliWr" << reset << std::endl;
+	std::cout << YEL << "Wr for socket " << cliFd << reset << std::endl;
 	std::map<int, std::string>::iterator	it = this->_httpRespose.end();
 
 	it = this->_httpRespose.find(cliFd);
