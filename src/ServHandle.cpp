@@ -315,8 +315,8 @@ void	ServHandle::sockCliRd(int const & cliFd) {
 			// printf("\n\n%s\n\n", this->_buffRd);
 			// std::cout << this->_buffRd << std::endl;
 			this->_tmpStdStr = this->_buffRd;
-			// this->_bufferPack += this->_tmpStdStr;
-			this->_bufferPack.append(this->_tmpStdStr, this->_valRd);
+			this->_bufferPack += this->_tmpStdStr;
+			// this->_bufferPack.append(this->_tmpStdStr, this->_valRd);
 		}
 	}
 	while (this->_valRd > 0);
