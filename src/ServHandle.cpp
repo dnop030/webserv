@@ -162,51 +162,6 @@ void	ServHandle::servStart(void) {
 						std::cout << RED << "[ERROR] fake fd num " << this->_event_ret[i].data.fd << reset << std::endl;
 					}
 				}
-
-				// if (this->_event_ret[i].events & EPOLLIN) {
-				// 	std::cout << MAG << "[INFO] Found Rd on " << this->_event_ret[i].data.fd << reset << std::endl;
-				// 	std::map<int, char>::iterator	it;
-
-				// 	it = this->_mapFd.find(this->_event_ret[i].data.fd);
-				// 	if (it != this->_mapFd.end()) {
-				// 		if (it->second == 's') {
-				// 			// go to server Rd Accept
-				// 			this->sockServRd(it->first);
-				// 			std::cout << std::endl << YEL << "End sockSerRd" << reset << std::endl;
-				// 		}
-				// 		else {
-				// 			// go to Rd Request
-				// 			this->sockCliRd(it->first);
-				// 			std::cout << std::endl << YEL << "End sockCliRd" << reset << std::endl;
-				// 		}
-				// 	}
-				// 	else {
-				// 		std::cout << RED << "[ERROR] fake fd num " << this->_event_ret[i].data.fd << reset << std::endl;
-				// 	}
-				// }
-				// // else if (this->_event_ret[i].events & EPOLLOUT) {
-				// else if ((this->_event_ret[i].events & EPOLLOUT) && (this->_httpRespose.size() > 0)) {
-				// 	std::cout << MAG << "[INFO] Found Wr on " << this->_event_ret[i].data.fd << reset << std::endl;
-				// 	std::map<int, char>::iterator	it;
-
-				// 	it = this->_mapFd.find(this->_event_ret[i].data.fd);
-				// 	if (it != this->_mapFd.end()) {
-				// 		if (it->second == 's') {
-				// 			// go to server Wr What???
-				// 			this->sockServWr(it->first);
-				// 		}
-				// 		else {
-				// 			// go to Wr Response
-				// 			this->sockCliWr(it->second);
-				// 		}
-				// 	}
-				// 	else {
-				// 		std::cout << RED << "[ERROR] fake fd num " << this->_event_ret[i].data.fd << reset << std::endl;
-				// 	}
-				// }
-				// else {
-				// 	std::cout << YEL << "[WARNING] found flag not rd and wr on " << this->_event_ret[i].data.fd << " with flag " << this->_event_ret[i].events << std::endl;
-				// }
 			}
 		}
 	}
