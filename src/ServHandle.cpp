@@ -373,8 +373,8 @@ void	ServHandle::sockCliRd(int const & cliFd) {
 	// }
 
 	std::cout << CYN << "Data in Package" << reset << std::endl;
-	std::cout << CYN << this->_bufferPack << reset << std::endl;
-	// std::cout << CYN << this->_tmpStdStr << reset << std::endl;
+	// std::cout << CYN << this->_bufferPack << reset << std::endl;
+	std::cout << CYN << this->_tmpStdStr << reset << std::endl;
 
 	// prepare the response and tie with client Fd
 	if (this->_httpRespose.find(cliFd) == this->_httpRespose.end()) {
