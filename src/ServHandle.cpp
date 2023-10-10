@@ -7,11 +7,7 @@
 
 ServHandle::ServHandle(void) {}
 
-ServHandle::~ServHandle(void) {
-	// for (int i=0; i<this->_serv.size(); i++) {
-	// 	delete this->_serv[i];
-	// }
-}
+ServHandle::~ServHandle(void) {}
 
 void	ServHandle::servCreate(char const * configFile) {
 	std::cout << MAG << "servCreate" << reset << std::endl;
@@ -67,7 +63,6 @@ void	ServHandle::servCreate(char const * configFile) {
 		if (this->_tmpInt < 0) {
 			std::cerr << RED << "Failed to add server file descriptor in instance epoll of server " << it->first << reset << std::endl;
 		}
-	}
 
 	// Show all Server Fd
 	// std::cout << MAG << "Show serv Fd" << reset << std::endl;
@@ -270,17 +265,6 @@ void	ServHandle::createServ(std::string const & config) {
 	}
 }
 
-// int		ServHandle::findVec(std::vector<int> const & vec, int val) {
-// 	int	i = 0;
-
-// 	while ((vec[i] != val) && (i < vec.size()))
-// 		i++;
-// 	if (i < vec.size())
-// 		return (i);
-// 	else
-// 		return (-1);
-// }
-
 void	ServHandle::showMapFd(void) {
 	std::map<int, char>::iterator	it = this->_mapFd.begin();
 
@@ -342,8 +326,6 @@ void	ServHandle::sockServRd(int const & servFd) {
 	else {
 		std::cerr << std::endl << RED << "[ERROR] Found duplicate fd when accept" << reset << std::endl;
 	}
-	// // Add client Fd into vector
-	// this->_cliFd.insert(this->_cliFd.begin(), this->_infd);
 
 	// for testing accept function
 	this->showMapFd();
