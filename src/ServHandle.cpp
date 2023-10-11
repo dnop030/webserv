@@ -1,4 +1,5 @@
 #include "ServHandle.hpp"
+#include "Request.hpp"
 #include <cstdlib>
 #include <fcntl.h>
 #include <sys/epoll.h>
@@ -330,6 +331,9 @@ void	ServHandle::sockCliRd(int const & cliFd) {
 	std::cout << CYN << "Data in Package" << reset << std::endl;
 	// std::cout << CYN << this->_bufferPack << reset << std::endl;
 	std::cout << CYN << this->_tmpStdStr << reset << std::endl;
+
+	Request rq(this->_tmpStdStr);
+	rq.parseRequest();	
 
 	// prepare the response and tie with client Fd
 	if (this->_httpRespose.find(cliFd) == this->_httpRespose.end()) {

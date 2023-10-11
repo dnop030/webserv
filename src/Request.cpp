@@ -95,36 +95,27 @@ void Request::trimTail(std::string &str, char delim)
 std::vector<std::string> Request::splitLine(void)
 {
 	std::vector<std::string> res;
-	int size = 0;
 
-	for (std::string::size_type idx = 0; this->_buffer[idx] != '\0'; ++idx)
-	{
-		if (this->_buffer[idx] == '\n')
-		{
-			++size;
-			if (this->endLine(idx))
-				break;
-		}
-	}
-	std::cout << "size is " << size << std::endl;
-	if (size <= 2)
-	{
-		throw BadRequest();
-	}
-	std::cout << "Size " << size - 1 << std::endl;
-	this->_buff_size = --size;
-	int i = 0;
 	std::string::size_type start = 0;
 	std::string::size_type end = this->_buffer.find('\n');
-	while (end != std::string::npos && i < size)
+	while (end != std::string::npos)
 	{
 		if (this->_buffer[end] == '\n')
 		{
-			res.push_back(this->_buffer.substr(start, end - start));
+			if (start != end)
+				res.push_back(this->_buffer.substr(start, end - start));
 			start = end + 1;
 			end = this->_buffer.find('\n', start);
 		}
 	}
+	this->_buff_size = 0;
+	for (std::vector<std::string>::iterator it = res.begin(); it != res.end(); ++it)
+		this->_buff_size += 1;
+	if (this->_buff_size <= 2)
+	{
+		throw BadRequest();
+	}
+	this->_buff_size -= 1;
 	if (this->_buffer[start] != '\0')
 		this->_body = this->_buffer.substr(start);
 	return (res);
@@ -261,7 +252,6 @@ std::vector<std::string> Request::splitStartLine(std::string &str)
 		throw BadRequest();
 	res.push_back(str.substr(start, end - start));
 	this->checkMethod(res[0]);
-	std::cout << "res[0]: " << res[0] << std::endl;
 	end = skipChar(str, end, ' ');
 	start = end;
 	while (str[end] != '\0')
@@ -276,7 +266,6 @@ std::vector<std::string> Request::splitStartLine(std::string &str)
 	res.push_back(str.substr(start, end - start));
 	this->trimTail(res[1], ' ');
 	this->checkTargetUri(res[1]);
-	std::cout << "res[1]: " << res[1] << std::endl;
 	start = end;
 	while (str[end] != '\0')
 	{
@@ -285,7 +274,6 @@ std::vector<std::string> Request::splitStartLine(std::string &str)
 		++end;
 	}
 	res.push_back(str.substr(start, end - start));
-	std::cout << "res[2]: " << res[2] << std::endl;
 	this->checkHttpVer(res[2]);
 	if (str[end] == ' ')
 	{
@@ -355,9 +343,7 @@ void Request::parseStartLine(void)
 	{
 		++count;
 		this->_start_line[idx] = buffer[idx];
-		std::cout << "startline: " << this->_start_line[idx] << std::endl;
 	}
-	std::cout << "count is " << count << std::endl;
 	if (count < 3)
 		throw BadRequest();
 }
@@ -366,27 +352,29 @@ void Request::parseHeader(void)
 {
 	for (int i = 1; i < this->_buff_size; ++i)
 	{
-		std::cout << "test buff: " << this->_line[i] << std::endl;
-		std::string *tmp = this->ft_split(this->_line[i], ':');
+		//std::string *tmp = this->ft_split(this->_line[i], ':');
+		std::string tmp[2];
+		size_t end = this->_line[i].find_first_of(':');
+		if (end == std::string::npos)
+			throw BadRequest();
+		tmp[0] = this->_line[i].substr(0, end);
+		if (++end == std::string::npos)
+			tmp[1] = "";
+		else
+			tmp[1] = this->_line[i].substr(end);
 		if (tmp == NULL || tmp[0] == "" || tmp[0][0] == ' ' || tmp[0][0] == '\t' || tmp[0].back() == ' ' || tmp[0].back() == '\t' || (tmp[1][0] != ' ' && tmp[1][0] != '\t'))
 			throw BadRequest();
 		if (std::isalpha(tmp[0][0]) && (tmp[0][0] < 'A' || tmp[0][0] > 'Z'))
-		{
-			// std::cout << "yyy" << std::endl;
 			tmp[0][0] -= 32;
-		}
 
 		for (int i = 1; tmp[0][i] != '\0'; ++i)
 		{
 			if (std::isalpha(tmp[0][i]) && (tmp[0][i] < 'a' || tmp[0][i] > 'z'))
-			{
-				// std::cout << "xxx" << std::endl;
 				tmp[0][i] += 32;
-			}
 		}
-		std::cout << "tmp[0]: " << tmp[0] << std::endl;
-		delete[] tmp;
-		tmp = NULL;
+		//this->_header[]
+		//delete[] tmp;
+		//tmp = NULL;
 	}
 }
 
@@ -399,7 +387,7 @@ void Request::parseRequest(void)
 			this->trimTail(this->_line[i], '\r');
 		this->parseStartLine();
 		this->parseHeader();
-		// this->printLine();
+		this->printLine();
 	}
 	catch (const BadRequest &e)
 	{
