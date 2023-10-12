@@ -157,6 +157,9 @@ void	ServHandle::servStart(void) {
 						if (itHttpResponse != this->_httpRespose.end()) {
 							std::cout << YEL << "Del Response" << std::endl << itHttpResponse->second << reset << std::endl << std::endl;
 						}
+						else {
+							std::cout << YEL << "Not found response from " << it->first << reset << std::endl;
+						}
 					}
 					else {
 						std::cout << RED << "[ERROR] fake fd num " << this->_event_ret[i].data.fd << reset << std::endl;
@@ -310,13 +313,14 @@ void	ServHandle::sockCliRd(int const & cliFd) {
 		// }
 
 		this->_valRd = recv(this->_infd, this->_buffRd, BUFFPACK, 0);
-		std::cout << "Recv " << this->_valRd << std::endl;
+		// std::cout << "Recv " << this->_valRd << std::endl;
 		if (this->_valRd > 0) {
 			// printf("\n\n%s\n\n", this->_buffRd);
 			// std::cout << this->_buffRd << std::endl;
 			this->_tmpStdStr = this->_buffRd;
-			this->_bufferPack += this->_tmpStdStr;
-			// this->_bufferPack.append(this->_tmpStdStr, this->_valRd);
+			// this->_bufferPack += this->_tmpStdStr;
+			this->_bufferPack.append(this->_tmpStdStr, this->_valRd);
+			// this->_bufferPack.append(this->_tmpStdStr, this->_valRd + 1);
 		}
 	}
 	while (this->_valRd > 0);
@@ -327,9 +331,11 @@ void	ServHandle::sockCliRd(int const & cliFd) {
 	// 	perror("recv");
 	// }
 
-	std::cout << CYN << "Data in Package" << reset << std::endl;
-	// std::cout << CYN << this->_bufferPack << reset << std::endl;
-	std::cout << CYN << this->_tmpStdStr << reset << std::endl;
+	// std::cout << CYN << "Data in Package tmpStdStr" << reset << std::endl;
+	// std::cout << CYN << this->_tmpStdStr << reset << std::endl << std::endl;
+
+	std::cout << CYN << "Data in Package bufferPack" << reset << std::endl;
+	std::cout << CYN << this->_tmpStdStr << reset << std::endl << std::endl;
 
 	// prepare the response and tie with client Fd
 	if (this->_httpRespose.find(cliFd) == this->_httpRespose.end()) {
