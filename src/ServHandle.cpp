@@ -349,7 +349,7 @@ void	ServHandle::sockCliRd(int const & cliFd) {
 	// this->sockCliWr(cliFd);
 
 	// show response after receive request
-	std::cout << std::endl << "Show Response" << std::endl;
+	std::cout << std::endl << "Show Response in CliRd" << std::endl;
 	{
 		std::map<int, std::string>::iterator	iterResponse = this->_httpRespose.begin();
 
