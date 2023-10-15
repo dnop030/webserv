@@ -1,10 +1,10 @@
 #include "Request.hpp"
 
-Request::Request(std::string &buffer) : _buffer(buffer), _line(0), _buff_size(0), _method("")
+Request::Request(std::string &buffer) : _buffer(buffer), _line(0), _buff_size(0), _method(""), _port(""), _hostname(""), _path(""), _fragment("")
 {
 }
 
-Request::Request(Request const &src) : _buff_size(src._buff_size), _buffer(src._buffer), _method(src._method)
+Request::Request(Request const &src) : _buff_size(src._buff_size), _buffer(src._buffer), _method(src._method), _port(src._port), _hostname(src._hostname), _path(src._path), _fragment(src._fragment)
 {
 	*this = src;
 }
@@ -15,6 +15,14 @@ Request &Request::operator=(Request const &src)
 	{
 		for (int i = 0; i < src._buff_size; ++i)
 			this->_line[i] = src._line[i];
+		if (this->_query.empty())
+			this->_query.clear();
+		std::map<std::string, std::string>::const_iterator it2 = src._query.begin();
+		while (it2 != src._query.end())
+		{
+			this->_query[it2->first] = it2->second;
+			++it2;
+		}
 	}
 	return (*this);
 }
@@ -128,13 +136,11 @@ std::string::size_type Request::skipChar(std::string &str, std::string::size_typ
 	return (idx);
 }
 
-int Request::ft_stoi(const std::string &s)
+double Request::ft_stod(const std::string &s)
 {
-	int res = 0;
+	double res = 0;
 
-	std::istringstream iss(s);
-	if (!(iss >> res))
-		return (0);
+	res = atof(s.c_str());
 	return (res);
 }
 
@@ -164,6 +170,14 @@ int Request::ft_strncmp(std::string &str1, std::string &str2, size_t size)
 			return (str1[i] - str2[i]);
 	}
 	return (0);
+}
+
+std::string::size_type Request::getLastChar(std::string &str)
+{
+	std::string::size_type res = 0;
+	while (str[res] != '\0')
+		++res;
+	return (res);
 }
 
 void Request::checkHttpVer(std::string &str)
@@ -215,11 +229,185 @@ void Request::checkMethod(std::string &str)
 		this->_method = "";
 }
 
+bool Request::isIPv4(std::string &str)
+{
+	std::cout << "In Ipv4" << std::endl;
+	std::string *chunk = NULL;
+	std::string::size_type end = str.find_first_of(':');
+	if (end == std::string::npos)
+		end = str.find_first_of('/');
+	if (end == std::string::npos)
+		chunk = this->ft_split(str, '.');
+	else
+	{
+		std::string str_tmp = str.substr(0, end - 0);
+		chunk = this->ft_split(str_tmp, '.');
+	}
+	if (chunk == NULL)
+		return (false);
+	int i = 0;
+	while (!chunk[i].empty())
+	{
+		if (chunk[i] == "" || !this->allDigit(chunk[i]))
+		{
+			return (false);
+			delete[] chunk;
+		}
+		double tmp = this->ft_stod(chunk[i]);
+		if (tmp < 0 || tmp > 255)
+		{
+			return (false);
+			delete[] chunk;
+		}
+		++i;
+	}
+	delete[] chunk;
+	std::cout << "i is " << i << std::endl;
+	if (i != 4)
+		return (false);
+	std::cout << "ipv4 => " << str << std::endl;
+	return (true);
+}
+
+void Request::parsePort(std::string &dns)
+{
+	std::string::size_type start = dns.find_first_of(':');
+	std::string::size_type end = dns.find_first_of('/');
+	if (start != std::string::npos)
+	{
+		this->_hostname = dns.substr(0, start);
+		if (end != std::string::npos)
+			this->_port = dns.substr(++start, --end - start);
+		else
+		{
+			end = this->getLastChar(dns);
+			this->_port = dns.substr(++start, end - start);
+		}
+	}
+	if (this->_port.empty() || !this->allDigit(this->_port))
+		throw BadRequest();
+}
+
+void Request::parsePath(std::string &dns)
+{
+	std::string::size_type start = dns.find_first_of('/');
+	std::string::size_type end = dns.find_first_of('?');
+	if (start != std::string::npos)
+	{
+		if (end == std::string::npos)
+			end = dns.find_first_of('#');
+		if (end != std::string::npos)
+			this->_path = dns.substr(start, end - start);
+		else
+		{
+			end = this->getLastChar(dns);
+			this->_path = dns.substr(start, end - start);
+		}
+	}
+}
+
+void Request::parseQuery(std::string &dns)
+{
+	std::string tmp = "";
+	std::string::size_type start = dns.find_first_of('?');
+	std::string::size_type end = dns.find_first_of('#');
+	if (start != std::string::npos)
+	{
+		if (end != std::string::npos)
+			tmp = dns.substr(++start, --end - start);
+		else
+		{
+			end = this->getLastChar(dns);
+			tmp = dns.substr(++start, end - start);
+		}
+		std::string *query = this->ft_split(tmp, '&');
+		std::string *map = NULL;
+		if (query == NULL)
+		{
+			map = this->ft_split(tmp, '=');
+			if (this->_query.find(map[0]) == this->_query.end())
+				this->_query[map[0]] = map[1];
+			delete[] map;
+			map = NULL;
+		}
+		for (int i = 0; !query[i].empty(); ++i)
+		{
+			map = this->ft_split(query[i], '=');
+			if (this->_query.find(map[0]) == this->_query.end())
+				this->_query[map[0]] = map[1];
+			delete[] map;
+			map = NULL;
+		}
+		if (map != NULL)
+		{
+			delete[] map;
+			map = NULL;
+		}
+		this->printMap(this->_query);
+	}
+}
+
+void Request::parseFragment(std::string &dns)
+{
+	std::string::size_type start = dns.find_first_of('#');
+	if (start == std::string::npos)
+		return;
+	std::string::size_type end = this->getLastChar(dns);
+	if (++start == end)
+		this->_fragment = "";
+	else
+		this->_fragment = dns.substr(start, end - start);
+}
+
+void Request::checkDNS(std::string &dns)
+{
+	std::string::size_type start = 0;
+	std::string::size_type end = this->getLastChar(dns) - 1;
+
+	if (!std::isalpha(dns[0]) || (!std::isalpha(dns[end]) && !std::isdigit(dns[end])))
+		throw BadRequest();
+	for (int i = 0; dns[i] != '\0'; ++i)
+	{
+		if (dns[i] == '.' && dns[i + 1] == '.')
+			throw BadRequest();
+	}
+	std::string *tmp = this->ft_split(dns, '.');
+	std::vector<std::string> chunk;
+	if (tmp == NULL)
+		chunk.push_back(dns);
+	else
+	{
+		for (int i = 0; !tmp[i].empty(); ++i)
+			chunk.push_back(tmp[i]);
+	}
+	delete[] tmp;
+	for (std::vector<std::string>::iterator it = chunk.begin(); it != chunk.end(); ++it)
+	{
+		std::string str = *it;
+		end = this->getLastChar(str) - 1;
+		if (!std::isalpha(str[0]) && !std::isdigit(str[0]) && !std::isalpha(str[end]) && !std::isdigit(str[end]))
+			throw BadRequest();
+		for (std::string::size_type i = 1; i < end; ++i)
+		{
+			if (!std::isalpha(str[i]) && !std::isdigit(str[i]) && str[i] != '-')
+				throw BadRequest();
+		}
+	}
+}
+
 void Request::checkTargetUri(std::string &str)
 {
+	// str = "http://www.mastermind42.com:9090/path?query=ferret&query2=ferret2&query3=ferret3#nose";
+	//     str = "http://255.255.255.255:9090/path?query=ferret&query2=ferret2";
 	if (str[0] == '/')
 	{
-		std::cout << "go to reconstruct uri" << std::endl;
+		if (this->_header.find("Host") == this->_header.end())
+			throw BadRequest();
+		this->parsePort(this->_header["Host"]);
+		// this->parsePath(this->_header["Host"]);
+		this->_path = str[0];
+		this->parseQuery(this->_header["Host"]);
+		this->parseFragment(this->_header["Host"]);
 		return;
 	}
 	std::string tmp = str;
@@ -234,6 +422,14 @@ void Request::checkTargetUri(std::string &str)
 	if (this->ft_strncmp(tmp, http, this->ft_strlen(http)) != 0)
 		throw BadRequest();
 	str = tmp;
+	std::string dns = str.substr(this->ft_strlen(http));
+	this->parsePort(dns);
+	this->parsePath(dns);
+	this->parseQuery(dns);
+	this->parseFragment(dns);
+	if (isIPv4(this->_hostname))
+		return;
+	this->checkDNS(this->_hostname);
 }
 
 std::vector<std::string> Request::splitStartLine(std::string &str)
@@ -333,6 +529,19 @@ void Request::printLine(void)
 	std::cout << "HTTP version: " << this->_start_line[2] << std::endl;
 	std::cout << "Body: " << this->_body << std::endl;
 	std::cout << "buffer size " << this->_buff_size << std::endl;
+	std::cout << "hostname: " << this->_hostname << std::endl;
+	std::cout << "port: " << this->_port << std::endl;
+	std::cout << "path: " << this->_path << std::endl;
+	std::cout << "fragment: " << this->_fragment << std::endl;
+	std::cout << "query: ";
+	this->printMap(this->_query);
+	std::cout << std::endl;
+}
+
+void Request::printMap(std::map<std::string, std::string> &map)
+{
+	for (std::map<std::string, std::string>::iterator it = map.begin(); it != map.end(); ++it)
+		std::cout << it->first << ": " << it->second << std::endl;
 }
 
 void Request::parseStartLine(void)
@@ -352,7 +561,6 @@ void Request::parseHeader(void)
 {
 	for (int i = 1; i < this->_buff_size; ++i)
 	{
-		//std::string *tmp = this->ft_split(this->_line[i], ':');
 		std::string tmp[2];
 		size_t end = this->_line[i].find_first_of(':');
 		if (end == std::string::npos)
@@ -372,9 +580,16 @@ void Request::parseHeader(void)
 			if (std::isalpha(tmp[0][i]) && (tmp[0][i] < 'a' || tmp[0][i] > 'z'))
 				tmp[0][i] += 32;
 		}
-		//this->_header[]
-		//delete[] tmp;
-		//tmp = NULL;
+		if (this->_header.find(tmp[0]) != this->_header.end())
+			throw BadRequest();
+		std::string::size_type start = 0;
+		start = this->skipChar(tmp[1], start, ' ');
+		start = this->skipChar(tmp[1], start, '\t');
+		start = this->skipChar(tmp[1], start, ' ');
+		if (tmp[1][start] == '\0')
+			this->_header[tmp[0]] = "";
+		else
+			this->_header[tmp[0]] = tmp[1].substr(start);
 	}
 }
 
@@ -385,8 +600,8 @@ void Request::parseRequest(void)
 		this->_line = this->splitLine();
 		for (int i = 0; i < this->_buff_size; ++i)
 			this->trimTail(this->_line[i], '\r');
-		this->parseStartLine();
 		this->parseHeader();
+		this->parseStartLine();
 		this->printLine();
 	}
 	catch (const BadRequest &e)

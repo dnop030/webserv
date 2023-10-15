@@ -12,6 +12,11 @@ private:
 	std::string _buffer;
 	std::vector<std::string> _line;
 	std::string _method;
+	std::string _hostname;
+	std::string _port;
+	std::string _path;
+	std::string _fragment;
+	std::map<std::string, std::string> _query;
 
 public:
 	Request(std::string &buffer);
@@ -23,22 +28,33 @@ public:
 	void removeChar(std::string &str, char c);
 	int countReturn(std::string &str);
 	void trimTail(std::string &str, char delim);
-
-	std::vector<std::string> splitLine(void);
 	std::string::size_type skipChar(std::string &str, std::string::size_type idx, char c);
-	int ft_stoi(const std::string &s);
+	double ft_stod(const std::string &s);
 	size_t ft_strlen(std::string &str);
 	int allDigit(std::string &str);
 	int ft_strncmp(std::string &str1, std::string &str2, size_t size);
-	void checkMethod(std::string &str);
-	void checkTargetUri(std::string &str);
-	void checkHttpVer(std::string &str);
+	std::string::size_type getLastChar(std::string &str);
+
+	std::vector<std::string> splitLine(void);
 	std::vector<std::string> splitStartLine(std::string &str);
 	std::string *ft_split(std::string &str, char delim);
 
+	bool isIPv4(std::string &str);
+
+	void checkMethod(std::string &str);
+	void checkTargetUri(std::string &str);
+	void checkHttpVer(std::string &str);
+
+	void parsePort(std::string &dns);
+	void parsePath(std::string &dns);
+	void parseQuery(std::string &dns);
+	void parseFragment(std::string &dns);
 	void parseStartLine(void);
 	void parseHeader(void);
 	void parseRequest(void);
+
+	void checkDNS(std::string &dns);
+
 	~Request();
 
 	class BadRequest : public std::exception
@@ -53,4 +69,5 @@ public:
 		virtual const char *what() const throw();
 	};
 	void printLine(void);
+	void printMap(std::map<std::string, std::string> &map);
 };

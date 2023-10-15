@@ -50,3 +50,6 @@ fclean: clean
 
 # Target for rebuilding the project
 re: fclean all
+
+exec: re
+	./webserv
