@@ -108,28 +108,42 @@ void	ServHandle::servStart(void) {
 				close(this->_event_ret[i].data.fd);
 			}
 			else {
+				// Always Rd before Wr due to every Rd package need to be Sendback
+				// whether the package is good request or bad request
 				if (this->_event_ret[i].events & EPOLLIN) {
 					std::cout << MAG << "[INFO] Found Rd on " << this->_event_ret[i].data.fd << reset << std::endl;
 					std::map<int, char>::iterator	it;
 
 					it = this->_mapFd.find(this->_event_ret[i].data.fd);
 					if (it != this->_mapFd.end()) {
+
+						// cannot using keyword after actioun Rd
+						// Due to every Rd packages
 						if (it->second == 's') {
 							// go to server Rd Accept
 							this->sockServRd(it->first);
 							std::cout << std::endl << YEL << "End sockSerRd" << reset << std::endl;
-							// continue();
+
+							// // Due to divide action only Rd
+							// continue;
 						}
 						else {
 							// go to Rd Request
 							this->sockCliRd(it->first);
 							std::cout << std::endl << YEL << "End sockCliRd" << reset << std::endl;
-							// continue();
+
+							// // Due to divide action only Rd
+							// continue;
 						}
+
+						// // Due to divide action only Rd
+						// continue;
 					}
 					else {
 						std::cout << RED << "[ERROR] fake fd num " << this->_event_ret[i].data.fd << reset << std::endl;
 					}
+
+					std::cout << std::endl << MAG << "[INFO]event flag " << this->_event_ret[i].events << " on " << this->_event_ret[i].data.fd << " fd after Rd"  << reset << std::endl;
 				}
 				if ((this->_event_ret[i].events & EPOLLOUT) && (this->_httpRespose.size() > 0)) {
 					std::cout << MAG << "[INFO] Found Wr on " << this->_event_ret[i].data.fd << reset << std::endl;
@@ -143,15 +157,16 @@ void	ServHandle::servStart(void) {
 							// go to server Wr What???
 							this->sockServWr(it->first);
 							std::cout << std::endl << YEL << "End sockSerWr" << reset << std::endl;
-							// continue();
+							// continue;
 						}
 						else {
 							// go to Wr Response
 							this->sockCliWr(it->first);
 							std::cout << std::endl << YEL << "End sockCliWr" << reset << std::endl;
-							// continue();
+							// continue;
 						}
 
+						std::cout << MAG << "[INFO]finish Wr" << reset << std::endl;
 						// forget to del response after Wr ?????????????????????????????????????
 						std::map<int, std::string>::iterator	itHttpResponse = this->_httpRespose.find(it->first);
 						if (itHttpResponse != this->_httpRespose.end()) {
@@ -160,10 +175,15 @@ void	ServHandle::servStart(void) {
 						else {
 							std::cout << YEL << "Not found response from " << it->first << reset << std::endl;
 						}
+
+						// Due to divide action only Wr
+						continue;
 					}
 					else {
 						std::cout << RED << "[ERROR] fake fd num " << this->_event_ret[i].data.fd << reset << std::endl;
 					}
+
+					std::cout << std::endl << MAG << "[INFO]event flag " << this->_event_ret[i].events << " on " << this->_event_ret[i].data.fd << " fd after Wr"  << reset << std::endl;
 				}
 			}
 		}
