@@ -89,24 +89,12 @@ void	ServHandle::servStart(void) {
 			std::cout << MAG << "[INFO]flag " << this->_event_ret[i].events << " to handle" << reset << std::endl;
 			if ((this->_event_ret[i].events & EPOLLERR) || (this->_event_ret[i].events & EPOLLHUP)) {
 
-				//forget to clear fd _mapFd
-				std::map<int, char>::iterator	it = this->_mapFd.find(this->_event_ret[i].data.fd);
-				if (it != this->_mapFd.end()) {
-					this->_mapFd.erase(it);
-				}
-
-				// del Fd from EPOLL instance
-				this->_tmpInt = epoll_ctl(this->_epoll_fd, EPOLL_CTL_DEL, this->_event_ret[i].data.fd, NULL);
-				if (this->_tmpInt != 0) {
-					perror("epoll_ctl(EPOLL_CTL_DEL)");
-				}
-
-				close(this->_event_ret[i].data.fd);
+				this->closeSock(this->_event_ret[i].data.fd);
 
 				/* An error has occured on this fd, or the socket is not
-					ready for reading (why were we notified then?) */
+				ready for reading (why were we notified then?) */
 				std::cerr << RED << "[ERROR] epoll error" << reset << std::endl;
-				std::cerr << RED << "[ERROR] error @ fd " << this->_event_ret[i].data.fd << reset << std::endl;
+				std::cerr << RED << "[ERROR] error @ fd tmpFd " << this->_event_ret[i].data.fd << reset << std::endl;
 			}
 			else {
 				// Always Rd before Wr due to every Rd package need to be Sendback
@@ -359,12 +347,19 @@ void	ServHandle::sockCliRd(int const & cliFd) {
 	std::cout << CYN << "Data in Package bufferPack" << reset << std::endl;
 	std::cout << CYN << this->_tmpStdStr << reset << std::endl << std::endl;
 
-	// prepare the response and tie with client Fd
-	if (this->_httpRespose.find(cliFd) == this->_httpRespose.end()) {
-		this->_httpRespose.insert(std::pair<int, std::string>(cliFd, this->generateHttpResponse(200, "Ok", "Hello from server")) );
+	if (this->_tmpStdStr.size() > 0) {
+		// prepare the response and tie with client Fd
+		if (this->_httpRespose.find(cliFd) == this->_httpRespose.end()) {
+			this->_httpRespose.insert(std::pair<int, std::string>(cliFd, this->generateHttpResponse(200, "Ok", "Hello from server")) );
+		}
+		else {
+			std::cout << YEL << "[WARNING] Need to handle Fd receive multiple request" << reset << std::endl;
+		}
 	}
 	else {
-		std::cout << YEL << "[WARNING] Need to handle Fd receive multiple request" << reset << std::endl;
+		// if the size of receive package = 0
+		// means client send some Flag ex. FIN
+		this->closeSock(cliFd);
 	}
 
 	// std::cout << CYN << "call from Rd" << reset << std::endl;
@@ -396,6 +391,33 @@ void	ServHandle::sockCliWr(int const & cliFd) {
 	else {
 		std::cout << YEL << "[WARNING] Not found response for " << cliFd << reset << std::endl;
 	}
+}
+
+void	ServHandle::closeSock(int fd) {
+
+	//forget to clear fd _mapFd
+	// std::map<int, char>::iterator	it = this->_mapFd.find(this->_event_ret[i].data.fd);
+	std::map<int, char>::iterator	it = this->_mapFd.find(fd);
+	this->_tmpInt = it->first;
+	if (it != this->_mapFd.end()) {
+		std::cout << MAG << "[INFO] Delete Fd from mapFd" << reset << std::endl;
+		this->_mapFd.erase(it);
+	}
+
+	// del Fd from EPOLL instance
+	// this->_tmpInt = epoll_ctl(this->_epoll_fd, EPOLL_CTL_DEL, this->_event_ret[i].data.fd, NULL);
+	this->_tmpInt = epoll_ctl(this->_epoll_fd, EPOLL_CTL_DEL, fd, NULL);
+	if (this->_tmpInt != 0) {
+		perror("epoll_ctl(EPOLL_CTL_DEL)");
+	}
+
+	// close(this->_event_ret[i].data.fd);
+	this->_tmpInt = close(fd);
+	if (this->_tmpInt != 0) {
+		perror("close when Err ");
+	}
+
+
 }
 
 std::string	ServHandle::generateHttpResponse(int statusCode, std::string const & statusMessage, std::string const & content) {
