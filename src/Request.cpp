@@ -41,13 +41,13 @@ const char *Request::HttpNotSupport::what() const throw()
 	return ("505 HTTP Version Not Supported");
 }
 
-bool Request::endLine(std::string::size_type idx)
+bool Request::endLine(std::string &buffer, std::string::size_type idx)
 {
-	if (this->_buffer[idx] == '\n' && this->_buffer[idx + 1] != '\0')
+	if (buffer[idx] == '\n' && buffer[idx + 1] != '\0')
 	{
-		if (this->_buffer[idx + 1] == '\n')
+		if (buffer[idx + 1] == '\n')
 			return (true);
-		if (this->_buffer[idx + 1] == '\r' && this->_buffer[idx + 2] != '\0' && this->_buffer[idx + 2] == '\n')
+		if (buffer[idx + 1] == '\r' && buffer[idx + 2] != '\0' && buffer[idx + 2] == '\n')
 			return (true);
 	}
 	return (false);
@@ -106,7 +106,7 @@ std::vector<std::string> Request::splitLine(void)
 
 	std::string::size_type start = 0;
 	std::string::size_type end = this->_buffer.find('\n');
-	while (end != std::string::npos)
+	while (end != std::string::npos && !this->endLine(this->_buffer, end))
 	{
 		if (this->_buffer[end] == '\n')
 		{
@@ -116,6 +116,11 @@ std::vector<std::string> Request::splitLine(void)
 			end = this->_buffer.find('\n', start);
 		}
 	}
+	if (this->_buffer[end] == '\n' && start != end)
+	{
+		res.push_back(this->_buffer.substr(start, end - start));
+		start = end + 1;
+	}
 	this->_buff_size = 0;
 	for (std::vector<std::string>::iterator it = res.begin(); it != res.end(); ++it)
 		this->_buff_size += 1;
@@ -123,7 +128,8 @@ std::vector<std::string> Request::splitLine(void)
 	{
 		throw BadRequest();
 	}
-	this->_buff_size -= 1;
+	while (this->_buffer[start] != '\0' && (this->_buffer[start] == '\n' || this->_buffer[start] == '\r'))
+		++start;
 	if (this->_buffer[start] != '\0')
 		this->_body = this->_buffer.substr(start);
 	return (res);
@@ -527,7 +533,10 @@ void Request::printLine(void)
 	std::cout << "Method: " << this->_start_line[0] << std::endl;
 	std::cout << "Request target: " << this->_start_line[1] << std::endl;
 	std::cout << "HTTP version: " << this->_start_line[2] << std::endl;
-	std::cout << "Body: " << this->_body << std::endl;
+	std::cout << "<<<<<<<<< Header as below >>>>>>>>>>" << std::endl;
+	this->printMap(this->_header);
+	std::cout << "<<<<<<<<< Body as below >>>>>>>>>>\n"
+			  << this->_body << std::endl;
 	std::cout << "buffer size " << this->_buff_size << std::endl;
 	std::cout << "hostname: " << this->_hostname << std::endl;
 	std::cout << "port: " << this->_port << std::endl;

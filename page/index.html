@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>webser</title>
+</head>
+<body>
+    <h1>Webser</h1>
+    <form id="testApi">
+        <select id="method">
+            <option value="GET">GET</option>
+            <option value="POST">POST</option>
+            <option value="PUT">PUT</option>
+            <option value="DELETE">DELETE</option>
+        </select>
+        <input type="text" name="url" id="url" placeholder="url for test">
+		<input type="text" name="port" id="port" placeholder="port" onkeypress="return onlyNumberKey(event)">
+        <button type="submit" id="submit">submit</button>
+    </form>
+    <!-- show result -->
+    <div id="output"></div>
+
+    <!-- script -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script> <!-- cdn axios -->
+    <script src="webser.js"></script>
+</body>
+</html>

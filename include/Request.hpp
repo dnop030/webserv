@@ -23,7 +23,7 @@ public:
 	Request(Request const &src);
 	Request &operator=(Request const &src);
 
-	bool endLine(std::string::size_type idx);
+	bool endLine(std::string &buffer, std::string::size_type idx);
 	int countChar(std::string &str, char c);
 	void removeChar(std::string &str, char c);
 	int countReturn(std::string &str);
