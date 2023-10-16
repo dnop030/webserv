@@ -177,7 +177,6 @@ void	ServHandle::servStart(void) {
 						else {
 							std::cout << YEL << "Not found response from " << it->first << reset << std::endl;
 						}
-						std::cout << "amount of response " << this->_httpRespose.size() << std::endl;
 
 						// Due to divide action only Wr
 						continue;
@@ -382,7 +381,6 @@ void	ServHandle::sockCliRd(int const & cliFd) {
 		}
 		std::cout << "-------------" << std::endl << std::endl;
 	}
-	std::cout << "amount of response " << this->_httpRespose.size() << std::endl;
 }
 
 void	ServHandle::sockCliWr(int const & cliFd) {
