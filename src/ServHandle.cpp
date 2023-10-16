@@ -88,10 +88,6 @@ void	ServHandle::servStart(void) {
 		for (i=0; i<numEvent; i++) {
 			std::cout << MAG << "[INFO]flag " << this->_event_ret[i].events << " to handle" << reset << std::endl;
 			if ((this->_event_ret[i].events & EPOLLERR) || (this->_event_ret[i].events & EPOLLHUP)) {
-				/* An error has occured on this fd, or the socket is not
-					ready for reading (why were we notified then?) */
-				std::cerr << RED << "[ERROR] epoll error" << reset << std::endl;
-				std::cerr << RED << "[ERROR] error @ fd " << this->_event_ret[i].data.fd << reset << std::endl;
 
 				//forget to clear fd _mapFd
 				std::map<int, char>::iterator	it = this->_mapFd.find(this->_event_ret[i].data.fd);
@@ -106,6 +102,11 @@ void	ServHandle::servStart(void) {
 				}
 
 				close(this->_event_ret[i].data.fd);
+
+				/* An error has occured on this fd, or the socket is not
+					ready for reading (why were we notified then?) */
+				std::cerr << RED << "[ERROR] epoll error" << reset << std::endl;
+				std::cerr << RED << "[ERROR] error @ fd " << this->_event_ret[i].data.fd << reset << std::endl;
 			}
 			else {
 				// Always Rd before Wr due to every Rd package need to be Sendback
@@ -171,10 +172,12 @@ void	ServHandle::servStart(void) {
 						std::map<int, std::string>::iterator	itHttpResponse = this->_httpRespose.find(it->first);
 						if (itHttpResponse != this->_httpRespose.end()) {
 							std::cout << YEL << "Del Response" << std::endl << itHttpResponse->second << reset << std::endl << std::endl;
+							this->_httpRespose.erase(itHttpResponse);
 						}
 						else {
 							std::cout << YEL << "Not found response from " << it->first << reset << std::endl;
 						}
+						std::cout << "amount of response " << this->_httpRespose.size() << std::endl;
 
 						// Due to divide action only Wr
 						continue;
@@ -379,6 +382,7 @@ void	ServHandle::sockCliRd(int const & cliFd) {
 		}
 		std::cout << "-------------" << std::endl << std::endl;
 	}
+	std::cout << "amount of response " << this->_httpRespose.size() << std::endl;
 }
 
 void	ServHandle::sockCliWr(int const & cliFd) {
