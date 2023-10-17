@@ -395,6 +395,14 @@ void	ServHandle::sockCliWr(int const & cliFd) {
 
 void	ServHandle::closeSock(int fd) {
 
+	// Delete response when close socket
+	// Therefore, socket can be reuse
+	std::map<int, std::string>::iterator	itHttpResponse = this->_httpRespose.find(it->first);
+	if (itHttpResponse != this->_httpRespose.end()) {
+		std::cout << YEL << "Del Response when close socket" << std::endl << itHttpResponse->second << reset << std::endl << std::endl;
+		this->_httpRespose.erase(itHttpResponse);
+	}
+
 	//forget to clear fd _mapFd
 	// std::map<int, char>::iterator	it = this->_mapFd.find(this->_event_ret[i].data.fd);
 	std::map<int, char>::iterator	it = this->_mapFd.find(fd);
@@ -416,7 +424,6 @@ void	ServHandle::closeSock(int fd) {
 	if (this->_tmpInt != 0) {
 		perror("close when Err ");
 	}
-
 
 }
 
