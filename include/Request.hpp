@@ -9,6 +9,7 @@ class Request : Http
 {
 private:
 	int _buff_size;
+	std::string::size_type _bodySize;
 	std::string _buffer;
 	std::vector<std::string> _line;
 	std::string _method;
@@ -34,6 +35,7 @@ public:
 	int allDigit(std::string &str);
 	int ft_strncmp(std::string &str1, std::string &str2, size_t size);
 	std::string::size_type getLastChar(std::string &str);
+	std::string::size_type findCLRF(std::string &str, std::string::size_type idx);
 
 	std::vector<std::string> splitLine(void);
 	std::vector<std::string> splitStartLine(std::string &str);
@@ -51,6 +53,7 @@ public:
 	void parseFragment(std::string &dns);
 	void parseStartLine(void);
 	void parseHeader(void);
+	void parseBody(void);
 	void parseRequest(void);
 
 	void checkDNS(std::string &dns);
@@ -68,6 +71,13 @@ public:
 	public:
 		virtual const char *what() const throw();
 	};
+
+	class LengthRequired : public std::exception
+	{
+	public:
+		virtual const char *what() const throw();
+	};
+
 	void printLine(void);
 	void printMap(std::map<std::string, std::string> &map);
 };

@@ -1,10 +1,10 @@
 #include "Request.hpp"
 
-Request::Request(std::string &buffer) : _buffer(buffer), _line(0), _buff_size(0), _method(""), _port(""), _hostname(""), _path(""), _fragment("")
+Request::Request(std::string &buffer) : _buffer(buffer), _line(0), _buff_size(0), _method(""), _port(""), _hostname(""), _path(""), _fragment(""), _bodySize(0)
 {
 }
 
-Request::Request(Request const &src) : _buff_size(src._buff_size), _buffer(src._buffer), _method(src._method), _port(src._port), _hostname(src._hostname), _path(src._path), _fragment(src._fragment)
+Request::Request(Request const &src) : _buff_size(src._buff_size), _buffer(src._buffer), _method(src._method), _port(src._port), _hostname(src._hostname), _path(src._path), _fragment(src._fragment), _bodySize(src._bodySize)
 {
 	*this = src;
 }
@@ -41,12 +41,28 @@ const char *Request::HttpNotSupport::what() const throw()
 	return ("505 HTTP Version Not Supported");
 }
 
+const char *Request::LengthRequired::what() const throw()
+{
+	return ("411 Length required");
+}
+
+// bool Request::endLine(std::string &buffer, std::string::size_type idx)
+// {
+// 	if (buffer[idx] == '\n' && buffer[idx + 1] != '\0')
+// 	{
+// 		if (buffer[idx + 1] == '\n')
+// 			return (true);
+// 		if (buffer[idx + 1] == '\r' && buffer[idx + 2] != '\0' && buffer[idx + 2] == '\n')
+// 			return (true);
+// 	}
+// 	return (false);
+// }
+
 bool Request::endLine(std::string &buffer, std::string::size_type idx)
 {
-	if (buffer[idx] == '\n' && buffer[idx + 1] != '\0')
+	if (buffer[idx] == '\r' && buffer[idx + 1] != '\0' && buffer[idx + 1] == '\n')
 	{
-		if (buffer[idx + 1] == '\n')
-			return (true);
+		++idx;
 		if (buffer[idx + 1] == '\r' && buffer[idx + 2] != '\0' && buffer[idx + 2] == '\n')
 			return (true);
 	}
@@ -100,38 +116,53 @@ void Request::trimTail(std::string &str, char delim)
 	str = res;
 }
 
+std::string::size_type Request::findCLRF(std::string &str, std::string::size_type idx)
+{
+	while (str[idx] != '\0')
+	{
+		if (str[idx] == '\r' && str[idx + 1] != '\0' && str[idx + 1] == '\n')
+			break;
+		++idx;
+	}
+	if (str[idx] == '\r' && str[idx + 1] != '\0' && str[idx + 1] == '\n')
+		return (idx);
+	return (std::string::npos);
+}
+
 std::vector<std::string> Request::splitLine(void)
 {
 	std::vector<std::string> res;
 
 	std::string::size_type start = 0;
-	std::string::size_type end = this->_buffer.find('\n');
+	std::string::size_type end = this->findCLRF(this->_buffer, start);
 	while (end != std::string::npos && !this->endLine(this->_buffer, end))
 	{
-		if (this->_buffer[end] == '\n')
+		if (this->_buffer[end] == '\r' && this->_buffer[end + 1] == '\n')
 		{
 			if (start != end)
 				res.push_back(this->_buffer.substr(start, end - start));
-			start = end + 1;
-			end = this->_buffer.find('\n', start);
+			end += 2;
+			start = end;
+			end = this->findCLRF(this->_buffer, start);
 		}
 	}
-	if (this->_buffer[end] == '\n' && start != end)
+	if (this->_buffer[end] == '\r' && this->_buffer[end + 1] == '\n' && start != end)
 	{
 		res.push_back(this->_buffer.substr(start, end - start));
-		start = end + 1;
+		start = end + 2;
 	}
 	this->_buff_size = 0;
 	for (std::vector<std::string>::iterator it = res.begin(); it != res.end(); ++it)
 		this->_buff_size += 1;
 	if (this->_buff_size <= 2)
-	{
 		throw BadRequest();
-	}
 	while (this->_buffer[start] != '\0' && (this->_buffer[start] == '\n' || this->_buffer[start] == '\r'))
 		++start;
 	if (this->_buffer[start] != '\0')
+	{
 		this->_body = this->_buffer.substr(start);
+		this->_bodySize = this->_body.size();
+	}
 	return (res);
 }
 
@@ -403,8 +434,6 @@ void Request::checkDNS(std::string &dns)
 
 void Request::checkTargetUri(std::string &str)
 {
-	// str = "http://www.mastermind42.com:9090/path?query=ferret&query2=ferret2&query3=ferret3#nose";
-	//     str = "http://255.255.255.255:9090/path?query=ferret&query2=ferret2";
 	if (str[0] == '/')
 	{
 		if (this->_header.find("Host") == this->_header.end())
@@ -537,6 +566,7 @@ void Request::printLine(void)
 	this->printMap(this->_header);
 	std::cout << "<<<<<<<<< Body as below >>>>>>>>>>\n"
 			  << this->_body << std::endl;
+	std::cout << "Body size: " << this->_bodySize << std::endl;
 	std::cout << "buffer size " << this->_buff_size << std::endl;
 	std::cout << "hostname: " << this->_hostname << std::endl;
 	std::cout << "port: " << this->_port << std::endl;
@@ -589,6 +619,13 @@ void Request::parseHeader(void)
 			if (std::isalpha(tmp[0][i]) && (tmp[0][i] < 'a' || tmp[0][i] > 'z'))
 				tmp[0][i] += 32;
 		}
+		std::string::size_type find = tmp[0].find_first_of('-');
+		if (find != std::string::npos)
+		{
+			find += 1;
+			if (std::isalpha(tmp[0][find]) && (tmp[0][find] < 'A' || tmp[0][find] > 'Z'))
+				tmp[0][find] -= 32;
+		}
 		if (this->_header.find(tmp[0]) != this->_header.end())
 			throw BadRequest();
 		std::string::size_type start = 0;
@@ -599,6 +636,25 @@ void Request::parseHeader(void)
 			this->_header[tmp[0]] = "";
 		else
 			this->_header[tmp[0]] = tmp[1].substr(start);
+	}
+	if (!this->_body.empty() && this->_header.find("Content-Length") == this->_header.end() && this->_header.find("Transfer-Encoding") == this->_header.end())
+		throw LengthRequired();
+	if (!this->_body.empty() && this->_header.find("Content-Length") != this->_header.end() && this->_header.find("Transfer-Encoding") != this->_header.end())
+		this->_header.erase("Content-Length");
+}
+
+void Request::parseBody(void)
+{
+	if (this->_method != "POST")
+		return;
+	if (!this->_body.empty() && this->_header.find("Content-Length") != this->_header.end())
+	{
+		if (!this->allDigit(this->_header["Content-Length"]))
+			throw BadRequest();
+		double tmp = this->ft_stod(this->_header["Content-Length"]);
+		std::string::size_type contentLen =
+			static_cast<std::string::size_type>(tmp);
+		this->_body = this->_body.substr(0, contentLen);
 	}
 }
 
@@ -611,6 +667,7 @@ void Request::parseRequest(void)
 			this->trimTail(this->_line[i], '\r');
 		this->parseHeader();
 		this->parseStartLine();
+		this->parseBody();
 		this->printLine();
 	}
 	catch (const BadRequest &e)
@@ -618,6 +675,10 @@ void Request::parseRequest(void)
 		std::cout << e.what() << std::endl;
 	}
 	catch (const HttpNotSupport &e)
+	{
+		std::cout << e.what() << std::endl;
+	}
+	catch (const LengthRequired &e)
 	{
 		std::cout << e.what() << std::endl;
 	}
