@@ -50,6 +50,8 @@ class ServHandle
 		void	sockCliRd(int const & cliFd);
 		void	sockCliWr(int const & cliFd);
 
+		void	closeSock(int fd);
+
 		std::string	generateHttpResponse(int statusCode, std::string const & statusMessage, std::string const & content);
 
 		ConfigFileHandle			_configServ;
