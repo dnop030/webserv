@@ -397,7 +397,7 @@ void	ServHandle::closeSock(int fd) {
 
 	// Delete response when close socket
 	// Therefore, socket can be reuse
-	std::map<int, std::string>::iterator	itHttpResponse = this->_httpRespose.find(it->first);
+	std::map<int, std::string>::iterator	itHttpResponse = this->_httpRespose.find(fd);
 	if (itHttpResponse != this->_httpRespose.end()) {
 		std::cout << YEL << "Del Response when close socket" << std::endl << itHttpResponse->second << reset << std::endl << std::endl;
 		this->_httpRespose.erase(itHttpResponse);
