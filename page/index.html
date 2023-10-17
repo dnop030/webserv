@@ -7,19 +7,16 @@
 </head>
 <body>
     <h1>Webser</h1>
-    <form id="testApi">
-        <select id="method">
-            <option value="GET">GET</option>
-            <option value="POST">POST</option>
-            <option value="PUT">PUT</option>
-            <option value="DELETE">DELETE</option>
-        </select>
-        <input type="text" name="url" id="url" placeholder="url for test">
-		<input type="text" name="port" id="port" placeholder="port" onkeypress="return onlyNumberKey(event)">
-        <button type="submit" id="submit">submit</button>
+	<h2>Upload file</h2>
+    <form id="methodPost">
+		<input type="file" name="file" id="file">
+        <button type="submit" id="uploadfile">Uploadfile</button>
     </form>
-    <!-- show result -->
-    <div id="output"></div>
+	<br>
+	<h2>Delete file</h2>
+    <form id="methodDelete">
+        <button type="submit" id="delfile">Deletefile</button>
+    </form>
 
     <!-- script -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script> <!-- cdn axios -->
