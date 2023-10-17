@@ -347,6 +347,8 @@ void	ServHandle::sockCliRd(int const & cliFd) {
 	std::cout << CYN << "Data in Package bufferPack" << reset << std::endl;
 	std::cout << CYN << this->_tmpStdStr << reset << std::endl << std::endl;
 
+	// if the size of receive package = 0
+	// means client send some Flag ex. FIN
 	if (this->_tmpStdStr.size() > 0) {
 		// prepare the response and tie with client Fd
 		if (this->_httpRespose.find(cliFd) == this->_httpRespose.end()) {
@@ -357,8 +359,6 @@ void	ServHandle::sockCliRd(int const & cliFd) {
 		}
 	}
 	else {
-		// if the size of receive package = 0
-		// means client send some Flag ex. FIN
 		this->closeSock(cliFd);
 	}
 
