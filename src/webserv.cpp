@@ -4,9 +4,11 @@
 
 #include "ServHandle.hpp"
 
+ServHandle	servManager;
+
 int	main(int argc, char ** argv) {
 
-	ServHandle	servManager;
+	// ServHandle	servManager;
 
 	if (argc <= 2) {
 		if (argc == 2) {
