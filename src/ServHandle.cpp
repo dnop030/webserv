@@ -25,7 +25,6 @@ void	ServHandle::servCreate(char const * configFile) {
 	std::cout << MAG << "amout of serv config " << this->_configServ.getAmountServConfig() << reset << std::endl;
 	for (int i=0; i<this->_configServ.getAmountServConfig(); i++) {
 		this->createServ(this->_configServ.getServConfigVal(i, "listen"));
-		// std::cout << MAG << "[INFO]fd of server " << this->_servFd[i] << reset << std::endl;
 	}
 
 	// epolll create
@@ -51,9 +50,7 @@ void	ServHandle::servCreate(char const * configFile) {
 	// Add Fd of server into epoll instance
 	for (std::map<int, char>::iterator it = this->_mapFd.begin(); it != this->_mapFd.end(); it++) {
 		this->_event.data.fd = it->first;
-		// event.events = EPOLLIN | EPOLLET;
 		this->_event.events = EPOLLIN | EPOLLOUT;
-		// event.events = EPOLLIN | EPOLLOUT | EPOLLET;
 
 		this->_tmpInt = epoll_ctl (this->_epoll_fd, EPOLL_CTL_ADD, it->first, &(this->_event));
 		if (this->_tmpInt < 0) {
@@ -61,11 +58,6 @@ void	ServHandle::servCreate(char const * configFile) {
 		}
 	}
 
-	// Show all Server Fd
-	// std::cout << MAG << "Show serv Fd" << reset << std::endl;
-	// for (int i=0; i<this->_configServ.getAmountServConfig(); i++) {
-	// 	std::cout << this->_servFd[i] << std::endl;
-	// }
 	this->showMapFd();
 
 	// Need to fix -> using new method
@@ -75,12 +67,6 @@ void	ServHandle::servCreate(char const * configFile) {
 }
 
 void	ServHandle::servStart(void) {
-
-	// register signal handler
-	// signal(SIGINT, ServHandle::handle_sigint);
-	// signal(SIGINT, handle_sigint);
-	// std::signal(SIGINT, handle_sigint);
-	// std::signal(SIGINT, this->handle_sigint());
 
 	while (this->_servRunning) {
 		int	numEvent, i;
@@ -160,6 +146,7 @@ void	ServHandle::servStart(void) {
 						}
 
 						std::cout << MAG << "[INFO]finish Wr" << reset << std::endl;
+
 						// forget to del response after Wr ?????????????????????????????????????
 						std::map<int, std::string>::iterator	itHttpResponse = this->_httpRespose.find(it->first);
 						if (itHttpResponse != this->_httpRespose.end()) {
@@ -193,58 +180,46 @@ void	ServHandle::servStop(void) {
 		it = this->_mapFd.begin();
 		this->closeSock(it->first);
 	}
-	// for (it = this->_mapFd.begin(); it != this->_mapFd.end(); it++) {
-	// 	this->closeSock(it->first);
-	// }
 
 	this->_tmpInt = close(this->_epoll_fd);
-	// delete	_event_ret;
+
 	free(this->_event_ret);
 
 	this->_servRunning = false;
 }
 
 void	ServHandle::createServ(std::string const & config) {
-	int	opt = 1;
-	// std::vector<int>::iterator	it = this->_servFd.begin();
-	std::map<int, char>::iterator	it = this->_mapFd.begin();
 
-	// std::cout << MAG << "config " << config << reset << std::endl;
+	int	opt = 1;
+
+	std::map<int, char>::iterator	it = this->_mapFd.begin();
 
 	this->_address.sin_family = AF_INET;
 	this->_address.sin_addr.s_addr = INADDR_ANY;
 	this->_address.sin_port = htons(atoi(config.c_str()));
 
 	if ((this->_fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0)) < 0) {
-	// if ((this->_fd = socket(AF_INET, SOCK_NONBLOCK, 0)) < 0) {
 		perror("socket failed");
 		exit (EXIT_FAILURE);
 	}
-	// std::cout << YEL << "socket fd "<< this->_fd << reset << std::endl;
 
 	// Forcefully attaching socket to the port
 	if (setsockopt(this->_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt))) {
 		perror("setsockopt");
 		exit (EXIT_FAILURE);
 	}
-	// std::cout << YEL << "socket opt" << reset << std::endl;
 
 	// Forcefully attaching socket to the port
 	if (bind(this->_fd, (struct sockaddr *)&(this->_address), sizeof(struct sockaddr)) < 0) {
-	// if (bind(this->_fd, static_cast<struct sockaddr *>(&(this->_address)), sizeof(struct sockaddr)) < 0) {
 		perror("bind failed");
 		exit (EXIT_FAILURE);
 	}
-	// std::cout << YEL << "bind" << reset << std::endl;
 
 	// changing socket from active to passive
 	if (listen(this->_fd, 1024) < 0) {
 		perror("listen");
 		exit (EXIT_FAILURE);
 	}
-
-	// // Add Fd into vector
-	// this->_servFd.insert(it, this->_fd);
 
 	// Add Fd into map
 	it = this->_mapFd.find(this->_fd);
@@ -260,7 +235,6 @@ void	ServHandle::showMapFd(void) {
 	std::map<int, char>::iterator	it = this->_mapFd.begin();
 
 	std::cout << std::endl << "Show Map Fd" << std::endl;
-	// std::cout << "fd s/c" << std::endl;
 	while (it != this->_mapFd.end()) {
 		std::cout << it->first << " " << it->second << std::endl;
 		it++;
@@ -270,9 +244,8 @@ void	ServHandle::showMapFd(void) {
 }
 
 void	ServHandle::sockServRd(int const & servFd) {
+
 	std::map<int, char>::iterator	it;
-	// this->_inLen = sizeof(this->_inAddr);
-	// this->_infd = accept(this->_servFd[this->_tmpInt], &(this->_inAddr), &(this->_inLen));
 	this->_infd = accept(servFd, NULL, NULL);
 	if (this->_infd == -1) {
 		if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) {
@@ -288,11 +261,6 @@ void	ServHandle::sockServRd(int const & servFd) {
 	}
 
 	// Make the accepted socket non-blocking
-	// int flags = fcntl(this->_infd, F_GETFL, 0);
-	// if (flags == -1) {
-	// 	perror("fcntl get");
-	// 	close(this->_infd);
-	// }
 	// if (fcntl(this->_infd, F_SETFL, flags | O_NONBLOCK) == -1) {
 	if (fcntl(this->_infd, F_SETFL, O_NONBLOCK) == -1) {
 		perror("fcntl set");
@@ -309,7 +277,6 @@ void	ServHandle::sockServRd(int const & servFd) {
 	}
 
 	// Add client Fd into map
-	// this->_cliFd.insert(this->_cliFd.begin(), this->_infd);
 	it = this->_mapFd.find(this->_infd);
 	if (it == this->_mapFd.end()) {
 		this->_mapFd.insert(std::pair<int, char>(this->_infd, 'c'));
@@ -345,14 +312,9 @@ void	ServHandle::sockCliRd(int const & cliFd) {
 		// }
 
 		this->_valRd = recv(this->_infd, this->_buffRd, BUFFPACK, 0);
-		// std::cout << "Recv " << this->_valRd << std::endl;
 		if (this->_valRd > 0) {
-			// printf("\n\n%s\n\n", this->_buffRd);
-			// std::cout << this->_buffRd << std::endl;
 			this->_tmpStdStr = this->_buffRd;
-			// this->_bufferPack += this->_tmpStdStr;
 			this->_bufferPack.append(this->_tmpStdStr, this->_valRd);
-			// this->_bufferPack.append(this->_tmpStdStr, this->_valRd + 1);
 		}
 	}
 	while (this->_valRd > 0);
@@ -362,9 +324,6 @@ void	ServHandle::sockCliRd(int const & cliFd) {
 	// 	// Handle error if needed
 	// 	perror("recv");
 	// }
-
-	// std::cout << CYN << "Data in Package tmpStdStr" << reset << std::endl;
-	// std::cout << CYN << this->_tmpStdStr << reset << std::endl << std::endl;
 
 	std::cout << CYN << "Data in Package bufferPack" << reset << std::endl;
 	std::cout << CYN << this->_tmpStdStr << reset << std::endl << std::endl;
@@ -383,9 +342,6 @@ void	ServHandle::sockCliRd(int const & cliFd) {
 	else {
 		this->closeSock(cliFd);
 	}
-
-	// std::cout << CYN << "call from Rd" << reset << std::endl;
-	// this->sockCliWr(cliFd);
 
 	// show response after receive request
 	std::cout << std::endl << "Show Response in CliRd" << std::endl;
@@ -426,8 +382,7 @@ void	ServHandle::closeSock(int fd) {
 		this->_httpRespose.erase(itHttpResponse);
 	}
 
-	//forget to clear fd _mapFd
-	// std::map<int, char>::iterator	it = this->_mapFd.find(this->_event_ret[i].data.fd);
+	// clear fd _mapFd
 	std::map<int, char>::iterator	it = this->_mapFd.find(fd);
 	this->_tmpInt = it->first;
 	if (it != this->_mapFd.end()) {
@@ -436,32 +391,17 @@ void	ServHandle::closeSock(int fd) {
 	}
 
 	// del Fd from EPOLL instance
-	// this->_tmpInt = epoll_ctl(this->_epoll_fd, EPOLL_CTL_DEL, this->_event_ret[i].data.fd, NULL);
 	this->_tmpInt = epoll_ctl(this->_epoll_fd, EPOLL_CTL_DEL, fd, NULL);
 	if (this->_tmpInt != 0) {
 		perror("epoll_ctl(EPOLL_CTL_DEL)");
 	}
 
-	// close(this->_event_ret[i].data.fd);
 	this->_tmpInt = close(fd);
 	if (this->_tmpInt != 0) {
 		perror("close when Err ");
 	}
 
 }
-
-// void	ServHandle::handle_sigint(void) {
-// 	// printf("Caught signal %d\n", sig);
-// 	std::cout << "Caught signal" << std::endl;
-// }
-// void	ServHandle::handle_sigint(int sig) {
-// 	// printf("Caught signal %d\n", sig);
-// 	std::cout << "Caught signal " << sig << std::endl;
-// }
-// static void	ServHandle::handle_sigint(int sig) {
-// 	// printf("Caught signal %d\n", sig);
-// 	std::cout << "Caught signal " << sig << std::endl;
-// }
 
 std::string	ServHandle::generateHttpResponse(int statusCode, std::string const & statusMessage, std::string const & content) {
 	// Create an output stream to build the response

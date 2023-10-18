@@ -5,7 +5,6 @@
 #include <string>
 
 #include <sys/socket.h>
-// #include <vector>
 #include <map>
 
 // test epool
@@ -24,11 +23,11 @@
 #include <fcntl.h>
 
 // #include "signal.h"
-#include <csignal>
+// #include <csignal>
+
+#include "unistd.h"
 
 #include "ConfigFileHandle.hpp"
-
-// #include "stdio.h"
 
 #define MAXEVENTS 128
 #define BUFFPACK 2048
@@ -42,10 +41,6 @@ class ServHandle
 		void	servCreate(char const * configFile);
 		void	servStart(void);
 		void	servStop(void);
-
-		// void	handle_sigint(int sig);
-		// void	handle_sigint(int sig);
-		// void	handle_sigint(void);
 
 	private:
 		ServHandle(ServHandle const & r);
