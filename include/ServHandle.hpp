@@ -5,7 +5,6 @@
 #include <string>
 
 #include <sys/socket.h>
-// #include <vector>
 #include <map>
 
 // test epool
@@ -21,9 +20,14 @@
 // for generate response
 #include <sstream>
 
-#include "ConfigFileHandle.hpp"
+#include <fcntl.h>
 
-// #include "stdio.h"
+// #include "signal.h"
+// #include <csignal>
+
+#include "unistd.h"
+
+#include "ConfigFileHandle.hpp"
 
 #define MAXEVENTS 128
 #define BUFFPACK 2048
@@ -50,7 +54,11 @@ class ServHandle
 		void	sockCliRd(int const & cliFd);
 		void	sockCliWr(int const & cliFd);
 
+		void	closeSock(int fd);
+
 		std::string	generateHttpResponse(int statusCode, std::string const & statusMessage, std::string const & content);
+
+		bool						_servRunning;
 
 		ConfigFileHandle			_configServ;
 
