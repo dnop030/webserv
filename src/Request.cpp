@@ -46,18 +46,6 @@ const char *Request::LengthRequired::what() const throw()
 	return ("411 Length required");
 }
 
-// bool Request::endLine(std::string &buffer, std::string::size_type idx)
-// {
-// 	if (buffer[idx] == '\n' && buffer[idx + 1] != '\0')
-// 	{
-// 		if (buffer[idx + 1] == '\n')
-// 			return (true);
-// 		if (buffer[idx + 1] == '\r' && buffer[idx + 2] != '\0' && buffer[idx + 2] == '\n')
-// 			return (true);
-// 	}
-// 	return (false);
-// }
-
 bool Request::endLine(std::string &buffer, std::string::size_type idx)
 {
 	if (buffer[idx] == '\r' && buffer[idx + 1] != '\0' && buffer[idx + 1] == '\n')
@@ -654,6 +642,8 @@ void Request::parseBody(void)
 		double tmp = this->ft_stod(this->_header["Content-Length"]);
 		std::string::size_type contentLen =
 			static_cast<std::string::size_type>(tmp);
+		if (contentLen != this->_bodySize)
+			throw BadRequest();
 		this->_body = this->_body.substr(0, contentLen);
 	}
 }
