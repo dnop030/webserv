@@ -7,6 +7,7 @@
 int	main(int argc, char ** argv) {
 
 	ServHandle	servManager;
+
 	if (argc <= 2) {
 		if (argc == 2) {
 			std::cout << GRN << "Config file name " << argv[1] << reset << std::endl;

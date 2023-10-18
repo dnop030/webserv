@@ -21,6 +21,11 @@
 // for generate response
 #include <sstream>
 
+#include <fcntl.h>
+
+// #include "signal.h"
+#include <csignal>
+
 #include "ConfigFileHandle.hpp"
 
 // #include "stdio.h"
@@ -38,6 +43,10 @@ class ServHandle
 		void	servStart(void);
 		void	servStop(void);
 
+		// void	handle_sigint(int sig);
+		// void	handle_sigint(int sig);
+		// void	handle_sigint(void);
+
 	private:
 		ServHandle(ServHandle const & r);
 		ServHandle &operator=(ServHandle const & r);
@@ -53,6 +62,8 @@ class ServHandle
 		void	closeSock(int fd);
 
 		std::string	generateHttpResponse(int statusCode, std::string const & statusMessage, std::string const & content);
+
+		bool						_servRunning;
 
 		ConfigFileHandle			_configServ;
 
