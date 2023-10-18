@@ -4,6 +4,7 @@
 #include <vector>
 #include <cctype>
 #include <sstream>
+#include "color.hpp"
 
 class Request : Http
 {
@@ -58,6 +59,11 @@ public:
 
 	void checkDNS(std::string &dns);
 
+	std::string getMethod();
+	std::string getHostname();
+	std::string getPort();
+	std::string getPath();
+	std::string getFragment();
 	~Request();
 
 	class BadRequest : public std::exception

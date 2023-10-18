@@ -650,14 +650,21 @@ void Request::parseBody(void)
 
 void Request::parseRequest(void)
 {
+	// std::cout << "\nthe buffer is as below\n"
+	// 		  << std::endl;
+	// std::cout << BLU << this->_buffer << std::endl;
 	try
 	{
 		this->_line = this->splitLine();
 		for (int i = 0; i < this->_buff_size; ++i)
 			this->trimTail(this->_line[i], '\r');
+		// std::cout << WHT << "After splitLine" << std::endl;
 		this->parseHeader();
+		// std::cout << "After parseHeader" << std::endl;
 		this->parseStartLine();
+		// std::cout << "After parseStartLine" << std::endl;
 		this->parseBody();
+		// std::cout << "After parseBody" << std::endl;
 		this->printLine();
 	}
 	catch (const BadRequest &e)

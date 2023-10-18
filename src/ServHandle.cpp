@@ -381,10 +381,18 @@ void ServHandle::sockCliRd(int const &cliFd)
 		// }
 
 		this->_valRd = recv(this->_infd, this->_buffRd, BUFFPACK, 0);
+		std::cout << "valRd is: " << this->_valRd << std::endl;
 		if (this->_valRd > 0)
 		{
 			this->_tmpStdStr = this->_buffRd;
-			this->_bufferPack.append(this->_tmpStdStr, this->_valRd);
+			// std::cout << "tmpStdStr is as below" << std::endl;
+			// std::cout << this->_tmpStdStr << std::endl;
+			// size_t valRd2 = static_cast<size_t>(this->_valRd);
+			// std::cout << "valRd2 is: " << valRd2 << std::endl;
+			this->_bufferPack.append(this->_buffRd, this->_valRd);
+			// this->_bufferPack.append(this->_tmpStdStr, this->_valRd);
+			std::cout << "bufferPack is as below" << std::endl;
+			std::cout << this->_bufferPack << std::endl;
 		}
 	} while (this->_valRd > 0);
 	std::cout << CYN << "valRd " << this->_valRd << reset << std::endl;
@@ -395,12 +403,16 @@ void ServHandle::sockCliRd(int const &cliFd)
 	// }
 
 	std::cout << CYN << "Data in Package bufferPack" << reset << std::endl;
-	std::cout << CYN << this->_tmpStdStr << reset << std::endl
-			  << std::endl;
-
+	// std::cout << CYN << this->_tmpStdStr << reset << std::endl
+	// 		  << std::endl;
+	// std::cout << CYN << this->_bufferPack << reset << std::endl
+	//<< std::endl;
+	Request rq(this->_bufferPack);
+	// Request rq(this->_tmpStdStr);
+	rq.parseRequest();
 	// if the size of receive package = 0
 	// means client send some Flag ex. FIN
-	if (this->_tmpStdStr.size() > 0)
+	if (this->_bufferPack.size() > 0)
 	{
 		// prepare the response and tie with client Fd
 		if (this->_httpRespose.find(cliFd) == this->_httpRespose.end())
