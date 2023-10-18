@@ -316,8 +316,9 @@ void	ServHandle::sockCliRd(int const & cliFd) {
 
 		this->_valRd = recv(this->_infd, this->_buffRd, BUFFPACK, 0);
 		if (this->_valRd > 0) {
-			this->_tmpStdStr = this->_buffRd;
-			this->_bufferPack.append(this->_tmpStdStr, this->_valRd);
+			// this->_tmpStdStr = this->_buffRd;
+			// this->_bufferPack.append(this->_tmpStdStr, this->_valRd);
+			this->_bufferPack.append(this->_buffRd, this->_valRd);
 		}
 	}
 	while (this->_valRd > 0);
@@ -329,11 +330,12 @@ void	ServHandle::sockCliRd(int const & cliFd) {
 	// }
 
 	std::cout << CYN << "Data in Package bufferPack" << reset << std::endl;
-	std::cout << CYN << this->_tmpStdStr << reset << std::endl << std::endl;
+	std::cout << CYN << this->_bufferPack << reset << std::endl << std::endl;
 
 	// if the size of receive package = 0
 	// means client send some Flag ex. FIN
-	if (this->_tmpStdStr.size() > 0) {
+	// if (this->_tmpStdStr.size() > 0) {
+	if (this->_bufferPack.size() > 0) {
 		// prepare the response and tie with client Fd
 		if (this->_httpRespose.find(cliFd) == this->_httpRespose.end()) {
 			this->_httpRespose.insert(std::pair<int, std::string>(cliFd, this->generateHttpResponse(200, "Ok", "Hello from server")) );
