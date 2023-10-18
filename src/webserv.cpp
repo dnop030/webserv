@@ -4,9 +4,25 @@
 
 #include "ServHandle.hpp"
 
+#include <csignal>
+
+ServHandle	servManager;
+
+// Signal handler function
+void handle_sigint(int sig) {
+    std::cout << "Received SIGINT (Ctrl+C). Exiting..." << std::endl;
+    // You can perform cleanup or take other actions here
+    // exit(0); // Terminate the program
+	servManager.servStop();
+}
+
 int	main(int argc, char ** argv) {
 
-	ServHandle	servManager;
+	// ServHandle	servManager;
+
+	// / Register the signal handler for SIGINT
+	std::signal(SIGINT, handle_sigint);
+
 	if (argc <= 2) {
 		if (argc == 2) {
 			std::cout << GRN << "Config file name " << argv[1] << reset << std::endl;

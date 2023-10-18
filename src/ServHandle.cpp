@@ -1,15 +1,11 @@
 #include "ServHandle.hpp"
-#include <cstdlib>
-#include <fcntl.h>
-#include <sys/epoll.h>
-#include <sys/socket.h>
-#include <unistd.h>
 
 ServHandle::ServHandle(void) {}
 
 ServHandle::~ServHandle(void) {}
 
 void	ServHandle::servCreate(char const * configFile) {
+
 	std::cout << MAG << "servCreate" << reset << std::endl;
 	this->_configServ.readConfigFile(configFile);
 
@@ -74,11 +70,19 @@ void	ServHandle::servCreate(char const * configFile) {
 
 	// Need to fix -> using new method
 	this->_event_ret = (struct epoll_event *)calloc(MAXEVENTS, sizeof(struct epoll_event));
+
+	this->_servRunning = true;
 }
 
 void	ServHandle::servStart(void) {
 
-	while (1) {
+	// register signal handler
+	// signal(SIGINT, ServHandle::handle_sigint);
+	// signal(SIGINT, handle_sigint);
+	// std::signal(SIGINT, handle_sigint);
+	// std::signal(SIGINT, this->handle_sigint());
+
+	while (this->_servRunning) {
 		int	numEvent, i;
 
 		std::cout << std::endl << YEL << "Wait for Event" << reset << std::endl;
@@ -180,7 +184,25 @@ void	ServHandle::servStart(void) {
 	}
 }
 
-void	ServHandle::servStop(void) {}
+void	ServHandle::servStop(void) {
+
+	std::map<int, char>::iterator	it;
+
+	std::cout << MAG << "[INFO] Server stop" << reset << std::endl;
+	while (this->_mapFd.size() != 0) {
+		it = this->_mapFd.begin();
+		this->closeSock(it->first);
+	}
+	// for (it = this->_mapFd.begin(); it != this->_mapFd.end(); it++) {
+	// 	this->closeSock(it->first);
+	// }
+
+	this->_tmpInt = close(this->_epoll_fd);
+	// delete	_event_ret;
+	free(this->_event_ret);
+
+	this->_servRunning = false;
+}
 
 void	ServHandle::createServ(std::string const & config) {
 	int	opt = 1;
@@ -394,6 +416,7 @@ void	ServHandle::sockCliWr(int const & cliFd) {
 }
 
 void	ServHandle::closeSock(int fd) {
+	std::cout << MAG << "[INFOR] close socket " << fd << reset << std::endl;
 
 	// Delete response when close socket
 	// Therefore, socket can be reuse
@@ -426,6 +449,19 @@ void	ServHandle::closeSock(int fd) {
 	}
 
 }
+
+// void	ServHandle::handle_sigint(void) {
+// 	// printf("Caught signal %d\n", sig);
+// 	std::cout << "Caught signal" << std::endl;
+// }
+// void	ServHandle::handle_sigint(int sig) {
+// 	// printf("Caught signal %d\n", sig);
+// 	std::cout << "Caught signal " << sig << std::endl;
+// }
+// static void	ServHandle::handle_sigint(int sig) {
+// 	// printf("Caught signal %d\n", sig);
+// 	std::cout << "Caught signal " << sig << std::endl;
+// }
 
 std::string	ServHandle::generateHttpResponse(int statusCode, std::string const & statusMessage, std::string const & content) {
 	// Create an output stream to build the response
