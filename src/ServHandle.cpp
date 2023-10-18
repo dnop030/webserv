@@ -182,6 +182,9 @@ void	ServHandle::servStop(void) {
 	}
 
 	this->_tmpInt = close(this->_epoll_fd);
+	if (this->_tmpInt != 0) {
+		perror("close when Server Stop ");
+	}
 
 	free(this->_event_ret);
 
@@ -398,7 +401,7 @@ void	ServHandle::closeSock(int fd) {
 
 	this->_tmpInt = close(fd);
 	if (this->_tmpInt != 0) {
-		perror("close when Err ");
+		perror("close ");
 	}
 
 }
