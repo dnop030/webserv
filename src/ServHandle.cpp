@@ -185,8 +185,10 @@ void	ServHandle::servStart(void) {
 }
 
 void	ServHandle::servStop(void) {
+
 	std::map<int, char>::iterator	it;
 
+	std::cout << MAG << "[INFO] Server stop" << reset << std::endl;
 	for (it = this->_mapFd.begin(); it != this->_mapFd.end(); it++) {
 		this->closeSock(it->first);
 	}
