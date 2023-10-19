@@ -15,5 +15,7 @@ public:
 	Http();
 	Http(Http const &src);
 	Http &operator=(const Http &src);
+	std::map<std::string, std::string> getHeader();
+	std::string getBody();
 	virtual ~Http();
 };

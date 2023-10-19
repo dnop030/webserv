@@ -1,10 +1,39 @@
 #include "Request.hpp"
 
-Request::Request(std::string &buffer) : _buffer(buffer), _line(0), _buff_size(0), _method(""), _port(""), _hostname(""), _path(""), _fragment(""), _bodySize(0)
+Request::Request(std::string &buffer) : _buffer(buffer), _line(0), _buff_size(0), _method(""), _port(""), _hostname(""), _path(""), _fragment(""), _bodySize(0), _statusCode(0)
 {
+	try
+	{
+		this->_line = this->splitLine();
+		for (int i = 0; i < this->_buff_size; ++i)
+			this->trimTail(this->_line[i], '\r');
+		// std::cout << WHT << "After splitLine" << std::endl;
+		this->parseHeader();
+		// std::cout << "After parseHeader" << std::endl;
+		this->parseStartLine();
+		// std::cout << "After parseStartLine" << std::endl;
+		this->parseBody();
+		// std::cout << "After parseBody" << std::endl;
+		this->printLine();
+	}
+	catch (const BadRequest &e)
+	{
+		this->_statusCode = 400;
+		std::cout << e.what() << std::endl;
+	}
+	catch (const HttpNotSupport &e)
+	{
+		this->_statusCode = 505;
+		std::cout << e.what() << std::endl;
+	}
+	catch (const LengthRequired &e)
+	{
+		this->_statusCode = 411;
+		std::cout << e.what() << std::endl;
+	}
 }
 
-Request::Request(Request const &src) : _buff_size(src._buff_size), _buffer(src._buffer), _method(src._method), _port(src._port), _hostname(src._hostname), _path(src._path), _fragment(src._fragment), _bodySize(src._bodySize)
+Request::Request(Request const &src) : _buff_size(src._buff_size), _buffer(src._buffer), _method(src._method), _port(src._port), _hostname(src._hostname), _path(src._path), _fragment(src._fragment), _bodySize(src._bodySize), _statusCode(src._statusCode)
 {
 	*this = src;
 }
@@ -15,7 +44,7 @@ Request &Request::operator=(Request const &src)
 	{
 		for (int i = 0; i < src._buff_size; ++i)
 			this->_line[i] = src._line[i];
-		if (this->_query.empty())
+		if (!this->_query.empty())
 			this->_query.clear();
 		std::map<std::string, std::string>::const_iterator it2 = src._query.begin();
 		while (it2 != src._query.end())
@@ -648,35 +677,78 @@ void Request::parseBody(void)
 	}
 }
 
-void Request::parseRequest(void)
+// void Request::parseRequest(void)
+// {
+// 	// std::cout << "\nthe buffer is as below\n"
+// 	// 		  << std::endl;
+// 	// std::cout << BLU << this->_buffer << std::endl;
+// 	try
+// 	{
+// 		this->_line = this->splitLine();
+// 		for (int i = 0; i < this->_buff_size; ++i)
+// 			this->trimTail(this->_line[i], '\r');
+// 		// std::cout << WHT << "After splitLine" << std::endl;
+// 		this->parseHeader();
+// 		// std::cout << "After parseHeader" << std::endl;
+// 		this->parseStartLine();
+// 		// std::cout << "After parseStartLine" << std::endl;
+// 		this->parseBody();
+// 		// std::cout << "After parseBody" << std::endl;
+// 		this->printLine();
+// 	}
+// 	catch (const BadRequest &e)
+// 	{
+// 		std::cout << e.what() << std::endl;
+// 	}
+// 	catch (const HttpNotSupport &e)
+// 	{
+// 		std::cout << e.what() << std::endl;
+// 	}
+// 	catch (const LengthRequired &e)
+// 	{
+// 		std::cout << e.what() << std::endl;
+// 	}
+// }
+
+std::string Request::getMethod()
 {
-	// std::cout << "\nthe buffer is as below\n"
-	// 		  << std::endl;
-	// std::cout << BLU << this->_buffer << std::endl;
-	try
+	return (this->_method);
+}
+
+std::string Request::getHostname()
+{
+	return (this->_hostname);
+}
+
+std::string Request::getPort()
+{
+	return (this->_port);
+}
+
+std::string Request::getPath()
+{
+	return (this->_path);
+}
+
+std::string Request::getFragment()
+{
+	return (this->_fragment);
+}
+
+std::map<std::string, std::string> Request::getQuery()
+{
+	std::map<std::string, std::string> res;
+	if (this->_query.empty())
+		return (res);
+	for (std::map<std::string, std::string>::iterator it = this->_query.begin(); it != this->_query.end(); ++it)
 	{
-		this->_line = this->splitLine();
-		for (int i = 0; i < this->_buff_size; ++i)
-			this->trimTail(this->_line[i], '\r');
-		// std::cout << WHT << "After splitLine" << std::endl;
-		this->parseHeader();
-		// std::cout << "After parseHeader" << std::endl;
-		this->parseStartLine();
-		// std::cout << "After parseStartLine" << std::endl;
-		this->parseBody();
-		// std::cout << "After parseBody" << std::endl;
-		this->printLine();
+		if (res.find(it->first) == res.end())
+			res[it->first] = it->second;
 	}
-	catch (const BadRequest &e)
-	{
-		std::cout << e.what() << std::endl;
-	}
-	catch (const HttpNotSupport &e)
-	{
-		std::cout << e.what() << std::endl;
-	}
-	catch (const LengthRequired &e)
-	{
-		std::cout << e.what() << std::endl;
-	}
+	return (res);
+}
+
+int Request::getStatusCode()
+{
+	return (this->_statusCode);
 }

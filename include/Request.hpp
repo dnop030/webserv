@@ -10,6 +10,7 @@ class Request : Http
 {
 private:
 	int _buff_size;
+	int _statusCode;
 	std::string::size_type _bodySize;
 	std::string _buffer;
 	std::vector<std::string> _line;
@@ -64,6 +65,8 @@ public:
 	std::string getPort();
 	std::string getPath();
 	std::string getFragment();
+	std::map<std::string, std::string> getQuery();
+	int getStatusCode();
 	~Request();
 
 	class BadRequest : public std::exception

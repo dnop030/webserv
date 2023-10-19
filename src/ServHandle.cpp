@@ -1,4 +1,5 @@
 #include "ServHandle.hpp"
+#include "HttpHandle.hpp"
 #include "Request.hpp"
 #include <cstdlib>
 #include <fcntl.h>
@@ -399,8 +400,9 @@ void ServHandle::sockCliRd(int const &cliFd)
 	std::cout << CYN << this->_bufferPack << reset << std::endl
 			  << std::endl;
 
-	Request rq(this->_bufferPack);
-	rq.parseRequest();
+	// Request rq(this->_bufferPack);
+	//  rq.parseRequest();
+	HttpHandle http(this->_bufferPack);
 
 	// if the size of receive package = 0
 	// means client send some Flag ex. FIN
