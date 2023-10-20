@@ -40,6 +40,9 @@ void	ConfigFileHandle::readConfigFile(char const * fileName) {
 				// std::cout << "Create New ServerConfigDetail" << std::endl;
 				this->_amountServConfigDetail++;
 			}
+			else if ((tmpRd.find("location") != std::string::npos) && (tmpRd.find("{") != std::string::npos)) {
+
+			}
 			else if ((tmpRd.length() > 1) && (tmpRd.find(";") != std::string::npos)) {
 				// std::cout << tmpRd;
 				// std::cout << std::endl;
