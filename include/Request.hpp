@@ -6,7 +6,7 @@
 #include <sstream>
 #include "color.hpp"
 
-class Request : Http
+class Request : public Http
 {
 private:
 	int _buff_size;
@@ -36,6 +36,8 @@ public:
 	size_t ft_strlen(std::string &str);
 	int allDigit(std::string &str);
 	int ft_strncmp(std::string &str1, std::string &str2, size_t size);
+	bool isHex(std::string &str);
+	int ft_htod(std::string &str);
 	std::string::size_type getLastChar(std::string &str);
 	std::string::size_type findCLRF(std::string &str, std::string::size_type idx);
 
@@ -82,6 +84,12 @@ public:
 	};
 
 	class LengthRequired : public std::exception
+	{
+	public:
+		virtual const char *what() const throw();
+	};
+
+	class NotImplement : public std::exception
 	{
 	public:
 		virtual const char *what() const throw();

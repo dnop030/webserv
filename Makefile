@@ -8,7 +8,7 @@ INC			:= -I./include
 
 CXX			:= g++
 # CXX			:= clang
-# CXXFLAGS	:= -Wall -Wextra -Werror -std=c++98
+#CXXFLAGS	:= -Wall -Wextra -Werror -std=c++98 -fsanitize=address
 
 SRCS		:= $(wildcard $(SRCDIR)/*.cpp)
 OBJS		:= $(patsubst %.cpp,$(OBJDIR)/%.o,$(SRCS))
@@ -30,7 +30,7 @@ all: $(NAME)
 
 # Main target
 $(NAME): $(OBJS)
-	$(CXX) $(CXXFLAGS) -o $(NAME) $(OBJS)
+	$(CXX) $(CXXFLAGS) -fsanitize=address -o $(NAME) $(OBJS)
 	@echo $(GREEN) "\n\tProject is compiled\n" ${END}
 
 # Rule for generating dependency and object files

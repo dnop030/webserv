@@ -24,6 +24,10 @@ Http &Http::operator=(Http const &src)
 			this->_header[it2->first] = it2->second;
 			++it2;
 		}
+		if (!this->_bodyChunk.empty())
+			this->_bodyChunk.clear();
+		for (std::vector<std::string>::const_iterator it = src._bodyChunk.begin(); it != src._bodyChunk.end(); ++it)
+			this->_bodyChunk.push_back(*it);
 	}
 	return (*this);
 }
@@ -48,4 +52,12 @@ std::map<std::string, std::string> Http::getHeader()
 std::string Http::getBody()
 {
 	return (this->_body);
+}
+
+std::vector<std::string> Http::getBodyChunk()
+{
+	std::vector<std::string> res;
+	for (std::vector<std::string>::iterator it = this->_bodyChunk.begin(); it != this->_bodyChunk.end(); ++it)
+		res.push_back(*it);
+	return (res);
 }

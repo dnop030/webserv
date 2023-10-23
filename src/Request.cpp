@@ -14,7 +14,7 @@ Request::Request(std::string &buffer) : _buffer(buffer), _line(0), _buff_size(0)
 		// std::cout << "After parseStartLine" << std::endl;
 		this->parseBody();
 		// std::cout << "After parseBody" << std::endl;
-		this->printLine();
+		// this->printLine();
 	}
 	catch (const BadRequest &e)
 	{
@@ -29,6 +29,11 @@ Request::Request(std::string &buffer) : _buffer(buffer), _line(0), _buff_size(0)
 	catch (const LengthRequired &e)
 	{
 		this->_statusCode = 411;
+		std::cout << e.what() << std::endl;
+	}
+	catch (const NotImplement &e)
+	{
+		this->_statusCode = 501;
 		std::cout << e.what() << std::endl;
 	}
 }
@@ -73,6 +78,11 @@ const char *Request::HttpNotSupport::what() const throw()
 const char *Request::LengthRequired::what() const throw()
 {
 	return ("411 Length required");
+}
+
+const char *Request::NotImplement::what() const throw()
+{
+	return ("501 not implemented");
 }
 
 bool Request::endLine(std::string &buffer, std::string::size_type idx)
@@ -226,6 +236,36 @@ int Request::ft_strncmp(std::string &str1, std::string &str2, size_t size)
 	return (0);
 }
 
+bool Request::isHex(std::string &str)
+{
+	for (int i = 0; str[i] != '\0'; ++i)
+	{
+		std::cout << "std[i]: " << str[i] << std::endl;
+		if (!std::isdigit(str[i]) && ((str[i] < 'A' || str[i] > 'F') && (str[i]) < 'a' || str[i] > 'f'))
+			return (false);
+	}
+	return (true);
+}
+
+int Request::ft_htod(std::string &str)
+{
+	int res = 0;
+	// if (!this->isHex(str))
+	// 	return (-1);
+	for (int i = 0; str[i] != '\0'; ++i)
+	{
+		if ((str[i] >= 'a' && str[i] <= 'f'))
+			res = (res * 16) + (str[i] - 'a' + 10);
+		else if ((str[i] >= 'A' && str[i] <= 'F'))
+			res = (res * 16) + (str[i] - 'A' + 10);
+		else if (std::isdigit(str[i]))
+			res = (res * 16) + (str[i] - '0');
+		else
+			return (-1);
+	}
+	return (res);
+}
+
 std::string::size_type Request::getLastChar(std::string &str)
 {
 	std::string::size_type res = 0;
@@ -267,6 +307,11 @@ void Request::checkHttpVer(std::string &str)
 		delete[] buffdot;
 		throw BadRequest();
 	}
+	if (buffdot != NULL)
+	{
+		delete[] buffdot;
+		buffdot = NULL;
+	}
 }
 
 void Request::checkMethod(std::string &str)
@@ -280,7 +325,7 @@ void Request::checkMethod(std::string &str)
 	else if (str == "DELETE")
 		this->_method = "DELETE";
 	else
-		this->_method = "";
+		throw NotImplement();
 }
 
 bool Request::isIPv4(std::string &str)
@@ -396,6 +441,11 @@ void Request::parseQuery(std::string &dns)
 		{
 			delete[] map;
 			map = NULL;
+		}
+		if (query != NULL)
+		{
+			delete[] query;
+			query = NULL;
 		}
 		this->printMap(this->_query);
 	}
@@ -583,6 +633,10 @@ void Request::printLine(void)
 	this->printMap(this->_header);
 	std::cout << "<<<<<<<<< Body as below >>>>>>>>>>\n"
 			  << this->_body << std::endl;
+	std::cout << "<<<<<<<<< Body in chunk as below >>>>>>>>>>" << std::endl;
+	for (std::vector<std::string>::iterator it = this->_bodyChunk.begin(); it != this->_bodyChunk.end(); ++it)
+		std::cout << *it << "\n\nnewline\n"
+				  << std::endl;
 	std::cout << "Body size: " << this->_bodySize << std::endl;
 	std::cout << "buffer size " << this->_buff_size << std::endl;
 	std::cout << "hostname: " << this->_hostname << std::endl;
@@ -674,6 +728,40 @@ void Request::parseBody(void)
 		if (contentLen != this->_bodySize)
 			throw BadRequest();
 		this->_body = this->_body.substr(0, contentLen);
+	}
+	else if (!this->_body.empty() && this->_header.find("Transfer-Encoding") != this->_header.end() && this->_header["Transfer-Encoding"] == "chunked")
+	{
+		std::string res;
+		std::string tmp;
+		std::string::size_type start = 0;
+		std::string::size_type end = this->findCLRF(this->_body, start);
+		int len_flag = 0;
+		int len = 0;
+		while (end != std::string::npos)
+		{
+			tmp = this->_body.substr(start, end - start);
+			if (len_flag == 0 || len_flag % 2 == 0)
+				len = this->ft_htod(tmp);
+			if ((len_flag == 0 || len_flag % 2 == 0) && len < 0)
+				throw BadRequest();
+			else if (len_flag % 2 != 0 && len > 0)
+			{
+				if (len != tmp.size())
+				{
+					std::cout << "size not equal" << std::endl;
+					throw BadRequest();
+				}
+				this->_bodyChunk.push_back(tmp);
+				res.append(tmp);
+			}
+			++len_flag;
+			end += 2;
+			start = end;
+			end = this->findCLRF(this->_body, start);
+		}
+		if (len != 0 || (len == 0 && this->_body[start] != '\0'))
+			throw BadRequest();
+		this->_body = res;
 	}
 }
 
