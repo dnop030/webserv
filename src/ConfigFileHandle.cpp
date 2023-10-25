@@ -4,6 +4,7 @@ ConfigFileHandle::ConfigFileHandle(void) {
 	this->_tmpServConfigDetail = NULL;
 	this->_amountServConfigDetail = 0;
 	this->_tmpStr.clear();
+	this->_foundLocation = 0;
 }
 
 ConfigFileHandle::~ConfigFileHandle(void) {
@@ -31,7 +32,10 @@ void	ConfigFileHandle::readConfigFile(char const * fileName) {
 		while (std::getline(ifs, tmpRd)) {
 			// std::cout << tmpRd;
 			// std::cout << std::endl;
-			if ((tmpRd.find("{") != std::string::npos) && (tmpRd.length() == 1)) {
+
+			// malloc when found new config server
+			// if ((tmpRd.find("{") != std::string::npos) && (tmpRd.length() == 1)) {
+			if ((tmpRd.find("{") != std::string::npos) && (tmpRd.length() == 1) && (this->_foundLocation == 0)) {
 				this->_servConfig[this->_amountServConfigDetail] = new ServConfigDetail();
 
 				// std::cout << YEL << "Add of ServConfigDetai " << this->_amountServConfigDetail << " ";
@@ -40,10 +44,21 @@ void	ConfigFileHandle::readConfigFile(char const * fileName) {
 				// std::cout << "Create New ServerConfigDetail" << std::endl;
 				this->_amountServConfigDetail++;
 			}
-			else if ((tmpRd.find("location") != std::string::npos) && (tmpRd.find("{") != std::string::npos)) {
-
+			// found new location in server config
+			// else if ((tmpRd.find("location") != std::string::npos) && (tmpRd.find("{") != std::string::npos)) {
+			else if ((tmpRd.find("location") != std::string::npos) && (tmpRd.find("{") != std::string::npos) && (this->_foundLocation == 0)) {
+				// std::cout << MAG << "[INFO] found start location " << tmpRd << reset << std::endl;
+				this->_tmpServConfigDetail->storeConfigLocation(tmpRd);
+				this->_foundLocation = 1;
 			}
-			else if ((tmpRd.length() > 1) && (tmpRd.find(";") != std::string::npos)) {
+			// end one group location in server config
+			else if ((this->_foundLocation == 1) && (tmpRd.find("}") != std::string::npos)) {
+				std::cout << MAG << "[INFO] found end location " << tmpRd << reset << std::endl;
+				this->_foundLocation = 0;
+			}
+			// detail of server config
+			// else if ((tmpRd.length() > 1) && (tmpRd.find(";") != std::string::npos)) {
+			else if ((tmpRd.length() > 1) && (tmpRd.find(";") != std::string::npos) && (this->_foundLocation == 0)) {
 				// std::cout << tmpRd;
 				// std::cout << std::endl;
 				this->_tmpServConfigDetail = this->_servConfig[this->_amountServConfigDetail - 1];
@@ -52,6 +67,11 @@ void	ConfigFileHandle::readConfigFile(char const * fileName) {
 				// std::cout << this->_tmpServConfigDetail << reset << std::endl;
 
 				this->_tmpServConfigDetail->storeConfig(tmpRd);
+			}
+			// detail of location in server config
+			else if ((tmpRd.length() > 1) && (tmpRd.find(";") != std::string::npos) && (this->_foundLocation == 1)) {
+				// std::cout << MAG << "[INFO] Detail location " << tmpRd << reset << std::endl;
+				this->_tmpServConfigDetail->storeConfigLocation(tmpRd);
 			}
 		}
 		ifs.close();

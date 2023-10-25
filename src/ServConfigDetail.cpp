@@ -1,9 +1,16 @@
 #include "ServConfigDetail.hpp"
-#include <cstddef>
 
-ServConfigDetail::ServConfigDetail(void) {}
+ServConfigDetail::ServConfigDetail(void) {
+	this->_amountLocation = 0;
+}
 
-ServConfigDetail::~ServConfigDetail(void) {}
+ServConfigDetail::~ServConfigDetail(void) {
+	std::multimap<int, LocationConfigDetail *>::iterator	it = this->_locationDetail.begin();
+	while (it != this->_locationDetail.end()) {
+		delete	it->second;
+		it++;
+	}
+}
 
 void	ServConfigDetail::storeConfig(std::string const & config) {
 	size_t		pos_space;
@@ -61,4 +68,31 @@ std::string const &	ServConfigDetail::getVal(std::string const & val) {
 		std::cout << MAG << "[INFO]NOT Found key:" << this->_tmpStr << reset << std::endl;
 		return (this->_tmpStr);
 	}
+}
+
+void	ServConfigDetail::storeConfigLocation(std::string const & location) {
+	if (location.find("{") != std::string::npos) {
+		std::cout << "Found open new location" << std::endl;
+		std::cout << MAG << "detail " << location << reset << std::endl;
+
+		// LocationConfigDetail	*tmpLocation = new LocationConfigDetail();
+		// this->_locationDetail[this->_amountLocation] = new LocationConfigDetail();
+		std::cout << "Size of location bef add " << this->getAmountLocation() << std::endl;
+		// this->_locationDetail.insert(this->_amountLocation, new LocationConfigDetail);
+		this->_locationDetail.insert(std::pair<int, LocationConfigDetail *>(this->_amountLocation, new LocationConfigDetail()));
+		std::cout << "Size of location aft add " << this->getAmountLocation() << std::endl;
+	}
+	else if (location.find("}") != std::string::npos) {
+		std::cout << "Found close new location" << std::endl;
+	}
+	else {
+		std::cout << MAG << "detail " << location << reset << std::endl;
+	}
+}
+
+int		ServConfigDetail::getAmountLocation(void) {
+	return (this->_locationDetail.size());
+}
+
+std::string const &	ServConfigDetail::getValLocation(int index, std::string const & key) {
 }

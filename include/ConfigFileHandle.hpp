@@ -27,6 +27,7 @@ class ConfigFileHandle
 		unsigned int					_amountServConfigDetail;
 		ServConfigDetail				*_tmpServConfigDetail;
 		std::string						_tmpStr;
+		int								_foundLocation;
 };
 
 #endif

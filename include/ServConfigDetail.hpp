@@ -8,6 +8,8 @@
 
 #include <map>
 
+#include "LocationConfigDetail.hpp"
+
 class ServConfigDetail
 {
 	public:
@@ -18,12 +20,19 @@ class ServConfigDetail
 		void	showDetail(void);
 		std::string const &	getVal(std::string const & val);
 
+		void	storeConfigLocation(std::string const & location);
+		int		getAmountLocation(void);
+		std::string const &	getValLocation(int index, std::string const & key);
+
 	private:
 		ServConfigDetail(ServConfigDetail const & r);
 		ServConfigDetail &operator=(ServConfigDetail const & r);
 
 		std::multimap<std::string, std::string>	_detail;
 		std::string							_tmpStr;
+		int									_amountLocation;
+
+		std::multimap<int, LocationConfigDetail *>	_locationDetail;
 };
 
 #endif
