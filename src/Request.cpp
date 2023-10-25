@@ -38,7 +38,7 @@ Request::Request(std::string &buffer) : _buffer(buffer), _line(0), _buff_size(0)
 	}
 }
 
-Request::Request(Request const &src) : _buff_size(src._buff_size), _buffer(src._buffer), _method(src._method), _port(src._port), _hostname(src._hostname), _path(src._path), _fragment(src._fragment), _bodySize(src._bodySize), _statusCode(src._statusCode)
+Request::Request(Request const &src) : Http(src), _buff_size(src._buff_size), _buffer(src._buffer), _method(src._method), _port(src._port), _hostname(src._hostname), _path(src._path), _fragment(src._fragment), _bodySize(src._bodySize), _statusCode(src._statusCode)
 {
 	*this = src;
 }
@@ -47,8 +47,10 @@ Request &Request::operator=(Request const &src)
 {
 	if (this != &src)
 	{
-		for (int i = 0; i < src._buff_size; ++i)
-			this->_line[i] = src._line[i];
+		// for (int i = 0; i < src._buff_size; ++i)
+		// 	this->_line[i] = src._line[i];
+		for (std::vector<std::string>::const_iterator it = src._line.begin(); it != src._line.end(); ++it)
+			this->_line.push_back(*it);
 		if (!this->_query.empty())
 			this->_query.clear();
 		std::map<std::string, std::string>::const_iterator it2 = src._query.begin();
@@ -714,10 +716,83 @@ void Request::parseHeader(void)
 		this->_header.erase("Content-Length");
 }
 
+// void Request::trimTail_str(std::string &str, std::string delim)
+// {
+// 	std::string res;
+
+// 	std::string::size_type end = str.find_last_of(delim);
+// 	while (end == std::string::npos)
+// 	{
+// 		end -= this->ft_strlen(delim);
+// 		end = str.find_last_of(delim);
+// 	}
+// 	res = str.substr(0, end - 0);
+// 	str = res;
+// }
+
+// void Request::getFromBound(std::vector<std::string> &chunk, std::string::size_type &start, std::string &bound)
+// {
+// 	start = this->_body.find("\r\n", start);
+// 	std::string::size_type end;
+// 	if (start == std::string::npos)
+// 		return;
+// 	start += 2;
+// 	end = this->_body.find(bound, start);
+// 	if (end == std::string::npos)
+// 	{
+// 		start = end;
+// 		return;
+// 	}
+// 	end = this->_body.find_last_of("\r\n", end);
+// 	if (end == std::string::npos)
+// 	{
+// 		start = end;
+// 		return;
+// 	}
+// 	std::string dummy = this->_body.substr(start, end - start);
+// 	this->trimTail_str(dummy, "\r\n");
+// 	chunk.push_back(dummy);
+// 	start = end;
+// 	start = this->_body.find_first_of(bound, start);
+// }
+
+// void Request::checkContentType(void)
+// {
+// 	if (this->_header.find("Content-Type") == this->_header.end())
+// 		return;
+// 	std::string tmp = this->_header["Content-Type"];
+// 	std::string *mime = this->ft_split(tmp, ';');
+// 	if (mime == NULL)
+// 		return;
+// 	std::string::size_type start = mime[1].find("=");
+// 	std::string::size_type end = 0;
+// 	if (mime[0] != "multipart/form-data" || start == std::string::npos)
+// 	{
+// 		delete[] mime;
+// 		return;
+// 	}
+// 	std::string bound = mime[1].substr(++start);
+// 	delete[] mime;
+// 	start = this->_body.find(bound);
+// 	if (start == std::string::npos)
+// 		return;
+// 	std::vector<std::string> chunk;
+// 	while (start != std::string::npos)
+// 	{
+// 		std::cout << "zzzzzzzz try escape delim => new one" << std::endl;
+// 		this->getFromBound(chunk, start, bound);
+// 		std::cout << chunk.back() << std::endl;
+// 	}
+// }
+
 void Request::parseBody(void)
 {
 	if (this->_method != "POST")
 		return;
+	// this->checkContentType();
+	FormData form(*this);
+	if (this->_statusCode == 400)
+		throw BadRequest();
 	if (!this->_body.empty() && this->_header.find("Content-Length") != this->_header.end())
 	{
 		if (!this->allDigit(this->_header["Content-Length"]))
@@ -764,39 +839,6 @@ void Request::parseBody(void)
 		this->_body = res;
 	}
 }
-
-// void Request::parseRequest(void)
-// {
-// 	// std::cout << "\nthe buffer is as below\n"
-// 	// 		  << std::endl;
-// 	// std::cout << BLU << this->_buffer << std::endl;
-// 	try
-// 	{
-// 		this->_line = this->splitLine();
-// 		for (int i = 0; i < this->_buff_size; ++i)
-// 			this->trimTail(this->_line[i], '\r');
-// 		// std::cout << WHT << "After splitLine" << std::endl;
-// 		this->parseHeader();
-// 		// std::cout << "After parseHeader" << std::endl;
-// 		this->parseStartLine();
-// 		// std::cout << "After parseStartLine" << std::endl;
-// 		this->parseBody();
-// 		// std::cout << "After parseBody" << std::endl;
-// 		this->printLine();
-// 	}
-// 	catch (const BadRequest &e)
-// 	{
-// 		std::cout << e.what() << std::endl;
-// 	}
-// 	catch (const HttpNotSupport &e)
-// 	{
-// 		std::cout << e.what() << std::endl;
-// 	}
-// 	catch (const LengthRequired &e)
-// 	{
-// 		std::cout << e.what() << std::endl;
-// 	}
-// }
 
 std::string Request::getMethod()
 {

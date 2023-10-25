@@ -5,6 +5,7 @@
 #include <cctype>
 #include <sstream>
 #include "color.hpp"
+#include "FormData.hpp"
 
 class Request : public Http
 {
@@ -31,6 +32,7 @@ public:
 	void removeChar(std::string &str, char c);
 	int countReturn(std::string &str);
 	void trimTail(std::string &str, char delim);
+	void trimTail_str(std::string &str, std::string delim);
 	std::string::size_type skipChar(std::string &str, std::string::size_type idx, char c);
 	double ft_stod(const std::string &s);
 	size_t ft_strlen(std::string &str);
@@ -50,6 +52,7 @@ public:
 	void checkMethod(std::string &str);
 	void checkTargetUri(std::string &str);
 	void checkHttpVer(std::string &str);
+	void checkContentType();
 
 	void parsePort(std::string &dns);
 	void parsePath(std::string &dns);
@@ -97,4 +100,10 @@ public:
 
 	void printLine(void);
 	void printMap(std::map<std::string, std::string> &map);
+
+	std::string *ft_split_dummy(std::string &str, std::string delim);
+	// std::string getFromBound(std::string::size_type &start, std::string &bound);
+	void getFromBound(std::vector<std::string> &chunk, std::string::size_type &start, std::string &bound);
+
+	friend class FormData;
 };
