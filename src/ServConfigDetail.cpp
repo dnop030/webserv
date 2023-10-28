@@ -65,7 +65,8 @@ std::string const &	ServConfigDetail::getVal(std::string const & val) {
 	}
 	else {
 		this->_tmpStr.clear();
-		std::cout << MAG << "[INFO]NOT Found key:" << this->_tmpStr << reset << std::endl;
+		std::cout << RED << "[INFO]NOT Found key:" << this->_tmpStr << reset << std::endl;
+		// return string that doesn't use
 		return (this->_tmpStr);
 	}
 }
@@ -77,10 +78,10 @@ void	ServConfigDetail::storeConfigLocation(std::string const & location) {
 
 		// LocationConfigDetail	*tmpLocation = new LocationConfigDetail();
 		// this->_locationDetail[this->_amountLocation] = new LocationConfigDetail();
-		std::cout << "Size of location bef add " << this->getAmountLocation() << std::endl;
+		// std::cout << "Size of location bef add " << this->getAmountLocation() << std::endl;
 		// this->_locationDetail.insert(this->_amountLocation, new LocationConfigDetail);
 		this->_locationDetail.insert(std::pair<int, LocationConfigDetail *>(this->_amountLocation, new LocationConfigDetail()));
-		std::cout << "Size of location aft add " << this->getAmountLocation() << std::endl;
+		// std::cout << "Size of location aft add " << this->getAmountLocation() << std::endl;
 	}
 	else if (location.find("}") != std::string::npos) {
 		std::cout << "Found close new location" << std::endl;
