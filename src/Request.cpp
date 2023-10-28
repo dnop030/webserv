@@ -653,7 +653,15 @@ void Request::printLine(void)
 void Request::printMap(std::map<std::string, std::string> &map)
 {
 	for (std::map<std::string, std::string>::iterator it = map.begin(); it != map.end(); ++it)
-		std::cout << it->first << ": " << it->second << std::endl;
+	{
+		if (it->first == "body")
+		{
+			std::cout << "body: as below" << std::endl;
+			std::cout << it->second << std::endl;
+		}
+		else
+			std::cout << it->first << ": " << it->second << std::endl;
+	}
 }
 
 void Request::parseStartLine(void)

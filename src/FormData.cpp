@@ -1,6 +1,6 @@
 #include "FormData.hpp"
 
-FormData::FormData(Request &req)
+FormData::FormData(Request &req) : _split(NULL)
 {
 	this->_req = new Request(req);
 	try
@@ -22,11 +22,27 @@ FormData::~FormData()
 		delete this->_req;
 		this->_req = NULL;
 	}
+	if (this->_split != NULL)
+	{
+		delete[] this->_split;
+		this->_split = NULL;
+	}
 }
 
 const char *FormData::BadRequest::what() const throw()
 {
 	return ("400 Bad request");
+}
+
+void FormData::printForm()
+{
+	for (std::vector<std::map<std::string, std::string>>::iterator vec = this->_form.begin(); vec != this->_form.end(); ++vec)
+	{
+		std::cout << "/////////// Map ////////////" << std::endl;
+		this->_req->printMap(*vec);
+		std::cout << "////////////////////////////\n"
+				  << std::endl;
+	}
 }
 
 int FormData::ft_strlen_size_t(std::string &str)
@@ -53,12 +69,71 @@ void FormData::trimTail_str(std::string &str, std::string delim)
 
 void FormData::trimHead(std::string &str, char delim)
 {
-	std::string::size_type start = this->_req->skipChar(str, 0, ' ');
+	std::string::size_type start = this->_req->skipChar(str, 0, delim);
 	str = str.substr(start);
 }
 
-void FormData::parseToMap(void)
+void FormData::trimHeadTail(std::string &str, char delim)
 {
+	this->trimHead(str, delim);
+	this->_req->trimTail(str, delim);
+}
+
+std::map<std::string, std::string> FormData::parseChunk(std::string &str)
+{
+	std::vector<std::string> chunk = this->splitCRLF(str);
+	std::vector<std::string>::iterator i = chunk.begin();
+	std::map<std::string, std::string> map;
+	while (i != chunk.end())
+	{
+		if (i == chunk.begin())
+		{
+			this->_split = this->_req->ft_split(*i, ';');
+			if (this->_split == NULL)
+				throw BadRequest();
+			for (int i = 0; !this->_split[i].empty(); ++i)
+			{
+				if (i == 0)
+				{
+					this->trimHead(this->_split[i], ' ');
+					this->parseHeader(map, this->_split[i]);
+				}
+				else
+				{
+					std::string *tmp_split = this->_req->ft_split(this->_split[i], '=');
+					if (tmp_split == NULL || !tmp_split[2].empty())
+					{
+						delete[] tmp_split;
+						throw BadRequest();
+					}
+					this->trimHeadTail(tmp_split[0], ' ');
+					this->trimHeadTail(tmp_split[1], '\"');
+					if (map.find(tmp_split[0]) == map.end())
+						map[tmp_split[0]] = tmp_split[1];
+					delete[] tmp_split;
+					tmp_split = NULL;
+				}
+			}
+			delete[] this->_split;
+			this->_split = NULL;
+			if (map.find("Content-Disposition") == map.end() || map.find("name") == map.end())
+				throw BadRequest();
+		}
+		else
+		{
+			this->parseHeader(map, *i);
+		}
+		++i;
+		std::vector<std::string>::iterator tmp = i + 1;
+		if (tmp == chunk.end())
+			break;
+	}
+	// this->_req->printMap(map);
+	//  std::cout << "Body is as below" << std::endl;
+	//  std::cout << chunk.back() << std::endl;
+	if (map.find("body") == map.end())
+		map["body"] = chunk.back();
+	return (map);
 }
 
 void FormData::getFromBound(std::vector<std::string> &chunk, std::string::size_type &start, std::string &bound)
@@ -69,6 +144,7 @@ void FormData::getFromBound(std::vector<std::string> &chunk, std::string::size_t
 		return;
 	start += 2;
 	end = this->_req->_body.find(bound, start);
+	std::string::size_type tmp_size = end;
 	if (end == std::string::npos)
 	{
 		start = end;
@@ -82,9 +158,50 @@ void FormData::getFromBound(std::vector<std::string> &chunk, std::string::size_t
 	}
 	std::string dummy = this->_req->_body.substr(start, end - start);
 	this->trimTail_str(dummy, "\r\n");
+	this->_form.push_back(this->parseChunk(dummy));
 	chunk.push_back(dummy);
 	start = end;
 	start = this->_req->_body.find_first_of(bound, start);
+}
+
+void FormData::parseHeader(std::map<std::string, std::string> &map, std::string &line)
+{
+	std::string tmp[2];
+	size_t end = line.find_first_of(':');
+	if (end == std::string::npos)
+		throw BadRequest();
+	tmp[0] = line.substr(0, end);
+	if (++end == std::string::npos)
+		tmp[1] = "";
+	else
+		tmp[1] = line.substr(end);
+	if (tmp == NULL || tmp[0] == "" || tmp[0][0] == ' ' || tmp[0][0] == '\t' || tmp[0].back() == ' ' || tmp[0].back() == '\t' || (tmp[1][0] != ' ' && tmp[1][0] != '\t'))
+		throw BadRequest();
+	if (std::isalpha(tmp[0][0]) && (tmp[0][0] < 'A' || tmp[0][0] > 'Z'))
+		tmp[0][0] -= 32;
+
+	for (int i = 1; tmp[0][i] != '\0'; ++i)
+	{
+		if (std::isalpha(tmp[0][i]) && (tmp[0][i] < 'a' || tmp[0][i] > 'z'))
+			tmp[0][i] += 32;
+	}
+	std::string::size_type find = tmp[0].find_first_of('-');
+	if (find != std::string::npos)
+	{
+		find += 1;
+		if (std::isalpha(tmp[0][find]) && (tmp[0][find] < 'A' || tmp[0][find] > 'Z'))
+			tmp[0][find] -= 32;
+	}
+	if (map.find(tmp[0]) != map.end())
+		throw BadRequest();
+	std::string::size_type start = 0;
+	start = this->_req->skipChar(tmp[1], start, ' ');
+	start = this->_req->skipChar(tmp[1], start, '\t');
+	start = this->_req->skipChar(tmp[1], start, ' ');
+	if (tmp[1][start] == '\0')
+		map[tmp[0]] = "";
+	else
+		map[tmp[0]] = tmp[1].substr(start);
 }
 
 void FormData::checkContentType(void)
@@ -104,53 +221,19 @@ void FormData::checkContentType(void)
 	}
 	std::string bound = mime[1].substr(++start);
 	delete[] mime;
+	std::string::size_type tmp_size = this->_req->_body.find_last_of(bound);
+	tmp_size -= (this->_req->ft_strlen(bound) + 2);
+	tmp = this->_req->_body.substr(tmp_size);
+	this->trimTail_str(tmp, "\r\n");
+	if (tmp[this->_req->ft_strlen(tmp) - 2] != '-' || tmp[this->_req->ft_strlen(tmp) - 3] != '-')
+		throw BadRequest();
 	start = this->_req->_body.find(bound);
 	if (start == std::string::npos)
 		return;
 	std::vector<std::string> chunk;
 	while (start != std::string::npos)
-	{
-		// std::cout << "xxxxxxx try escape delim => new one " << i << std::endl;
 		this->getFromBound(chunk, start, bound);
-		// if (start != std::string::npos)
-		// 	std::cout << chunk.back() << std::endl;
-	}
-	int i = 1;
-	for (std::vector<std::string>::iterator it = chunk.begin(); it != chunk.end(); ++it)
-	{
-		std::cout << "zzzzzzzz try escape delim => new one " << i << std::endl;
-		std::cout << *it << std::endl;
-		std::vector<std::string> dummy = this->splitCRLF(*it);
-		std::cout << "LLLLLLLLLL Start in splitCRLF LLLLLLLLLL" << std::endl;
-		std::vector<std::string>::iterator i = dummy.begin();
-		while (i != dummy.end())
-		{
-			if (i == dummy.begin())
-			{
-				std::string *firstLine = this->_req->ft_split(*i, ';');
-				if (firstLine == NULL)
-					throw BadRequest();
-				for (int i = 0; !firstLine[i].empty(); ++i)
-				{
-					// std::string::size_type start = this->_req->skipChar(firstLine[i], 0, ' ');
-					// firstLine[i] = firstLine[i].substr(start);
-					this->trimHead(firstLine[i], ' ');
-					std::cout << "firstLine[" << i << "]: " << firstLine[i] << std::endl;
-				}
-				delete[] firstLine;
-			}
-			// std::cout << "-------- Bound --------" << std::endl;
-			std::cout << *i << std::endl;
-			++i;
-			std::vector<std::string>::iterator tmp = i + 1;
-			if (tmp == dummy.end())
-				break;
-		}
-		std::cout << "Body is as below" << std::endl;
-		std::cout << dummy.back() << std::endl;
-		std::cout << "LLLLLLLLLL End in splitCRLF LLLLLLLLLL" << std::endl;
-		++i;
-	}
+	this->printForm();
 }
 
 std::vector<std::string> FormData::splitCRLF(std::string &buffer)
@@ -181,11 +264,6 @@ std::vector<std::string> FormData::splitCRLF(std::string &buffer)
 	while (buffer[start] != '\0' && (buffer[start] == '\n' || buffer[start] == '\r'))
 		++start;
 	if (buffer[start] != '\0')
-	{
 		res.push_back(buffer.substr(start));
-		// 	std::string body = buffer.substr(start);
-		// 	std::cout << "///////// Content of each multipart ///////////" << std::endl;
-		// 	std::cout << body << std::endl;
-	}
 	return (res);
 }

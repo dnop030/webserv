@@ -12,6 +12,7 @@ private:
 	// Http *_req;
 	// Response *_res;
 	int _statusCode;
+	double _contentLength;
 	std::string _buffer;
 	std::string _method;
 	std::string _hostname;

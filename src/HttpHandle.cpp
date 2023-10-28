@@ -1,6 +1,6 @@
 #include "HttpHandle.hpp"
 
-HttpHandle::HttpHandle(std::string &buffer) : _statusCode(0), _buffer(buffer)
+HttpHandle::HttpHandle(std::string &buffer) : _statusCode(0), _buffer(buffer), _contentLength(0)
 {
 	this->_req = new Request(this->_buffer);
 	// this->_req = Request(this->_buffer);
@@ -13,7 +13,8 @@ HttpHandle::HttpHandle(std::string &buffer) : _statusCode(0), _buffer(buffer)
 	this->_header = this->_req->getHeader();
 	this->_body = this->_req->getBody();
 	this->_bodyChunk = this->_req->getBodyChunk();
-
+	if (this->_header.find("Content-Length") != this->_header.end())
+		this->_contentLength = this->_req->ft_stod(this->_header["Content-Length"]);
 	this->printLine();
 }
 
