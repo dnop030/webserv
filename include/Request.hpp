@@ -6,6 +6,7 @@
 #include <sstream>
 #include "color.hpp"
 #include "FormData.hpp"
+#include "CheckHeader.hpp"
 
 class Request : public Http
 {
@@ -106,4 +107,5 @@ public:
 	void getFromBound(std::vector<std::string> &chunk, std::string::size_type &start, std::string &bound);
 
 	friend class FormData;
+	friend class CheckHeader;
 };

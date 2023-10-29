@@ -3,14 +3,10 @@
 #include "Http.hpp"
 #include "Request.hpp"
 
-// class Http;
-//  class Request;
 class HttpHandle
 {
 private:
 	Request *_req;
-	// Http *_req;
-	// Response *_res;
 	int _statusCode;
 	double _contentLength;
 	std::string _buffer;

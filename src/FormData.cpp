@@ -1,18 +1,37 @@
 #include "FormData.hpp"
 
-FormData::FormData(Request &req) : _split(NULL)
+FormData::FormData(Request &req) : _split(NULL), _req(NULL)
 {
 	this->_req = new Request(req);
 	try
 	{
 		this->checkContentType();
-		// req.checkContentType();
 	}
 	catch (const BadRequest &e)
 	{
 		this->_req->_statusCode = 400;
 		std::cout << e.what() << std::endl;
 	}
+}
+
+FormData::FormData(FormData const &src)
+{
+	*this = src;
+}
+
+FormData &FormData::operator=(FormData const &src)
+{
+	if (this != &src)
+	{
+		if (this->_req != NULL)
+			delete this->_req;
+		this->_req = new Request(*src._req);
+		if (this->_split != NULL)
+			delete[] this->_split;
+		for (int i = 0; !src._split[i].empty(); ++i)
+			this->_split[i] = src._split[i];
+	}
+	return (*this);
 }
 
 FormData::~FormData()
@@ -220,6 +239,11 @@ void FormData::checkContentType(void)
 		return;
 	}
 	std::string bound = mime[1].substr(++start);
+	if (bound[0] != '-' && bound[1] != '-')
+	{
+		delete[] mime;
+		throw BadRequest();
+	}
 	delete[] mime;
 	std::string::size_type tmp_size = this->_req->_body.find_last_of(bound);
 	tmp_size -= (this->_req->ft_strlen(bound) + 2);
