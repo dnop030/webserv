@@ -417,7 +417,11 @@ void ServHandle::sockCliRd(int const &cliFd)
 		// prepare the response and tie with client Fd
 		if (this->_httpRespose.find(cliFd) == this->_httpRespose.end())
 		{
-			this->_httpRespose.insert(std::pair<int, std::string>(cliFd, this->generateHttpResponse(200, "Ok", "Hello from server")));
+			this->_response.setStatusCode(200); // petch
+			this->_response.setStatusMessage("ok"); // petch
+			this->_response.setFileResponse("page/index.html"); // petch
+			this->_httpRespose.insert(std::pair<int, std::string>(cliFd, this->_response.returnResponse()));
+			// this->_httpRespose.insert(std::pair<int, std::string>(cliFd, this->generateHttpResponse(200, "Ok", "Hello from server")));
 		}
 		else
 		{
