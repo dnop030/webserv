@@ -2,6 +2,7 @@
 
 #include "Http.hpp"
 #include "Request.hpp"
+#include "UtilsFunction.hpp"
 
 class HttpHandle
 {

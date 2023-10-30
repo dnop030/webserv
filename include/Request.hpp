@@ -7,6 +7,7 @@
 #include "color.hpp"
 #include "FormData.hpp"
 #include "CheckHeader.hpp"
+#include "UtilsFunction.hpp"
 
 class Request : public Http
 {
@@ -29,19 +30,19 @@ public:
 	Request &operator=(Request const &src);
 
 	bool endLine(std::string &buffer, std::string::size_type idx);
-	int countChar(std::string &str, char c);
-	void removeChar(std::string &str, char c);
+	// int countChar(std::string &str, char c);
+	// void removeChar(std::string &str, char c);
 	int countReturn(std::string &str);
-	void trimTail(std::string &str, char delim);
-	void trimTail_str(std::string &str, std::string delim);
-	std::string::size_type skipChar(std::string &str, std::string::size_type idx, char c);
-	double ft_stod(const std::string &s);
-	size_t ft_strlen(std::string &str);
-	int allDigit(std::string &str);
-	int ft_strncmp(std::string &str1, std::string &str2, size_t size);
-	bool isHex(std::string &str);
-	int ft_htod(std::string &str);
-	std::string::size_type getLastChar(std::string &str);
+	// void trimTail(std::string &str, char delim);
+	// void trimTail_str(std::string &str, std::string delim);
+	// std::string::size_type skipChar(std::string &str, std::string::size_type idx, char c);
+	// double ft_stod(const std::string &s);
+	// size_t ft_strlen(std::string &str);
+	// int allDigit(std::string &str);
+	// int ft_strncmp(std::string &str1, std::string &str2, size_t size);
+	// bool isHex(std::string &str);
+	// int ft_htod(std::string &str);
+	// std::string::size_type getLastChar(std::string &str);
 	std::string::size_type findCLRF(std::string &str, std::string::size_type idx);
 
 	std::vector<std::string> splitLine(void);

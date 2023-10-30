@@ -72,31 +72,31 @@ int FormData::ft_strlen_size_t(std::string &str)
 	return (i);
 }
 
-void FormData::trimTail_str(std::string &str, std::string delim)
-{
-	std::string res;
+// void FormData::trimTail_str(std::string &str, std::string delim)
+// {
+// 	std::string res;
 
-	std::string::size_type end = str.find_last_of(delim);
-	while (end == std::string::npos)
-	{
-		end -= this->_req->ft_strlen(delim);
-		end = str.find_last_of(delim);
-	}
-	res = str.substr(0, end - 0);
-	str = res;
-}
+// 	std::string::size_type end = str.find_last_of(delim);
+// 	while (end == std::string::npos)
+// 	{
+// 		end -= this->_req->ft_strlen(delim);
+// 		end = str.find_last_of(delim);
+// 	}
+// 	res = str.substr(0, end - 0);
+// 	str = res;
+// }
 
-void FormData::trimHead(std::string &str, char delim)
-{
-	std::string::size_type start = this->_req->skipChar(str, 0, delim);
-	str = str.substr(start);
-}
+// void FormData::trimHead(std::string &str, char delim)
+// {
+// 	std::string::size_type start = this->_req->skipChar(str, 0, delim);
+// 	str = str.substr(start);
+// }
 
-void FormData::trimHeadTail(std::string &str, char delim)
-{
-	this->trimHead(str, delim);
-	this->_req->trimTail(str, delim);
-}
+// void FormData::trimHeadTail(std::string &str, char delim)
+// {
+// 	this->trimHead(str, delim);
+// 	this->_req->trimTail(str, delim);
+// }
 
 std::map<std::string, std::string> FormData::parseChunk(std::string &str)
 {
@@ -114,7 +114,7 @@ std::map<std::string, std::string> FormData::parseChunk(std::string &str)
 			{
 				if (i == 0)
 				{
-					this->trimHead(this->_split[i], ' ');
+					trimHead(this->_split[i], ' ');
 					this->parseHeader(map, this->_split[i]);
 				}
 				else
@@ -125,8 +125,8 @@ std::map<std::string, std::string> FormData::parseChunk(std::string &str)
 						delete[] tmp_split;
 						throw BadRequest();
 					}
-					this->trimHeadTail(tmp_split[0], ' ');
-					this->trimHeadTail(tmp_split[1], '\"');
+					trimHeadTail(tmp_split[0], ' ');
+					trimHeadTail(tmp_split[1], '\"');
 					if (map.find(tmp_split[0]) == map.end())
 						map[tmp_split[0]] = tmp_split[1];
 					delete[] tmp_split;
@@ -147,9 +147,6 @@ std::map<std::string, std::string> FormData::parseChunk(std::string &str)
 		if (tmp == chunk.end())
 			break;
 	}
-	// this->_req->printMap(map);
-	//  std::cout << "Body is as below" << std::endl;
-	//  std::cout << chunk.back() << std::endl;
 	if (map.find("body") == map.end())
 		map["body"] = chunk.back();
 	return (map);
@@ -176,7 +173,7 @@ void FormData::getFromBound(std::vector<std::string> &chunk, std::string::size_t
 		return;
 	}
 	std::string dummy = this->_req->_body.substr(start, end - start);
-	this->trimTail_str(dummy, "\r\n");
+	trimTail_str(dummy, "\r\n");
 	this->_form.push_back(this->parseChunk(dummy));
 	chunk.push_back(dummy);
 	start = end;
@@ -214,9 +211,9 @@ void FormData::parseHeader(std::map<std::string, std::string> &map, std::string 
 	if (map.find(tmp[0]) != map.end())
 		throw BadRequest();
 	std::string::size_type start = 0;
-	start = this->_req->skipChar(tmp[1], start, ' ');
-	start = this->_req->skipChar(tmp[1], start, '\t');
-	start = this->_req->skipChar(tmp[1], start, ' ');
+	start = skipChar(tmp[1], start, ' ');
+	start = skipChar(tmp[1], start, '\t');
+	start = skipChar(tmp[1], start, ' ');
 	if (tmp[1][start] == '\0')
 		map[tmp[0]] = "";
 	else
@@ -246,10 +243,10 @@ void FormData::checkContentType(void)
 	}
 	delete[] mime;
 	std::string::size_type tmp_size = this->_req->_body.find_last_of(bound);
-	tmp_size -= (this->_req->ft_strlen(bound) + 2);
+	tmp_size -= (ft_strlen(bound) + 2);
 	tmp = this->_req->_body.substr(tmp_size);
-	this->trimTail_str(tmp, "\r\n");
-	if (tmp[this->_req->ft_strlen(tmp) - 2] != '-' || tmp[this->_req->ft_strlen(tmp) - 3] != '-')
+	trimTail_str(tmp, "\r\n");
+	if (tmp[ft_strlen(tmp) - 2] != '-' || tmp[ft_strlen(tmp) - 3] != '-')
 		throw BadRequest();
 	start = this->_req->_body.find(bound);
 	if (start == std::string::npos)
