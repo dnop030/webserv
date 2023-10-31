@@ -8,6 +8,9 @@ CheckHeader::CheckHeader(Request &req) : _contentLang("*")
 		this->checkContentLength();
 		this->checkDate();
 		this->contentNego();
+		this->addRespondHeader();
+		// std::cout << "@@@@@ Respond header @@@@@" << std::endl;
+		// this->_req->printMap(this->_respHeader);
 	}
 	catch (const LengthRequired &e)
 	{
@@ -76,7 +79,7 @@ void CheckHeader::checkDate(void)
 	if (this->_req->_header.find("Date") == this->_req->_header.end())
 		return;
 	std::string tmp = this->_req->_header["Date"];
-	std::string *date = this->_req->ft_split(tmp, ' ');
+	std::string *date = ft_split(tmp, ' ');
 	int i = 0;
 	while (date != NULL && !date[i].empty())
 		++i;
@@ -119,7 +122,7 @@ void CheckHeader::checkDate(void)
 	int year = static_cast<int>(ft_stod(date[3]));
 	if (date[5] != "GMT")
 		this->ft_error(date);
-	std::string *clock = this->_req->ft_split(date[4], ':');
+	std::string *clock = ft_split(date[4], ':');
 	delete[] date;
 	i = 0;
 	while (clock != NULL && !clock[i].empty())
@@ -165,7 +168,7 @@ void CheckHeader::checkContentLength()
 float CheckHeader::checkAcceptLanguage(std::string &str, float q)
 {
 	float tmp_q = q;
-	std::string *tmp = this->_req->ft_split(str, ';');
+	std::string *tmp = ft_split(str, ';');
 	if (tmp == NULL)
 	{
 		this->_contentLang = str;
@@ -176,7 +179,7 @@ float CheckHeader::checkAcceptLanguage(std::string &str, float q)
 		delete[] tmp;
 		return (-1);
 	}
-	std::string *tmp2 = this->_req->ft_split(tmp[1], '=');
+	std::string *tmp2 = ft_split(tmp[1], '=');
 	std::string lang = tmp[0];
 	delete[] tmp;
 	std::string weight = tmp2[1];
@@ -203,7 +206,7 @@ void CheckHeader::contentNego(void)
 {
 	if (this->_req->_header.find("Accept-Language") == this->_req->_header.end())
 		return;
-	std::string *tmp = this->_req->ft_split(this->_req->_header["Accept-Language"], ',');
+	std::string *tmp = ft_split(this->_req->_header["Accept-Language"], ',');
 	if (tmp != NULL)
 	{
 		std::vector<std::string> token;
@@ -221,6 +224,10 @@ void CheckHeader::contentNego(void)
 	else
 		this->_contentLang = this->_req->_header["Accept-Language"];
 	trimHead(this->_contentLang, ' ');
-	std::cout << "@@@@@@ content language is @@@@@@" << std::endl;
-	std::cout << this->_contentLang << std::endl;
+}
+
+void CheckHeader::addRespondHeader()
+{
+	addKey(this->_respHeader, "Accept-Language", this->_contentLang);
+	addKey(this->_respHeader, "Server", "42Webserver/1.0");
 }

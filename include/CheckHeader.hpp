@@ -12,6 +12,7 @@ private:
 	Request *_req;
 	struct tm _t;
 	std::string _contentLang;
+	std::map<std::string, std::string> _respHeader;
 
 public:
 	CheckHeader(Request &req);
@@ -24,6 +25,7 @@ public:
 	float checkAcceptLanguage(std::string &str, float q);
 	void contentNego(void);
 	void ft_error(std::string *split);
+	void addRespondHeader();
 
 	class BadRequest : public std::exception
 	{
@@ -36,4 +38,6 @@ public:
 	public:
 		virtual const char *what() const throw();
 	};
+
+	friend class Request;
 };

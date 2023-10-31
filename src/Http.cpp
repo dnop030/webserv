@@ -24,6 +24,16 @@ Http &Http::operator=(Http const &src)
 			this->_header[it2->first] = it2->second;
 			++it2;
 		}
+
+		if (!this->_respHeader.empty())
+			this->_respHeader.clear();
+		it2 = src._respHeader.begin();
+		while (it2 != src._respHeader.end())
+		{
+			this->_respHeader[it2->first] = it2->second;
+			++it2;
+		}
+
 		if (!this->_bodyChunk.empty())
 			this->_bodyChunk.clear();
 		for (std::vector<std::string>::const_iterator it = src._bodyChunk.begin(); it != src._bodyChunk.end(); ++it)

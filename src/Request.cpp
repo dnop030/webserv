@@ -91,28 +91,6 @@ bool Request::endLine(std::string &buffer, std::string::size_type idx)
 	return (false);
 }
 
-// int Request::countChar(std::string &str, char c)
-// {
-// 	int res = 0;
-// 	for (std::string::size_type idx = 0; str[idx] != '\0'; ++idx)
-// 	{
-// 		if (str[idx] == c)
-// 			++res;
-// 	}
-// 	return (res);
-// }
-
-// void Request::removeChar(std::string &str, char c)
-// {
-// 	std::string res;
-// 	for (std::string::size_type idx = 0; str[idx] != '\0'; ++idx)
-// 	{
-// 		if (str[idx] != c)
-// 			res += str[idx];
-// 	}
-// 	str = res;
-// }
-
 int Request::countReturn(std::string &str)
 {
 	int res = 0;
@@ -125,18 +103,6 @@ int Request::countReturn(std::string &str)
 	}
 	return (res);
 }
-
-// void Request::trimTail(std::string &str, char delim)
-// {
-// 	std::string res;
-
-// 	std::string::size_type end = str.length();
-// 	while (end > 0 && str[end - 1] == delim)
-// 		--end;
-// 	for (std::string::size_type idx = 0; idx != end; ++idx)
-// 		res += str[idx];
-// 	str = res;
-// }
 
 std::string::size_type Request::findCLRF(std::string &str, std::string::size_type idx)
 {
@@ -188,96 +154,16 @@ std::vector<std::string> Request::splitLine(void)
 	return (res);
 }
 
-// std::string::size_type Request::skipChar(std::string &str, std::string::size_type idx, char c)
-// {
-// 	while (str[idx] == c && str[idx] != '\0')
-// 		++idx;
-// 	return (idx);
-// }
-
-// double Request::ft_stod(const std::string &s)
-// {
-// 	double res = 0;
-
-// 	res = atof(s.c_str());
-// 	return (res);
-// }
-
-// size_t Request::ft_strlen(std::string &str)
-// {
-// 	size_t i = 0;
-// 	while (str[i] != '\0')
-// 		++i;
-// 	return (i);
-// }
-
-// int Request::allDigit(std::string &str)
-// {
-// 	for (int i = 0; str[i] != '\0'; ++i)
-// 	{
-// 		if (!std::isdigit(str[i]))
-// 			return (0);
-// 	}
-// 	return (1);
-// }
-
-// int Request::ft_strncmp(std::string &str1, std::string &str2, size_t size)
-// {
-// 	for (size_t i = 0; i < size && str1[i] != '\0' && str2[i] != '\0'; ++i)
-// 	{
-// 		if (str1[i] != str2[i])
-// 			return (str1[i] - str2[i]);
-// 	}
-// 	return (0);
-// }
-
-// bool Request::isHex(std::string &str)
-// {
-// 	for (int i = 0; str[i] != '\0'; ++i)
-// 	{
-// 		std::cout << "std[i]: " << str[i] << std::endl;
-// 		if (!std::isdigit(str[i]) && ((str[i] < 'A' || str[i] > 'F') && (str[i]) < 'a' || str[i] > 'f'))
-// 			return (false);
-// 	}
-// 	return (true);
-// }
-
-// int Request::ft_htod(std::string &str)
-// {
-// 	int res = 0;
-
-// 	for (int i = 0; str[i] != '\0'; ++i)
-// 	{
-// 		if ((str[i] >= 'a' && str[i] <= 'f'))
-// 			res = (res * 16) + (str[i] - 'a' + 10);
-// 		else if ((str[i] >= 'A' && str[i] <= 'F'))
-// 			res = (res * 16) + (str[i] - 'A' + 10);
-// 		else if (std::isdigit(str[i]))
-// 			res = (res * 16) + (str[i] - '0');
-// 		else
-// 			return (-1);
-// 	}
-// 	return (res);
-// }
-
-// std::string::size_type Request::getLastChar(std::string &str)
-// {
-// 	std::string::size_type res = 0;
-// 	while (str[res] != '\0')
-// 		++res;
-// 	return (res);
-// }
-
 void Request::checkHttpVer(std::string &str)
 {
 	std::string tmp = "HTTP";
-	std::string *buffslash = this->ft_split(str, '/');
+	std::string *buffslash = ft_split(str, '/');
 	if (buffslash == NULL || ft_strncmp(buffslash[0], tmp, ft_strlen(tmp) != 0))
 	{
 		delete[] buffslash;
 		throw BadRequest();
 	}
-	std::string *buffdot = this->ft_split(buffslash[1], '.');
+	std::string *buffdot = ft_split(buffslash[1], '.');
 	delete[] buffslash;
 	buffslash = NULL;
 	if (buffdot == NULL)
@@ -330,11 +216,11 @@ bool Request::isIPv4(std::string &str)
 	if (end == std::string::npos)
 		end = str.find_first_of('/');
 	if (end == std::string::npos)
-		chunk = this->ft_split(str, '.');
+		chunk = ft_split(str, '.');
 	else
 	{
 		std::string str_tmp = str.substr(0, end - 0);
-		chunk = this->ft_split(str_tmp, '.');
+		chunk = ft_split(str_tmp, '.');
 	}
 	if (chunk == NULL)
 		return (false);
@@ -413,11 +299,11 @@ void Request::parseQuery(std::string &dns)
 			end = getLastChar(dns);
 			tmp = dns.substr(++start, end - start);
 		}
-		std::string *query = this->ft_split(tmp, '&');
+		std::string *query = ft_split(tmp, '&');
 		std::string *map = NULL;
 		if (query == NULL)
 		{
-			map = this->ft_split(tmp, '=');
+			map = ft_split(tmp, '=');
 			if (this->_query.find(map[0]) == this->_query.end())
 				this->_query[map[0]] = map[1];
 			delete[] map;
@@ -425,7 +311,7 @@ void Request::parseQuery(std::string &dns)
 		}
 		for (int i = 0; !query[i].empty(); ++i)
 		{
-			map = this->ft_split(query[i], '=');
+			map = ft_split(query[i], '=');
 			if (this->_query.find(map[0]) == this->_query.end())
 				this->_query[map[0]] = map[1];
 			delete[] map;
@@ -469,7 +355,7 @@ void Request::checkDNS(std::string &dns)
 		if (dns[i] == '.' && dns[i + 1] == '.')
 			throw BadRequest();
 	}
-	std::string *tmp = this->ft_split(dns, '.');
+	std::string *tmp = ft_split(dns, '.');
 	std::vector<std::string> chunk;
 	if (tmp == NULL)
 		chunk.push_back(dns);
@@ -575,47 +461,6 @@ std::vector<std::string> Request::splitStartLine(std::string &str)
 	return (res);
 }
 
-std::string *Request::ft_split(std::string &str, char delim)
-{
-	int size = 0;
-	std::string *res;
-
-	std::string::size_type start = 0;
-	trimTail(str, delim);
-	start = skipChar(str, start, delim);
-	std::string::size_type tmp_idx = start;
-	while (str[start] != '\0')
-	{
-		if (str[start] == delim)
-		{
-			++size;
-			start = skipChar(str, start, delim);
-		}
-		else
-			++start;
-	}
-	if (size == 0)
-		return (NULL);
-	res = new std::string[size + 2];
-
-	int i = 0;
-	start = 0;
-	std::string::size_type end = str.find(delim, tmp_idx);
-	while (end != std::string::npos && i < size)
-	{
-		if (str[end] == delim)
-		{
-			res[i++] = str.substr(start, end - start);
-			start = end;
-			start = skipChar(str, start, delim);
-			end = str.find(delim, start);
-		}
-	}
-	res[i++] = str.substr(start);
-	res[i] = "";
-	return (res);
-}
-
 void Request::printLine(void)
 {
 	std::cout << "Result from parsing" << std::endl;
@@ -710,6 +555,7 @@ void Request::parseHeader(void)
 			this->_header[tmp[0]] = tmp[1].substr(start);
 	}
 	CheckHeader header(*this);
+	deepCopyMap(header._respHeader, this->_respHeader);
 	if (this->_statusCode == 400)
 		throw BadRequest();
 	if (this->_statusCode == 411)
@@ -752,10 +598,7 @@ void Request::parseBody(void)
 			else if (len_flag % 2 != 0 && len > 0)
 			{
 				if (len != tmp.size())
-				{
-					std::cout << "size not equal" << std::endl;
 					throw BadRequest();
-				}
 				this->_bodyChunk.push_back(tmp);
 				res.append(tmp);
 			}

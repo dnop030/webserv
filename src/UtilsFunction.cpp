@@ -138,3 +138,131 @@ std::string::size_type getLastChar(std::string &str)
 		++res;
 	return (res);
 }
+
+std::string *ft_split(std::string &str, char delim)
+{
+	int size = 0;
+	std::string *res;
+
+	std::string::size_type start = 0;
+	trimTail(str, delim);
+	start = skipChar(str, start, delim);
+	std::string::size_type tmp_idx = start;
+	while (str[start] != '\0')
+	{
+		if (str[start] == delim)
+		{
+			++size;
+			start = skipChar(str, start, delim);
+		}
+		else
+			++start;
+	}
+	if (size == 0)
+		return (NULL);
+	res = new std::string[size + 2];
+
+	int i = 0;
+	start = 0;
+	std::string::size_type end = str.find(delim, tmp_idx);
+	while (end != std::string::npos && i < size)
+	{
+		if (str[end] == delim)
+		{
+			res[i++] = str.substr(start, end - start);
+			start = end;
+			start = skipChar(str, start, delim);
+			end = str.find(delim, start);
+		}
+	}
+	res[i++] = str.substr(start);
+	res[i] = "";
+	return (res);
+}
+
+std::string ft_itoa(int num)
+{
+	std::stringstream ss;
+	ss << num;
+	return (ss.str());
+}
+
+std::string currentDate(void)
+{
+	std::time_t currentTime = std::time(nullptr);
+	struct tm *localTime = std::localtime(&currentTime);
+
+	int year;
+	std::string month;
+	int day;
+	std::string w_day;
+	int hour;
+	int minute;
+	int second;
+
+	if (localTime)
+	{
+		year = localTime->tm_year + 1900;
+		day = localTime->tm_mday;
+		localTime->tm_wday;
+		hour = localTime->tm_hour + 7;
+		minute = localTime->tm_min;
+		second = localTime->tm_sec;
+
+		if (localTime->tm_mon + 1 == 1)
+			month = "Jan";
+		else if (localTime->tm_mon + 1 == 2)
+			month = "Feb";
+		else if (localTime->tm_mon + 1 == 3)
+			month = "Mar";
+		else if (localTime->tm_mon + 1 == 4)
+			month = "Apr";
+		else if (localTime->tm_mon + 1 == 5)
+			month = "May";
+		else if (localTime->tm_mon + 1 == 6)
+			month = "Jun";
+		else if (localTime->tm_mon + 1 == 7)
+			month = "Jul";
+		else if (localTime->tm_mon + 1 == 8)
+			month = "Aug";
+		else if (localTime->tm_mon + 1 == 9)
+			month = "Sep";
+		else if (localTime->tm_mon + 1 == 10)
+			month = "Oct";
+		else if (localTime->tm_mon + 1 == 11)
+			month = "Nov";
+		else if (localTime->tm_mon + 1 == 12)
+			month = "Dec";
+
+		if (localTime->tm_wday == 0)
+			w_day = "Sun";
+		else if (localTime->tm_wday == 1)
+			w_day = "Mon";
+		else if (localTime->tm_wday == 2)
+			w_day = "Tue";
+		else if (localTime->tm_wday == 3)
+			w_day = "Wed";
+		else if (localTime->tm_wday == 4)
+			w_day = "Thu";
+		else if (localTime->tm_wday == 5)
+			w_day = "Fri";
+		else if (localTime->tm_wday == 6)
+			w_day = "Sat";
+	}
+	std::string res_hour;
+	std::string res_minute;
+	std::string res_second;
+	if (hour < 10)
+		res_hour = "0" + ft_itoa(hour);
+	else
+		res_hour = ft_itoa(hour);
+	if (minute < 10)
+		res_minute = "0" + ft_itoa(minute);
+	else
+		res_minute = ft_itoa(minute);
+	if (second < 10)
+		res_second = "0" + ft_itoa(second);
+	else
+		res_second = ft_itoa(second);
+	return (w_day + ", " + ft_itoa(day) + " " + month + " " + ft_itoa(year) + " " + res_hour + ":" + res_minute + ":" + res_second + " GMT");
+}

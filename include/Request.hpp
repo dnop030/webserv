@@ -6,6 +6,7 @@
 #include <sstream>
 #include "color.hpp"
 #include "FormData.hpp"
+#include "HttpHandle.hpp"
 #include "CheckHeader.hpp"
 #include "UtilsFunction.hpp"
 
@@ -30,24 +31,11 @@ public:
 	Request &operator=(Request const &src);
 
 	bool endLine(std::string &buffer, std::string::size_type idx);
-	// int countChar(std::string &str, char c);
-	// void removeChar(std::string &str, char c);
 	int countReturn(std::string &str);
-	// void trimTail(std::string &str, char delim);
-	// void trimTail_str(std::string &str, std::string delim);
-	// std::string::size_type skipChar(std::string &str, std::string::size_type idx, char c);
-	// double ft_stod(const std::string &s);
-	// size_t ft_strlen(std::string &str);
-	// int allDigit(std::string &str);
-	// int ft_strncmp(std::string &str1, std::string &str2, size_t size);
-	// bool isHex(std::string &str);
-	// int ft_htod(std::string &str);
-	// std::string::size_type getLastChar(std::string &str);
 	std::string::size_type findCLRF(std::string &str, std::string::size_type idx);
 
 	std::vector<std::string> splitLine(void);
 	std::vector<std::string> splitStartLine(std::string &str);
-	std::string *ft_split(std::string &str, char delim);
 
 	bool isIPv4(std::string &str);
 
@@ -103,10 +91,9 @@ public:
 	void printLine(void);
 	void printMap(std::map<std::string, std::string> &map);
 
-	std::string *ft_split_dummy(std::string &str, std::string delim);
-	// std::string getFromBound(std::string::size_type &start, std::string &bound);
 	void getFromBound(std::vector<std::string> &chunk, std::string::size_type &start, std::string &bound);
 
 	friend class FormData;
 	friend class CheckHeader;
+	friend class HttpHandle;
 };

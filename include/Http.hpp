@@ -7,9 +7,9 @@
 class Http
 {
 protected:
-	// std::map<std::string, std::string> _start_line;
 	std::string _start_line[3];
 	std::map<std::string, std::string> _header;
+	std::map<std::string, std::string> _respHeader;
 	std::string _body;
 	std::vector<std::string> _bodyChunk;
 

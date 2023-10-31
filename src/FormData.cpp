@@ -72,32 +72,6 @@ int FormData::ft_strlen_size_t(std::string &str)
 	return (i);
 }
 
-// void FormData::trimTail_str(std::string &str, std::string delim)
-// {
-// 	std::string res;
-
-// 	std::string::size_type end = str.find_last_of(delim);
-// 	while (end == std::string::npos)
-// 	{
-// 		end -= this->_req->ft_strlen(delim);
-// 		end = str.find_last_of(delim);
-// 	}
-// 	res = str.substr(0, end - 0);
-// 	str = res;
-// }
-
-// void FormData::trimHead(std::string &str, char delim)
-// {
-// 	std::string::size_type start = this->_req->skipChar(str, 0, delim);
-// 	str = str.substr(start);
-// }
-
-// void FormData::trimHeadTail(std::string &str, char delim)
-// {
-// 	this->trimHead(str, delim);
-// 	this->_req->trimTail(str, delim);
-// }
-
 std::map<std::string, std::string> FormData::parseChunk(std::string &str)
 {
 	std::vector<std::string> chunk = this->splitCRLF(str);
@@ -107,7 +81,7 @@ std::map<std::string, std::string> FormData::parseChunk(std::string &str)
 	{
 		if (i == chunk.begin())
 		{
-			this->_split = this->_req->ft_split(*i, ';');
+			this->_split = ft_split(*i, ';');
 			if (this->_split == NULL)
 				throw BadRequest();
 			for (int i = 0; !this->_split[i].empty(); ++i)
@@ -119,7 +93,7 @@ std::map<std::string, std::string> FormData::parseChunk(std::string &str)
 				}
 				else
 				{
-					std::string *tmp_split = this->_req->ft_split(this->_split[i], '=');
+					std::string *tmp_split = ft_split(this->_split[i], '=');
 					if (tmp_split == NULL || !tmp_split[2].empty())
 					{
 						delete[] tmp_split;
@@ -225,7 +199,7 @@ void FormData::checkContentType(void)
 	if (this->_req->_header.find("Content-Type") == this->_req->_header.end())
 		return;
 	std::string tmp = this->_req->_header["Content-Type"];
-	std::string *mime = this->_req->ft_split(tmp, ';');
+	std::string *mime = ft_split(tmp, ';');
 	if (mime == NULL)
 		return;
 	std::string::size_type start = mime[1].find("=");

@@ -4,6 +4,7 @@
 #include "Request.hpp"
 #include "UtilsFunction.hpp"
 
+class Request;
 class HttpHandle
 {
 private:
@@ -27,5 +28,9 @@ public:
 	HttpHandle(HttpHandle const &src);
 	HttpHandle &operator=(HttpHandle const &src);
 
+	void addResponseHeader();
+
 	void printLine(void);
+	void printHeader(void);
+	void printResponseHeader();
 };

@@ -22,9 +22,6 @@ public:
 	~FormData();
 
 	int ft_strlen_size_t(std::string &str);
-	// void trimTail_str(std::string &str, std::string delim);
-	// void trimHead(std::string &str, char delim);
-	// void trimHeadTail(std::string &str, char delim);
 	void getFromBound(std::vector<std::string> &chunk, std::string::size_type &start, std::string &bound);
 
 	void checkEndBound(std::string::size_type start, std::string::size_type end);
