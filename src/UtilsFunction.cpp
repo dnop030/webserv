@@ -205,7 +205,7 @@ std::string currentDate(void)
 		year = localTime->tm_year + 1900;
 		day = localTime->tm_mday;
 		localTime->tm_wday;
-		hour = localTime->tm_hour + 7;
+		hour = localTime->tm_hour;
 		minute = localTime->tm_min;
 		second = localTime->tm_sec;
 
