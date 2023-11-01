@@ -190,7 +190,7 @@ std::string ft_itoa(int num)
 std::string currentDate(void)
 {
 	std::time_t currentTime = std::time(nullptr);
-	struct tm *localTime = std::localtime(&currentTime);
+	struct tm *localTime = std::gmtime(&currentTime);
 
 	int year;
 	std::string month;
@@ -205,7 +205,7 @@ std::string currentDate(void)
 		year = localTime->tm_year + 1900;
 		day = localTime->tm_mday;
 		localTime->tm_wday;
-		hour = localTime->tm_hour;
+		hour = (localTime->tm_hour + 7) % 12;
 		minute = localTime->tm_min;
 		second = localTime->tm_sec;
 
