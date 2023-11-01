@@ -3,7 +3,6 @@
 HttpHandle::HttpHandle(std::string &buffer) : _statusCode(0), _buffer(buffer), _contentLength(0)
 {
 	this->_req = new Request(this->_buffer);
-	// this->_req = Request(this->_buffer);
 	this->_method = this->_req->getMethod();
 	this->_hostname = this->_req->getHostname();
 	this->_port = this->_req->getPort();
@@ -14,7 +13,7 @@ HttpHandle::HttpHandle(std::string &buffer) : _statusCode(0), _buffer(buffer), _
 	this->_body = this->_req->getBody();
 	this->_bodyChunk = this->_req->getBodyChunk();
 	if (this->_header.find("Content-Length") != this->_header.end())
-		this->_contentLength = this->_req->ft_stod(this->_header["Content-Length"]);
+		this->_contentLength = ft_stod(this->_header["Content-Length"]);
 	this->printLine();
 }
 
@@ -36,10 +35,7 @@ HttpHandle &HttpHandle::operator=(HttpHandle const &src)
 {
 	if (this != &src)
 	{
-		// if (this->_req != NULL)
-		// 	delete this->_req;
 		std::string tmp_buff = src._buffer;
-		// this->_req = new Request(tmp_buff);
 		this->_method = src._method;
 		this->_hostname = src._hostname;
 		this->_port = src._port;
@@ -71,5 +67,45 @@ void HttpHandle::printLine(void)
 	std::cout << "query: ";
 	this->_req->printMap(this->_query);
 	std::cout << "\nstatus code is " << this->_statusCode << std::endl;
-	std::cout << std::endl;
+	std::cout << "\n@@@@@ Respond header @@@@@" << std::endl;
+	this->printResponseHeader();
+	std::cout << "@@@@@ End of Respond header @@@@@" << std::endl;
+	std::cout << "Current date" << std::endl;
+	std::cout << currentDate() << std::endl;
+}
+
+void HttpHandle::addResponseHeader(void)
+{
+	// Allow => lists of method that resources allowed => get from Petch
+	// Location => indicates the URL to redirect a page to => get from Petch
+	// Content-Type => type of resources to send back to client => get from Petch
+	// Content-Length => size of resources to send back to client => get from Petch
+	// Content-Location => indicates an alternate location(url) for the returned data => get from Petch
+	// Last-Modified => contains a date and time when the origin server believes the resource was last modified => get from Petch
+}
+
+void HttpHandle::printResponseHeader(void)
+{
+	std::string tmp;
+	std::string date = currentDate();
+	addKey(this->_req->_respHeader, "Date", date);
+	tmp = "Date";
+	printKeyValue(this->_req->_respHeader, tmp);
+	tmp = "Allow";
+	printKeyValue(this->_req->_respHeader, tmp);
+	tmp = "Location";
+	printKeyValue(this->_req->_respHeader, tmp);
+	tmp = "Content-Type";
+	printKeyValue(this->_req->_respHeader, tmp);
+	tmp = "Content-Length";
+	printKeyValue(this->_req->_respHeader, tmp);
+	tmp = "Accept-Language";
+	printKeyValue(this->_req->_respHeader, tmp);
+	tmp = "Server";
+	printKeyValue(this->_req->_respHeader, tmp);
+	tmp = "Content-Location";
+	printKeyValue(this->_req->_respHeader, tmp);
+	tmp = "Last-Modified";
+	printKeyValue(this->_req->_respHeader, tmp);
+	std::cout << "\r\n";
 }
