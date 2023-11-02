@@ -12,6 +12,7 @@ class HttpResponse : public Http
 		std::string _statusMessage;
 		std::string _fileResponse;
 		std::string	checkFile();
+		std::map<std::string, std::string> _header;
 
 	// protected:
 	public:
@@ -23,6 +24,7 @@ class HttpResponse : public Http
 		void			setStatusCode(int statusCode);
 		void			setStatusMessage(std::string const &statusMessage);
 		void			setFileResponse(std::string const &fileResponse);
+		void			setHeader(std::string const &key, std::string const &value);
 		std::string		returnResponse();
 };
 

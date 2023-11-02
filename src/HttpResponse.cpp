@@ -51,17 +51,28 @@ std::string	HttpResponse::checkFile()
 	}
 }
 
+void	HttpResponse::setHeader(std::string const &key, std::string const &value)
+{
+	this->_header[key] = value;
+}
+
 std::string	HttpResponse::returnResponse()
 {
-	std::ostringstream responseStream;
+	std::ostringstream resStream;
 	std::ifstream ifs(this->_fileResponse);
-	std::string contentResponse = this->checkFile();
+	std::string contentRes = this->checkFile();
+	std::map<std::string, std::string>::iterator it;
 
-	responseStream << "HTTP/1.1 " << this->_statusCode << " " << this->_statusMessage << "\r\n";
-	responseStream << "Content-Length: " << contentResponse.length() << "\r\n";
-	responseStream << "Content-Type: text/html\r\n";
-	responseStream << "\r\n";
-	responseStream << contentResponse;
+	setHeader("Content-Length:", std::to_string(contentRes.length()));
+	setHeader("Content-Type:", "text/html");
+	setHeader("Accept-Language:", "TH");
 
-	return responseStream.str();
+	resStream << "HTTP/1.1 " << this->_statusCode << " " << this->_statusMessage << "\r\n";
+	for (it = this->_header.begin(); it != this->_header.end(); it++) {
+		resStream << it->first << " " << it->second << "\r\n";
+	}
+	resStream << "\r\n";
+	resStream << contentRes;
+
+	return resStream.str();
 }

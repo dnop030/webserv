@@ -19,7 +19,6 @@
 
 // for generate response
 #include <sstream>
-#include "HttpResponse.hpp" // petch
 
 #include <fcntl.h>
 
@@ -84,7 +83,6 @@ class ServHandle
 
 		int							_tmpInt;
 		std::string					_tmpStdStr;
-		HttpResponse				_response;	// petch
 };
 
 #endif
