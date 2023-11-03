@@ -28,7 +28,15 @@ void ServHandle::servCreate(char const *configFile)
 	// std::cout << MAG << "[INFO]output \"listen \" 0 " << tmpStr << reset << std::endl;
 	// // std::cout << MAG << "[INFO]output length " << tmpStr.length() << reset << std::endl;
 
+	// Debug End this line
+
+
 	this->showMapFd();
+
+	// need to check amount Serv config before
+	// if 0 then return
+
+	// validate server config here !!!!!!!!!!!
 
 	std::cout << MAG << "amout of serv config " << this->_configServ.getAmountServConfig() << reset << std::endl;
 	for (int i = 0; i < this->_configServ.getAmountServConfig(); i++)
