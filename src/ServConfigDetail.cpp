@@ -15,77 +15,77 @@ ServConfigDetail::~ServConfigDetail(void) {
 void	ServConfigDetail::saveOneBlockConfig(std::string const & block) {
 	std::string	tmpBlock = block;
 	std::string	tmpOneLine;
-	// std::cout << YEL << block << reset << std::endl << std::endl;
+	std::cout << YEL << block << reset << std::endl << std::endl;
 
-	// cut server header
-	tmpBlock.erase(0, tmpBlock.find("{") + 2);
-	// std::cout << MAG << tmpBlock << reset << std::endl;
+	// // cut server header
+	// tmpBlock.erase(0, tmpBlock.find("{") + 2);
+	// // std::cout << MAG << tmpBlock << reset << std::endl;
 
-	tmpBlock.erase(tmpBlock.find("}"), 2);
-	// std::cout << MAG << tmpBlock << reset << "------------------" << std::endl;
+	// tmpBlock.erase(tmpBlock.find("}"), 2);
+	// // std::cout << MAG << tmpBlock << reset << "------------------" << std::endl;
 
-	while (tmpBlock.size() != 0) {
-		// delete space at front
-		while (isblank(tmpBlock[0])) {
-			tmpBlock.erase(0, 1);
-		}
-		tmpOneLine = tmpBlock.substr(0, tmpBlock.find("\n"));
-		tmpBlock.erase(0, tmpBlock.find("\n") + 1);
-		// std::cout << tmpOneLine << std::endl;
-		// std::cout << MAG << tmpBlock << reset << "------------------" << std::endl;
+	// while (tmpBlock.size() != 0) {
+	// 	// delete space at front
+	// 	while (isblank(tmpBlock[0])) {
+	// 		tmpBlock.erase(0, 1);
+	// 	}
+	// 	tmpOneLine = tmpBlock.substr(0, tmpBlock.find("\n"));
+	// 	tmpBlock.erase(0, tmpBlock.find("\n") + 1);
+	// 	// std::cout << tmpOneLine << std::endl;
+	// 	// std::cout << MAG << tmpBlock << reset << "------------------" << std::endl;
 
-		if (tmpOneLine.find("location") == std::string::npos) {
-			size_t		pos_space;
-			size_t		pos_semicolon;
-			std::string	key;
-			std::string	val;
+	// 	if (tmpOneLine.find("location") == std::string::npos) {
+	// 		size_t		pos_space;
+	// 		size_t		pos_semicolon;
+	// 		std::string	key;
+	// 		std::string	val;
 
-			pos_space = tmpOneLine.find(" ");
-			pos_semicolon = tmpOneLine.find(";");
+	// 		pos_space = tmpOneLine.find(" ");
+	// 		pos_semicolon = tmpOneLine.find(";");
 
-			if ((pos_space == std::string::npos) || (pos_semicolon == std::string::npos)) {
-				std::cout << RED << "[ERROR]Format of config file error" << reset << std::endl;
-				if (pos_space == std::string::npos)
-					std::cout << BLU << "[ERROR]Not found space" << reset << std::endl;
-				if (pos_semicolon == std::string::npos)
-					std::cout << BLU << "[ERROR]Not found semicolon" << reset << std::endl;
-				return;
-			}
-			else {
-				key = tmpOneLine.substr(0, pos_space - 0);
-				// while (isblank(key[0])) {
-				// 	key.erase(0, 1);
-				// }
-				val = tmpOneLine.substr(pos_space + 1, (pos_semicolon - pos_space) - 1);
+	// 		if ((pos_space == std::string::npos) || (pos_semicolon == std::string::npos)) {
+	// 			std::cout << RED << "[ERROR]Format of config file error" << reset << std::endl;
+	// 			if (pos_space == std::string::npos)
+	// 				std::cout << BLU << "[ERROR]Not found space" << reset << std::endl;
+	// 			if (pos_semicolon == std::string::npos)
+	// 				std::cout << BLU << "[ERROR]Not found semicolon" << reset << std::endl;
+	// 			return;
+	// 		}
+	// 		else {
+	// 			key = tmpOneLine.substr(0, pos_space - 0);
+	// 			// while (isblank(key[0])) {
+	// 			// 	key.erase(0, 1);
+	// 			// }
+	// 			val = tmpOneLine.substr(pos_space + 1, (pos_semicolon - pos_space) - 1);
 
-				// std::cout << "key " << key << std::endl;
-				// std::cout << GRN << "val " << val << reset << std::endl;
+	// 			// std::cout << "key " << key << std::endl;
+	// 			// std::cout << GRN << "val " << val << reset << std::endl;
 
-				this->_detail.insert(std::pair<std::string, std::string>(key, val));
-			}
-		}
-		else {
-			size_t		pos_space;
-			size_t		pos_space2;
-			size_t		pos_semicolon;
-			std::string	key;
-			std::string	val;
+	// 			this->_detail.insert(std::pair<std::string, std::string>(key, val));
+	// 		}
+	// 	}
+	// 	else {
+	// 		size_t		pos_space;
+	// 		size_t		pos_space2;
+	// 		size_t		pos_semicolon;
+	// 		std::string	key;
+	// 		std::string	val;
 
-			pos_space = tmpOneLine.find(" ");
-			pos_space2 = tmpOneLine.find(" ", pos_space + 1);
-			pos_semicolon = tmpOneLine.find_last_of(";");
+	// 		pos_space = tmpOneLine.find(" ");
+	// 		pos_space2 = tmpOneLine.find(" ", pos_space + 1);
+	// 		pos_semicolon = tmpOneLine.find_last_of(";");
 
-			key = tmpOneLine.substr(0, pos_space2 - 0);
+	// 		key = tmpOneLine.substr(0, pos_space2 - 0);
 
-			// val = tmpOneLine.substr(pos_space2 + 1, (pos_semicolon - pos_space2) - 1);
-			val = tmpOneLine.substr(pos_space2 + 1, (pos_semicolon - pos_space2));
+	// 		// val = tmpOneLine.substr(pos_space2 + 1, (pos_semicolon - pos_space2) - 1);
+	// 		val = tmpOneLine.substr(pos_space2 + 1, (pos_semicolon - pos_space2));
 
-			// std::cout << "key " << key << std::endl;
-			// std::cout << GRN << "val " << val << reset << std::endl;
+	// 		// std::cout << "key " << key << std::endl;
+	// 		// std::cout << GRN << "val " << val << reset << std::endl;
 
-			this->_detail.insert(std::pair<std::string, std::string>(key, val));
-		}
-	}
+	// 		this->_detail.insert(std::pair<std::string, std::string>(key, val));
+	// 	}
+	// }
 }
 
 void	ServConfigDetail::storeConfig(std::string const & config) {

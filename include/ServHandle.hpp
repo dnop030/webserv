@@ -60,7 +60,8 @@ class ServHandle
 
 		bool						_servRunning;
 
-		ConfigFileHandle			_configServ;
+		// ConfigFileHandle			_configServ;
+		ConfigFileHandle			*_configServ;
 
 		// using only when create socket server
 		std::map<int, char>			_mapFd;

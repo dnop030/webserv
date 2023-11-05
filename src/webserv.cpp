@@ -32,7 +32,7 @@ int	main(int argc, char ** argv) {
 			std::cout << YEL << "Config file name Default config file" << reset << std::endl;
 			servManager.servCreate("config/webserv.conf");
 		}
-		servManager.servStart();
+		// servManager.servStart();
 	}
 	else {
 		std::cout << RED << "Example cmd : ./webserv [configuration file]\n" << reset << std::endl;

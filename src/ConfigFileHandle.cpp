@@ -40,7 +40,7 @@ void	ConfigFileHandle::readConfigFile(char const * fileName) {
 		while (std::getline(ifs, tmpRd)) {
 
 			// new code
-			if (tmpRd.find("server") != std::string::npos) {
+			if (tmpRd.find("server ") != std::string::npos) {
 				foundServKeyW = 1;
 			}
 			if (tmpRd.find("{") != std::string::npos) {
