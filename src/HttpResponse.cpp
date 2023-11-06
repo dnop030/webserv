@@ -17,6 +17,7 @@ HttpResponse::HttpResponse()
 	this->_status[501] = "Not Implemented";
 	this->_status[505] = "HTTP Version not supported";
 	this->_fileError[404] = "page/404.html";
+	this->_fileError[405] = "page/405.html";
 	this->_fileError[500] = "page/500.html";
 }
 
@@ -65,7 +66,7 @@ std::string	HttpResponse::_checkFile()
 		std::string content((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
 		return content;
 	} else {
-		std::string content("<h1>404 not found file</h1>");
+		std::string content("");
 		return content;
 	}
 }
@@ -99,7 +100,7 @@ int	HttpResponse::_checkPath()
 	return this->_config_location.length();
 }
 
-void HttpResponse::_setConfigCondition()
+void	HttpResponse::_setConfigCondition()
 {
 	std::string condition = this->_config_location;
 	std::string delimiter = ";";
@@ -112,6 +113,33 @@ void HttpResponse::_setConfigCondition()
 		condition.erase(0, pos + delimiter.length());
 	}
 	this->_config_condition.push_back(condition);
+}
+
+void	HttpResponse::_checkMethod()
+{
+	size_t 						pos = 0;
+	std::string 				method = "allow_method", delimiter = " ", token;
+	std::vector<std::string>	allow_method;
+
+	for(auto value : this->_config_condition) {
+		if (method == value.substr(0, method.length())) {
+			method = value;
+		}
+	}
+	if (method != "allow_method") {
+		while ((pos = method.find(delimiter)) != std::string::npos) {
+			token = method.substr(0, pos);
+			allow_method.push_back(token);
+			method.erase(0, pos + delimiter.length());
+		}
+		allow_method.push_back(method);
+
+		for(auto value : allow_method) {
+			if (value == this->_method)
+				return ;
+		}
+		throw (405);
+	}
 }
 
 std::string	HttpResponse::_setResponseStream()
@@ -141,6 +169,7 @@ std::string	HttpResponse::returnResponse()
 	try {
 		if (this->_checkPort() > -1 && this->_checkPath()) {
 			this->_setConfigCondition();
+			this->_checkMethod();
 			this->_statusCode = 200;
 			this->_fileResponse = "page/index.html";
 		} else

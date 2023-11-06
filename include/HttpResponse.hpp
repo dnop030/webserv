@@ -29,6 +29,7 @@ class HttpResponse : public Http
 		int					_checkPath();
 		void				_setHeader(std::string const &key, std::string const &value);
 		void				_setConfigCondition();
+		void				_checkMethod();
 		std::string			_checkFile();
 		std::string			_setResponseStream();
 
