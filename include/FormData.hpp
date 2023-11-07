@@ -33,6 +33,8 @@ public:
 
 	std::vector<std::string> splitCRLF(std::string &buffer);
 
+	std::string mapToJason(void);
+
 	class BadRequest : public std::exception
 	{
 	public:

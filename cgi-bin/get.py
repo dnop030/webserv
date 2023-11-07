@@ -10,12 +10,12 @@ class InternalServerError(Exception):
 	pass
 
 #Specify the path to html file
-html_path = "/webserv/html/" + os.environ["FILE_NAME"]
+html_path = "../page/" + os.environ["FILE_NAME"]
 
 def printHeader(header, key):
 	value = os.environ.get(key, "NULL")
 	if value == "NULL" and key == "CONTENT_TYPE":
-		raise FileNotFoundError()
+		raise InternalServerError()
 	if value != "NULL":
 		print(header + os.environ[key] + "\r\n")
 
@@ -36,5 +36,12 @@ try:
 	printHeader("Last-Modified: ", "LAST_MODIFICATION")
 	print("\r\n")
 except (InternalServerError):
-	print("HTTP/1.1 500 Internal Server Error\r\n")
-	print("Content-Type: text/html\r\n")
+	try:
+		with open("../page/500.html", "r") as file:
+			err_page = file.read()
+		print("HTTP/1.1 500 Internal Server Error\r\n")
+		print("Content-Type: text/html\r\n")
+		print("\r\n")
+		print(err_page)
+	except FileNotFoundError as e:
+		print(f"Find Error!!! => f{e}")
