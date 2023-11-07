@@ -35,7 +35,7 @@ try:
 	printHeader("Content-Location: ", "CONTENT_LOCATION")
 	printHeader("Last-Modified: ", "LAST_MODIFICATION")
 	print("\r\n")
-except (InternalServerError):
+except (InternalServerError,  FileNotFoundError):
 	try:
 		with open("../page/500.html", "r") as file:
 			err_page = file.read()

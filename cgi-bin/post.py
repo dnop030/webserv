@@ -1,0 +1,38 @@
+#!/usr/bin/env python
+
+import os
+import cgi
+import sys
+
+class InternalServerError(Exception):
+	pass
+
+def getEnvValue(key):
+	res = os.environ.get(key, "NULL")
+	if res == "NULL":
+		raise InternalServerError()
+	return (res)
+
+try:
+	dir_name = getEnvValue("DIRECTORY_NAME")
+	# Create a new directory (if it doesn't exist)
+	new_dir = "../upload/" + dir_name
+	os.makedirs(new_dir, exist_ok=True)
+
+	body = sys.stdin.read()
+	filename = getEnvValue("FILE_NAME")
+	file_path = os.path.join(dir_name, filename)
+
+	with open(file_path, 'wb') as res_file:
+		file_path.write(body)
+
+except (InternalServerError,  FileNotFoundError):
+	try:
+		with open("../page/500.html", "r") as file:
+			err_page = file.read()
+		print("HTTP/1.1 500 Internal Server Error\r\n")
+		print("Content-Type: text/html\r\n")
+		print("\r\n")
+		print(err_page)
+	except FileNotFoundError as e:
+		print(f"Find Error!!! => f{e}")
