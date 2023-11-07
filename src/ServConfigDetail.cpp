@@ -15,7 +15,17 @@ ServConfigDetail::~ServConfigDetail(void) {
 void	ServConfigDetail::saveOneBlockConfig(std::string const & block) {
 	std::string	tmpBlock = block;
 	std::string	tmpOneLine;
-	std::cout << YEL << block << reset << std::endl << std::endl;
+	std::cout << YEL << block << reset;
+
+	// del charactor until 1st { (del including 1st {)
+	tmpBlock.erase(0, tmpBlock.find("{") + 1);
+
+	// del } until the end of file
+	tmpBlock.erase(tmpBlock.find_last_of("}"), tmpBlock.find_last_of("}") - tmpBlock.size());
+	// std::cout << MAG << tmpBlock << reset;
+
+	this->delFrontSpace(&tmpBlock);
+	std::cout << BLU << tmpBlock << reset;
 
 	// // cut server header
 	// tmpBlock.erase(0, tmpBlock.find("{") + 2);
@@ -88,39 +98,39 @@ void	ServConfigDetail::saveOneBlockConfig(std::string const & block) {
 	// }
 }
 
-void	ServConfigDetail::storeConfig(std::string const & config) {
-	size_t		pos_space;
-	size_t		pos_semicolon;
-	std::string	key;
-	std::string	val;
+// void	ServConfigDetail::storeConfig(std::string const & config) {
+// 	size_t		pos_space;
+// 	size_t		pos_semicolon;
+// 	std::string	key;
+// 	std::string	val;
 
-	pos_space = config.find(" ");
-	pos_semicolon = config.find(";");
+// 	pos_space = config.find(" ");
+// 	pos_semicolon = config.find(";");
 
-	if ((pos_space == std::string::npos) || (pos_semicolon == std::string::npos)) {
-		std::cout << RED << "[ERROR]Format of config file error" << reset << std::endl;
-		if (pos_space == std::string::npos)
-			std::cout << BLU << "[ERROR]Not found space" << reset << std::endl;
-		if (pos_semicolon == std::string::npos)
-			std::cout << BLU << "[ERROR]Not found semicolon" << reset << std::endl;
-		return;
-	}
-	else {
-		// std::cout << RED << config << reset << std::endl;
-		// std::cout << GRN << "Key @" << pos_space << " " << "val @" << pos_semicolon << reset << std::endl;
+// 	if ((pos_space == std::string::npos) || (pos_semicolon == std::string::npos)) {
+// 		std::cout << RED << "[ERROR]Format of config file error" << reset << std::endl;
+// 		if (pos_space == std::string::npos)
+// 			std::cout << BLU << "[ERROR]Not found space" << reset << std::endl;
+// 		if (pos_semicolon == std::string::npos)
+// 			std::cout << BLU << "[ERROR]Not found semicolon" << reset << std::endl;
+// 		return;
+// 	}
+// 	else {
+// 		// std::cout << RED << config << reset << std::endl;
+// 		// std::cout << GRN << "Key @" << pos_space << " " << "val @" << pos_semicolon << reset << std::endl;
 
-		key = config.substr(0, pos_space - 0);
-		while (isblank(key[0])) {
-			key.erase(0, 1);
-		}
-		val = config.substr(pos_space + 1, (pos_semicolon - pos_space) - 1);
+// 		key = config.substr(0, pos_space - 0);
+// 		while (isblank(key[0])) {
+// 			key.erase(0, 1);
+// 		}
+// 		val = config.substr(pos_space + 1, (pos_semicolon - pos_space) - 1);
 
-		// std::cout << "key " << key << std::endl;
-		// std::cout << GRN << "val " << val << reset << std::endl;
+// 		// std::cout << "key " << key << std::endl;
+// 		// std::cout << GRN << "val " << val << reset << std::endl;
 
-		this->_detail.insert(std::pair<std::string, std::string>(key, val));
-	}
-}
+// 		this->_detail.insert(std::pair<std::string, std::string>(key, val));
+// 	}
+// }
 
 void	ServConfigDetail::showDetail(void) {
 	std::multimap<std::string, std::string>::iterator	it = this->_detail.begin();
@@ -145,6 +155,32 @@ std::string const &	ServConfigDetail::getVal(std::string const & val) {
 		// return string that doesn't use
 		return (this->_tmpStr);
 	}
+}
+
+void	ServConfigDetail::delFrontSpace(std::string *str) {
+	// std::cout << CYN << *str << reset;
+	// this->_tmpStr.clear();
+	// this->_tmpStr = *str;
+	int	i = 0;
+
+	// while (isspace(this->_tmpStr[i])) {
+	while (isspace((*str)[i])) {
+		i++;
+	}
+	(*str).erase(0, i);
+	// while (isspace(this->_tmpStr[i])) {
+	// 	this->_tmpStr.erase(this->_tmpStr[i], 1);
+	// 	i++;
+	// }
+	// std::cout << BLU << *str << reset;
+}
+
+void	ServConfigDetail::delAllComment(std::string *str) {
+
+}
+
+void	ServConfigDetail::storeOneLineConfig(std::string *str) {
+
 }
 
 // void	ServConfigDetail::storeConfigLocation(std::string const & location) {
