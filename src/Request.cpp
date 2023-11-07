@@ -386,7 +386,8 @@ void Request::checkTargetUri(std::string &str)
 		if (this->_header.find("Host") == this->_header.end())
 			throw BadRequest();
 		this->parsePort(this->_header["Host"]);
-		this->_path = str[0];
+		// this->_path = str[0];
+		this->_path = str;
 		this->parseQuery(this->_header["Host"]);
 		this->parseFragment(this->_header["Host"]);
 		return;
