@@ -17,6 +17,9 @@ void	ServConfigDetail::saveOneBlockConfig(std::string const & block) {
 	std::string	tmpOneLine;
 	std::cout << YEL << block << reset;
 
+	this->delAllComment(&tmpBlock);
+	// std::cout << MAG << tmpBlock << reset;
+
 	// del charactor until 1st { (del including 1st {)
 	tmpBlock.erase(0, tmpBlock.find("{") + 1);
 
@@ -26,6 +29,8 @@ void	ServConfigDetail::saveOneBlockConfig(std::string const & block) {
 
 	this->delFrontSpace(&tmpBlock);
 	std::cout << BLU << tmpBlock << reset;
+
+
 
 	// // cut server header
 	// tmpBlock.erase(0, tmpBlock.find("{") + 2);
@@ -159,8 +164,6 @@ std::string const &	ServConfigDetail::getVal(std::string const & val) {
 
 void	ServConfigDetail::delFrontSpace(std::string *str) {
 	// std::cout << CYN << *str << reset;
-	// this->_tmpStr.clear();
-	// this->_tmpStr = *str;
 	int	i = 0;
 
 	// while (isspace(this->_tmpStr[i])) {
@@ -168,15 +171,17 @@ void	ServConfigDetail::delFrontSpace(std::string *str) {
 		i++;
 	}
 	(*str).erase(0, i);
-	// while (isspace(this->_tmpStr[i])) {
-	// 	this->_tmpStr.erase(this->_tmpStr[i], 1);
-	// 	i++;
-	// }
 	// std::cout << BLU << *str << reset;
 }
 
 void	ServConfigDetail::delAllComment(std::string *str) {
-
+	// if ((*str).find("#") != std::string::npos) {
+	// 	std::cout << "Del All comment" << (*str).find("#") << std::endl;
+	// 	std::cout << "Del All comment" << (*str).find("\n", (*str).find("#")) << std::endl;
+	// }
+	while ((*str).find("#") != std::string::npos) {
+		(*str).erase((*str).find("#"), (*str).find("\n", (*str).find("#")) - (*str).find("#"));
+	}
 }
 
 void	ServConfigDetail::storeOneLineConfig(std::string *str) {
