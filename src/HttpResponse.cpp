@@ -64,11 +64,16 @@ std::string	HttpResponse::_checkFile()
 
 	if (ifs.good()) {
 		std::string content((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
+		
 		return content;
 	} else {
-		std::string content("");
+		this->_statusCode = 404;
+		std::ifstream t(this->_fileError[404]);
+		std::string content((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
+		
 		return content;
 	}
+
 }
 
 void	HttpResponse::setConfig(ConfigFileHandle *config)
@@ -170,11 +175,46 @@ void	HttpResponse::_setRootPath(std::string const &pathFile)
 	throw(500);
 }
 
-void	HttpResponse::_setFileResponse(std::string const &pathFile)
+std::string	HttpResponse::_searchIndex(std::string const &pathFile)
 {
-	std::cout << "-a-f-ds-fa-sdf--dsf-as-d" << std::endl;
-	std::cout << pathFile << std::endl;
-	std::cout << "-a-f-ds-fa-sdf--dsf-as-d" << std::endl;
+	size_t 						pos = 0;
+	std::string 				index = "index", delimiter = " ", token;
+	std::vector<std::string>	arr_index;
+
+	for(auto value : this->_config_condition) {
+		if (index == value.substr(0, index.length())) {
+			index = value;
+		}
+	}
+	if (index != "index") {
+		while ((pos = index.find(delimiter)) != std::string::npos) {
+			token = index.substr(0, pos);
+			arr_index.push_back(token);
+			index.erase(0, pos + delimiter.length());
+		}
+		arr_index.push_back(index);
+		
+		for(auto value : arr_index) {
+			if (value == "index")
+				continue ;
+			std::ifstream ifs(pathFile + value);
+			if (ifs.good()) {
+				ifs.close();
+				return (pathFile + value);
+			}
+		}
+	}
+
+	return pathFile;
+}
+
+void	HttpResponse::_setFileResponse(std::string const &pathFile, std::string const &rootPath)
+{
+	if (rootPath.compare("/") == 0) {
+		this->_fileResponse = this->_searchIndex(pathFile);
+	} else {
+		this->_fileResponse = pathFile;
+	}
 }
 
 std::string	HttpResponse::_setResponseStream()
@@ -204,9 +244,8 @@ std::string	HttpResponse::returnResponse()
 			this->_setConfigCondition();
 			this->_checkMethod();
 			this->_setRootPath("root");
-			this->_setFileResponse(this->_config_root + this->_path);
+			this->_setFileResponse(this->_config_root + this->_path, this->_path);
 			this->_statusCode = 200;
-			this->_fileResponse = "/home/pmikada/Desktop/webserv/page/index.html";
 		} else
 			throw (404);
 	} catch (int status) {

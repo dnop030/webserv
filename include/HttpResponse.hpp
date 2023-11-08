@@ -32,7 +32,8 @@ class HttpResponse : public Http
 		void				_setConfigCondition();
 		void				_checkMethod();
 		void				_setRootPath(std::string const &pathFile);
-		void				_setFileResponse(std::string const &pathFile);
+		void				_setFileResponse(std::string const &pathFile, std::string const &rootPath);
+		std::string			_searchIndex(std::string const &pathFile);
 		std::string			_checkFile();
 		std::string			_setResponseStream();
 
