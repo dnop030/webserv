@@ -95,7 +95,11 @@ int	HttpResponse::_checkPort()
 
 int	HttpResponse::_checkPath()
 {
+	
 	this->_config_location = (this->_config_ser > -1) ? this->_config->getServConfigVal(this->_config_ser, "location " + this->_path) : "";
+
+	if (this->_config_location.length() == 0)
+		this->_config_location = (this->_config_ser > -1) ? this->_config->getServConfigVal(this->_config_ser, "location /") : "";
 
 	return this->_config_location.length();
 }
@@ -142,6 +146,37 @@ void	HttpResponse::_checkMethod()
 	}
 }
 
+void	HttpResponse::_setRootPath(std::string const &pathFile)
+{
+	size_t 						pos = 0;
+	std::string 				path = "", delimiter = " ", token;
+	std::vector<std::string>	config_path;
+
+	for(auto value : this->_config_condition) {
+		if (pathFile == value.substr(0, pathFile.length())) {
+			path = value;
+		}
+	}
+	if (path.length()) {
+		while ((pos = path.find(delimiter)) != std::string::npos) {
+			token = path.substr(0, pos);
+			config_path.push_back(token);
+			path.erase(0, pos + delimiter.length());
+		}
+		config_path.push_back(path);
+		this->_config_root = config_path[1];
+		return ;
+	}
+	throw(500);
+}
+
+void	HttpResponse::_setFileResponse(std::string const &pathFile)
+{
+	std::cout << "-a-f-ds-fa-sdf--dsf-as-d" << std::endl;
+	std::cout << pathFile << std::endl;
+	std::cout << "-a-f-ds-fa-sdf--dsf-as-d" << std::endl;
+}
+
 std::string	HttpResponse::_setResponseStream()
 {
 	std::ostringstream resStream;
@@ -156,8 +191,6 @@ std::string	HttpResponse::_setResponseStream()
 	for (it = this->_header.begin(); it != this->_header.end(); it++) {
 		resStream << it->first << " " << it->second << "\r\n";
 	}
-	// resStream << "test-path: " << this->_path << "\r\n";
-	// resStream << "test-condition: " << this->_config_location << "\r\n";
 	resStream << "\r\n";
 	resStream << contentRes;
 
@@ -170,8 +203,10 @@ std::string	HttpResponse::returnResponse()
 		if (this->_checkPort() > -1 && this->_checkPath()) {
 			this->_setConfigCondition();
 			this->_checkMethod();
+			this->_setRootPath("root");
+			this->_setFileResponse(this->_config_root + this->_path);
 			this->_statusCode = 200;
-			this->_fileResponse = "page/index.html";
+			this->_fileResponse = "/home/pmikada/Desktop/webserv/page/index.html";
 		} else
 			throw (404);
 	} catch (int status) {
