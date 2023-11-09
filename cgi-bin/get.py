@@ -41,6 +41,7 @@ except (InternalServerError,  FileNotFoundError):
 			err_page = file.read()
 		print("HTTP/1.1 500 Internal Server Error\r\n")
 		print("Content-Type: text/html\r\n")
+		print("Content-Length: " + len(err_page) + "\r\n")
 		print("\r\n")
 		print(err_page)
 	except FileNotFoundError as e:

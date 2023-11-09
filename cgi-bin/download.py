@@ -1,0 +1,49 @@
+#!/usr/bin/env python3
+
+import os
+
+class InternalServerError(Exception):
+	pass
+
+def getEnvValue(key):
+	res = os.environ.get(key, "NULL")
+	if res == "NULL":
+		raise InternalServerError()
+	return (res)
+
+try:
+	# Get the path to the file you want to send
+	dir_name = getEnvValue("DIRECTORY_NAME")
+	filename = getEnvValue("FILE_NAME")
+	file_path = os.path.join("../upload", dir_name, filename)
+
+	# Set the Content-Disposition header
+	content_disposition = f'attachment; filename="{filename}"'
+
+	# Set the Content-Type header based on the file type
+	content_type = getEnvValue("CONTENT_TYPE")
+
+	# Print the HTTP headers
+	with open(file_path, 'rb') as file:
+		res = file.read
+	print("HTTP/1.1 200 OK\r\n")
+	print("Content-Type: " + content_type)
+	print("Content-Length: " + len(res))
+	print(f'Content-Disposition: {content_disposition}' + "\r\n")
+	print("\r\n")  # End of headers
+	# Read and send the file content
+	print(res)
+
+
+except InternalServerError:
+    try:
+        with open("../page/500.html", "r") as file:
+            err_page = file.read()
+        print("HTTP/1.1 500 Internal Server Error\r\n")
+        print("Content-Type: text/html\r\n")
+        print("Content-Length: " + str(len(err_page)) + "\r\n")
+        print("\r\n")
+        print(err_page)
+    except FileNotFoundError as e:
+        print(f"Find Error!!! => f{e}")
+

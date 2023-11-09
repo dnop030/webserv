@@ -25,6 +25,12 @@ try:
 
 	with open(file_path, 'wb') as res_file:
 		file_path.write(body)
+		message = f"{filename} has been posted successfully."
+	print("HTTP/1.1 200 OK\r\n")
+	print("Content-Type: text/plain\r\n")
+	print("Content-Length: " + str(len(message)) + "\r\n")
+	print("\r\n")
+	print(message)
 
 except (InternalServerError,  FileNotFoundError):
 	try:
@@ -32,6 +38,7 @@ except (InternalServerError,  FileNotFoundError):
 			err_page = file.read()
 		print("HTTP/1.1 500 Internal Server Error\r\n")
 		print("Content-Type: text/html\r\n")
+		print("Content-Length: " + len(err_page) + "\r\n")
 		print("\r\n")
 		print(err_page)
 	except FileNotFoundError as e:
