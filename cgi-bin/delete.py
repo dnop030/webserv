@@ -3,19 +3,11 @@
 import os
 import cgi
 import sys
-
-class InternalServerError(Exception):
-    pass
-
-def getEnvValue(key):
-    res = os.environ.get(key, "NULL")
-    if res == "NULL":
-        raise InternalServerError()
-    return res
+import utils
 
 try:
-    dir_name = getEnvValue("DIRECTORY_NAME")
-    filename = getEnvValue("FILE_NAME")
+    dir_name = utils.getEnvValue("DIRECTORY_NAME")
+    filename = utils.getEnvValue("FILE_NAME")
     file_path = os.path.join("../upload", dir_name, filename)
 
     # Check if the file exists
@@ -29,9 +21,9 @@ try:
         print("\r\n")
         print(message)
     else:
-        raise InternalServerError
+        raise utils.InternalServerError
 
-except InternalServerError:
+except utils.InternalServerError:
     try:
         with open("../page/500.html", "r") as file:
             err_page = file.read()

@@ -1,27 +1,19 @@
 #!/usr/bin/env python3
 
 import os
-
-class InternalServerError(Exception):
-	pass
-
-def getEnvValue(key):
-	res = os.environ.get(key, "NULL")
-	if res == "NULL":
-		raise InternalServerError()
-	return (res)
+import utils
 
 try:
 	# Get the path to the file you want to send
-	dir_name = getEnvValue("DIRECTORY_NAME")
-	filename = getEnvValue("FILE_NAME")
+	dir_name = utils.getEnvValue("DIRECTORY_NAME")
+	filename = utils.getEnvValue("FILE_NAME")
 	file_path = os.path.join("../upload", dir_name, filename)
 
 	# Set the Content-Disposition header
 	content_disposition = f'attachment; filename="{filename}"'
 
 	# Set the Content-Type header based on the file type
-	content_type = getEnvValue("CONTENT_TYPE")
+	content_type = utils.getEnvValue("CONTENT_TYPE")
 
 	# Print the HTTP headers
 	with open(file_path, 'rb') as file:
@@ -35,7 +27,7 @@ try:
 	print(res)
 
 
-except InternalServerError:
+except utils.InternalServerError:
     try:
         with open("../page/500.html", "r") as file:
             err_page = file.read()
