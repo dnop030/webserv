@@ -7,18 +7,22 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-ServHandle::ServHandle(void) {}
+ServHandle::ServHandle(void) {
+	this->_configServ = new ConfigFileHandle();
+}
 
-ServHandle::~ServHandle(void) {}
+ServHandle::~ServHandle(void) {
+	delete this->_configServ;
+}
 
 void ServHandle::servCreate(char const *configFile)
 {
 
 	std::cout << MAG << "servCreate" << reset << std::endl;
-	this->_configServ.readConfigFile(configFile);
+	this->_configServ->readConfigFile(configFile);
 
 	// // Debug
-	// this->_configServ.showDetailConfigFile();
+	this->_configServ->showDetailConfigFile();
 
 	// std::string	tmpStr;
 	// tmpStr = this->_configServ.getServConfigVal(0, "listen");
@@ -38,10 +42,10 @@ void ServHandle::servCreate(char const *configFile)
 
 	// validate server config here !!!!!!!!!!!
 
-	std::cout << MAG << "amout of serv config " << this->_configServ.getAmountServConfig() << reset << std::endl;
-	for (int i = 0; i < this->_configServ.getAmountServConfig(); i++)
+	std::cout << MAG << "amout of serv config " << this->_configServ->getAmountServConfig() << reset << std::endl;
+	for (int i = 0; i < this->_configServ->getAmountServConfig(); i++)
 	{
-		this->createServ(this->_configServ.getServConfigVal(i, "listen"));
+		this->createServ(this->_configServ->getServConfigVal(i, "listen"));
 	}
 
 	// epolll create
@@ -416,6 +420,7 @@ void ServHandle::sockCliRd(int const &cliFd)
 	// Request rq(this->_bufferPack);
 	//  rq.parseRequest();
 	HttpHandle http(this->_bufferPack);
+	http.response.setConfig(this->_configServ);
 
 	// if the size of receive package = 0
 	// means client send some Flag ex. FIN
@@ -425,9 +430,6 @@ void ServHandle::sockCliRd(int const &cliFd)
 		// prepare the response and tie with client Fd
 		if (this->_httpRespose.find(cliFd) == this->_httpRespose.end())
 		{
-			http.response.setStatusCode(200); // petch
-			http.response.setStatusMessage("ok"); // petch
-			http.response.setFileResponse("page/index.html"); // petch
 			this->_httpRespose.insert(std::pair<int, std::string>(cliFd, http.response.returnResponse()));
 			// this->_httpRespose.insert(std::pair<int, std::string>(cliFd, this->generateHttpResponse(200, "Ok", "Hello from server")));
 		}
