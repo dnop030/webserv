@@ -11,6 +11,7 @@ try:
 	print("HTTP/1.1" + status + " " + status_message + "\r\n")
 	print("Content-Type: text/html\r\n")
 	print("Content-Length: " + len(err_file) + "\r\n")
+	print("Location: " + "http://" + utils.getEnvValue("HOSTNAME") + "/page/" + status + ".html" + "\r\n")
 	print("\r\n")
 	print(err_file)
 

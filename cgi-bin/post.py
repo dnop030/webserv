@@ -21,6 +21,7 @@ try:
 	print("HTTP/1.1 200 OK\r\n")
 	print("Content-Type: text/plain\r\n")
 	print("Content-Length: " + str(len(message)) + "\r\n")
+	#print("Location: " + "http://" + utils.getEnvValue("HOSTNAME") + "/page/" + utils.getEnvValue("FILENAME") + "\r\n")
 	print("\r\n")
 	print(message)
 
