@@ -17,25 +17,27 @@ class HttpResponse : public Http
 		std::string 		_port;
 		std::string			_method;
 		ConfigFileHandle	*_config;
-		std::map<std::string, std::string>	_header;
 		std::map<int, std::string>			_status;
 		std::map<int, std::string>			_fileError;
+		std::map<std::string, std::string>	_header;
 		// read from ConfigFileHandle
 		int					_config_ser;
 		std::string			_config_location;
 		std::string			_config_root;
 		std::vector<std::string>	_config_condition;
-		// func check before send response
+		// func check and set before send response
 		int					_checkPort();
 		int					_checkPath();
 		void				_setHeader(std::string const &key, std::string const &value);
 		void				_setConfigCondition();
 		void				_checkMethod();
-		void				_setRootPath(std::string const &pathFile);
+		void				_setRootPath();
 		void				_setFileResponse(std::string const &pathFile, std::string const &rootPath);
+		std::string			_setConfigCondition(std::string const &nameCondition);
 		std::string			_searchIndex(std::string const &pathFile);
 		std::string			_checkFile();
 		std::string			_setResponseStream();
+		std::vector<std::string>	_spiltString(std::string &str, std::string const &delim);
 
 	public:
 		HttpResponse();

@@ -124,26 +124,44 @@ void	HttpResponse::_setConfigCondition()
 	this->_config_condition.push_back(condition);
 }
 
-void	HttpResponse::_checkMethod()
+std::string	HttpResponse::_setConfigCondition(std::string const &nameCondition)
 {
-	size_t 						pos = 0;
-	std::string 				method = "allow_method", delimiter = " ", token;
-	std::vector<std::string>	allow_method;
+	std::string condition = nameCondition;
 
-	for(auto value : this->_config_condition) {
-		if (method == value.substr(0, method.length())) {
-			method = value;
+	for (auto value : this->_config_condition) {
+		if (condition == value.substr(0, condition.length())) {
+			return value;
 		}
 	}
-	if (method != "allow_method") {
-		while ((pos = method.find(delimiter)) != std::string::npos) {
-			token = method.substr(0, pos);
-			allow_method.push_back(token);
-			method.erase(0, pos + delimiter.length());
-		}
-		allow_method.push_back(method);
 
-		for(auto value : allow_method) {
+	return condition;
+}
+
+std::vector<std::string>	HttpResponse::_spiltString(std::string &str, std::string const &delim)
+{
+	size_t						pos = 0;
+	std::string 				token;
+	std::vector<std::string>	arr_return;
+
+	while ((pos = str.find(delim)) != std::string::npos) {
+		token = str.substr(0, pos);
+		arr_return.push_back(token);
+		str.erase(0, pos + delim.length());
+	}
+	arr_return.push_back(str);
+
+	return arr_return;
+}
+
+void	HttpResponse::_checkMethod()
+{
+	std::string 				method;
+	std::vector<std::string>	allow_method;
+
+	method = this->_setConfigCondition("allow_method");
+	if (method != "allow_method") {
+		allow_method = this->_spiltString(method, " ");
+		for (auto value : allow_method) {
 			if (value == this->_method)
 				return ;
 		}
@@ -151,24 +169,14 @@ void	HttpResponse::_checkMethod()
 	}
 }
 
-void	HttpResponse::_setRootPath(std::string const &pathFile)
+void	HttpResponse::_setRootPath()
 {
-	size_t 						pos = 0;
-	std::string 				path = "", delimiter = " ", token;
+	std::string 				path;
 	std::vector<std::string>	config_path;
 
-	for(auto value : this->_config_condition) {
-		if (pathFile == value.substr(0, pathFile.length())) {
-			path = value;
-		}
-	}
+	path = this->_setConfigCondition("root");
 	if (path.length()) {
-		while ((pos = path.find(delimiter)) != std::string::npos) {
-			token = path.substr(0, pos);
-			config_path.push_back(token);
-			path.erase(0, pos + delimiter.length());
-		}
-		config_path.push_back(path);
+		config_path = this->_spiltString(path, " ");
 		this->_config_root = config_path[1];
 		return ;
 	}
@@ -177,24 +185,13 @@ void	HttpResponse::_setRootPath(std::string const &pathFile)
 
 std::string	HttpResponse::_searchIndex(std::string const &pathFile)
 {
-	size_t 						pos = 0;
-	std::string 				index = "index", delimiter = " ", token;
+	std::string 				index;
 	std::vector<std::string>	arr_index;
 
-	for(auto value : this->_config_condition) {
-		if (index == value.substr(0, index.length())) {
-			index = value;
-		}
-	}
+	index = this->_setConfigCondition("index");
 	if (index != "index") {
-		while ((pos = index.find(delimiter)) != std::string::npos) {
-			token = index.substr(0, pos);
-			arr_index.push_back(token);
-			index.erase(0, pos + delimiter.length());
-		}
-		arr_index.push_back(index);
-		
-		for(auto value : arr_index) {
+		arr_index = this->_spiltString(index, " ");
+		for (auto value : arr_index) {
 			if (value == "index")
 				continue ;
 			std::ifstream ifs(pathFile + value);
@@ -243,7 +240,7 @@ std::string	HttpResponse::returnResponse()
 		if (this->_checkPort() > -1 && this->_checkPath()) {
 			this->_setConfigCondition();
 			this->_checkMethod();
-			this->_setRootPath("root");
+			this->_setRootPath();
 			this->_setFileResponse(this->_config_root + this->_path, this->_path);
 			this->_statusCode = 200;
 		} else
