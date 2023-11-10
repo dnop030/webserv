@@ -33,6 +33,7 @@ class HttpResponse : public Http
 		void				_checkMethod();
 		void				_setRootPath();
 		void				_setFileResponse(std::string const &pathFile, std::string const &rootPath);
+		void				_setErrorPage();
 		std::string			_setConfigCondition(std::string const &nameCondition);
 		std::string			_searchIndex(std::string const &pathFile);
 		std::string			_checkFile();

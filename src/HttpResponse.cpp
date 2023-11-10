@@ -16,9 +16,9 @@ HttpResponse::HttpResponse()
 	this->_status[500] = "Internal Server Error";
 	this->_status[501] = "Not Implemented";
 	this->_status[505] = "HTTP Version not supported";
-	this->_fileError[404] = "page/404.html";
-	this->_fileError[405] = "page/405.html";
-	this->_fileError[500] = "page/500.html";
+	this->_fileError[404] = "page/error/404.html";
+	this->_fileError[405] = "page/error/405.html";
+	this->_fileError[500] = "page/error/500.html";
 }
 
 HttpResponse::~HttpResponse()
@@ -68,7 +68,7 @@ std::string	HttpResponse::_checkFile()
 		return content;
 	} else {
 		this->_statusCode = 404;
-		std::ifstream t(this->_fileError[404]);
+		std::ifstream t(this->_fileError[this->_statusCode]);
 		std::string content((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
 		
 		return content;
@@ -214,6 +214,19 @@ void	HttpResponse::_setFileResponse(std::string const &pathFile, std::string con
 	}
 }
 
+void	HttpResponse::_setErrorPage()
+{
+	std::string	error_page = "error_page";
+	std::vector<std::string>	config_path;
+
+	for (auto value : this->_config_condition) {
+		if (error_page == value.substr(0, error_page.length())) {
+			config_path = this->_spiltString(value, " ");
+			this->_fileError[std::stoi(config_path[1])] = config_path[2];
+		}
+	}
+}
+
 std::string	HttpResponse::_setResponseStream()
 {
 	std::ostringstream resStream;
@@ -239,6 +252,7 @@ std::string	HttpResponse::returnResponse()
 	try {
 		if (this->_checkPort() > -1 && this->_checkPath()) {
 			this->_setConfigCondition();
+			this->_setErrorPage();
 			this->_checkMethod();
 			this->_setRootPath();
 			this->_setFileResponse(this->_config_root + this->_path, this->_path);
@@ -248,6 +262,7 @@ std::string	HttpResponse::returnResponse()
 	} catch (int status) {
 		this->_statusCode = status;
 		this->_fileResponse = this->_fileError[status];
+		std::cout << "test: " << this->_fileResponse << std::endl;
 	}
 
 	return (this->_setResponseStream());
