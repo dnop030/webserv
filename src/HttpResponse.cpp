@@ -222,7 +222,7 @@ std::string	HttpResponse::_setResponseStream()
 
 	this->_setHeader("Content-Length:", std::to_string(contentRes.length()));
 	this->_setHeader("Content-Type:", "text/html");
-	this->_setHeader("Accept-Language:", "TH");
+	this->_setHeader("Location-Header:", "TH");
 
 	resStream << "HTTP/1.1 " << this->_statusCode << " " << this->_status[this->_statusCode] << "\r\n";
 	for (it = this->_header.begin(); it != this->_header.end(); it++) {

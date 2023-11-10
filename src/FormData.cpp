@@ -6,6 +6,7 @@ FormData::FormData(Request &req) : _split(NULL), _req(NULL)
 	try
 	{
 		this->checkContentType();
+		std::string dummy = this->mapToJason();
 	}
 	catch (const BadRequest &e)
 	{
@@ -261,4 +262,36 @@ std::vector<std::string> FormData::splitCRLF(std::string &buffer)
 	if (buffer[start] != '\0')
 		res.push_back(buffer.substr(start));
 	return (res);
+}
+
+std::string FormData::mapToJason(void)
+{
+	std::string serializedData = "{";
+
+	for (size_t i = 0; i < this->_form.size(); ++i)
+	{
+		serializedData += "\"entry" + std::to_string(i) + "\": {";
+
+		const std::map<std::string, std::string> &entry = this->_form[i];
+		bool firstField = true;
+
+		for (std::map<std::string, std::string>::const_iterator it = entry.begin(); it != entry.end(); ++it)
+		{
+			if (!firstField)
+				serializedData += ",";
+
+			serializedData += "\"" + it->first + "\": \"" + it->second + "\"";
+			firstField = false;
+		}
+
+		serializedData += "}";
+
+		if (i < this->_form.size() - 1)
+			serializedData += ",";
+	}
+
+	serializedData += "}";
+	std::cout << "Try print jason format" << std::endl;
+	std::cout << serializedData << std::endl;
+	return (serializedData);
 }

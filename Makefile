@@ -52,4 +52,4 @@ fclean: clean
 re: fclean all
 
 exec: re
-	./webserv
+	./webserv config/hardcode.conf
