@@ -15,7 +15,7 @@ class ServConfigDetail
 		~ServConfigDetail(void);
 
 		void	saveOneBlockConfig(std::string const & block);
-		void	storeConfig(std::string const & config);
+		// void	storeConfig(std::string const & config);
 		void	showDetail(void);
 		std::string const &	getVal(std::string const & val);
 
@@ -26,6 +26,12 @@ class ServConfigDetail
 	private:
 		ServConfigDetail(ServConfigDetail const & r);
 		ServConfigDetail &operator=(ServConfigDetail const & r);
+
+		void	delFrontSpace(std::string *str);
+		void	delAllComment(std::string *str);
+		void	storeOneLineNormalConfig(std::string const & str);
+		void	storeLocationConfig(std::string const & str);
+		void	delIsCntrl(std::string *str);
 
 		std::multimap<std::string, std::string>	_detail;
 		std::string							_tmpStr;
