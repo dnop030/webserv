@@ -216,7 +216,9 @@ void	ServConfigDetail::delAllComment(std::string *str) {
 
 void	ServConfigDetail::storeOneLineNormalConfig(std::string const & str) {
 	std::string	tmpStore = str.substr(0, str.find(";"));
-	std::cout << MAG << tmpStore << reset << std::endl;
+	// std::cout << MAG << tmpStore << reset << std::endl;
+
+
 }
 
 void	ServConfigDetail::storeLocationConfig(std::string const & str) {
@@ -239,7 +241,6 @@ void	ServConfigDetail::storeLocationConfig(std::string const & str) {
 	// std::cout << "val:" << val << std::endl;
 	// std::cout << "len val:" << val.size() << std::endl;
 	this->delIsCntrl(&val);
-	this->delFrontSpace(&val); // just in case any space in front
 	// std::cout << "key:" << key << MAG << "test msg" << reset << std::endl;
 	// std::cout << "val:" << val << std::endl;
 	this->_detail.insert(std::pair<std::string, std::string>(key, val));
