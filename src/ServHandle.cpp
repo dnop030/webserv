@@ -7,28 +7,33 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-ServHandle::ServHandle(void) {}
+ServHandle::ServHandle(void) {
+	this->_configServ = new ConfigFileHandle();
+}
 
-ServHandle::~ServHandle(void) {}
+ServHandle::~ServHandle(void) {
+	delete this->_configServ;
+}
 
 void ServHandle::servCreate(char const *configFile)
 {
 
 	std::cout << MAG << "servCreate" << reset << std::endl;
-	this->_configServ.readConfigFile(configFile);
+	// this->_configServ.readConfigFile(configFile);
+	this->_configServ->readConfigFile(configFile);
 
 	// // Debug
-	// this->_configServ.showDetailConfigFile();
+	// this->_configServ->showDetailConfigFile();
 
 	// std::string	tmpStr;
-	// tmpStr = this->_configServ.getServConfigVal(0, "listen");
+	// tmpStr = this->_configServ->getServConfigVal(0, "listen");
 	// std::cout << MAG << "[INFO]output \"listen\" 0 " << tmpStr << reset << std::endl;
 
-	// tmpStr = this->_configServ.getServConfigVal(0, "listen ");
+	// tmpStr = this->_configServ->getServConfigVal(0, "listen ");
 	// std::cout << MAG << "[INFO]output \"listen \" 0 " << tmpStr << reset << std::endl;
-	// // std::cout << MAG << "[INFO]output length " << tmpStr.length() << reset << std::endl;
+	// std::cout << MAG << "[INFO]output length " << tmpStr.length() << reset << std::endl;
 
-	// Debug End this line
+	// // Debug End this line
 
 
 	this->showMapFd();
@@ -38,10 +43,9 @@ void ServHandle::servCreate(char const *configFile)
 
 	// validate server config here !!!!!!!!!!!
 
-	std::cout << MAG << "amout of serv config " << this->_configServ.getAmountServConfig() << reset << std::endl;
-	for (int i = 0; i < this->_configServ.getAmountServConfig(); i++)
-	{
-		this->createServ(this->_configServ.getServConfigVal(i, "listen"));
+	std::cout << MAG << "amout of serv config " << this->_configServ->getAmountServConfig() << reset << std::endl;
+	for (int i=0; i<this->_configServ->getAmountServConfig(); i++) {
+		this->createServ(this->_configServ->getServConfigVal(i, "listen"));
 	}
 
 	// epolll create
