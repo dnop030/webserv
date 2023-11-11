@@ -14,16 +14,16 @@ void	ServHandle::servCreate(char const * configFile) {
 	// this->_configServ.readConfigFile(configFile);
 	this->_configServ->readConfigFile(configFile);
 
-	// // Debug
-	// this->_configServ.showDetailConfigFile();
+	// Debug
+	this->_configServ->showDetailConfigFile();
 
-	// std::string	tmpStr;
-	// tmpStr = this->_configServ.getServConfigVal(0, "listen");
-	// std::cout << MAG << "[INFO]output \"listen\" 0 " << tmpStr << reset << std::endl;
+	std::string	tmpStr;
+	tmpStr = this->_configServ->getServConfigVal(0, "listen");
+	std::cout << MAG << "[INFO]output \"listen\" 0 " << tmpStr << reset << std::endl;
 
-	// tmpStr = this->_configServ.getServConfigVal(0, "listen ");
-	// std::cout << MAG << "[INFO]output \"listen \" 0 " << tmpStr << reset << std::endl;
-	// // std::cout << MAG << "[INFO]output length " << tmpStr.length() << reset << std::endl;
+	tmpStr = this->_configServ->getServConfigVal(0, "listen ");
+	std::cout << MAG << "[INFO]output \"listen \" 0 " << tmpStr << reset << std::endl;
+	std::cout << MAG << "[INFO]output length " << tmpStr.length() << reset << std::endl;
 
 	// Debug End this line
 

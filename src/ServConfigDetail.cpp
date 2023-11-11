@@ -15,7 +15,8 @@ ServConfigDetail::~ServConfigDetail(void) {
 void	ServConfigDetail::saveOneBlockConfig(std::string const & block) {
 	std::string	tmpBlock = block;
 	std::string	tmpOneLine;
-	std::cout << YEL << block << reset;
+
+	// std::cout << YEL << block << reset;
 
 	this->delAllComment(&tmpBlock);
 	// std::cout << MAG << tmpBlock << reset;
@@ -29,15 +30,17 @@ void	ServConfigDetail::saveOneBlockConfig(std::string const & block) {
 	// std::cout << MAG << tmpBlock << reset;
 
 	// using loop by detecting ;
-	// while (tmpBlock.find(";") != std::string::npos) {
+	while (tmpBlock.find(";") != std::string::npos) {
 		this->delFrontSpace(&tmpBlock);
-		std::cout << BLU << tmpBlock << reset;
+		// std::cout << BLU << tmpBlock << reset;
 
 		tmpOneLine.clear();
 		tmpOneLine = tmpBlock.substr(0, tmpBlock.find(";"));
 		// std::cout << MAG << tmpOneLine << reset << std::endl;
 
 		if (tmpOneLine.find("location") != std::string::npos) {
+			// std::cout << "location" << std::endl;
+
 			// need to re substr for location
 			// due to location might consist of multiple line
 			tmpOneLine.clear();
@@ -46,9 +49,12 @@ void	ServConfigDetail::saveOneBlockConfig(std::string const & block) {
 
 			// delete after store
 			// + 1 due to include what we want to delete
-			tmpBlock.erase(0, tmpBlock.find(";") + 1);
+			tmpBlock.erase(0, tmpBlock.find("}") + 1);
+			// tmpBlock.erase(0, tmpBlock.find("}"));
 		}
 		else {
+			// std::cout << "Not location" << std::endl;
+
 			// store to multimap
 			tmpOneLine.clear();
 			this->storeOneLineNormalConfig(tmpBlock);
@@ -56,9 +62,11 @@ void	ServConfigDetail::saveOneBlockConfig(std::string const & block) {
 
 			// delete after store
 			// + 1 due to include what we want to delete
-			tmpBlock.erase(0, tmpBlock.find("}") + 1);
+			tmpBlock.erase(0, tmpBlock.find(";") + 1);
+			// tmpBlock.erase(0, tmpBlock.find(";"));
 		}
-	// }
+		// std::cout << MAG << tmpBlock << reset;
+	}
 
 
 
@@ -215,10 +223,20 @@ void	ServConfigDetail::delAllComment(std::string *str) {
 }
 
 void	ServConfigDetail::storeOneLineNormalConfig(std::string const & str) {
+	int	pos_space;
+	std::string	key;
+	std::string	val;
 	std::string	tmpStore = str.substr(0, str.find(";"));
 	// std::cout << MAG << tmpStore << reset << std::endl;
 
-
+	this->delIsCntrl(&tmpStore);
+	pos_space = tmpStore.find(" ");
+	key = tmpStore.substr(0, pos_space);
+	val = tmpStore.substr(pos_space, tmpStore.size() - pos_space);
+	this->delFrontSpace(&val);
+	// std::cout << "key:" << key << MAG << "test msg" << reset << std::endl;
+	// std::cout << "val:" << val << std::endl;
+	this->_detail.insert(std::pair<std::string, std::string>(key, val));
 }
 
 void	ServConfigDetail::storeLocationConfig(std::string const & str) {
