@@ -14,69 +14,69 @@ void	ServHandle::servCreate(char const * configFile) {
 	// this->_configServ.readConfigFile(configFile);
 	this->_configServ->readConfigFile(configFile);
 
-	// Debug
-	this->_configServ->showDetailConfigFile();
+	// // Debug
+	// this->_configServ->showDetailConfigFile();
 
-	std::string	tmpStr;
-	tmpStr = this->_configServ->getServConfigVal(0, "listen");
-	std::cout << MAG << "[INFO]output \"listen\" 0 " << tmpStr << reset << std::endl;
+	// std::string	tmpStr;
+	// tmpStr = this->_configServ->getServConfigVal(0, "listen");
+	// std::cout << MAG << "[INFO]output \"listen\" 0 " << tmpStr << reset << std::endl;
 
-	tmpStr = this->_configServ->getServConfigVal(0, "listen ");
-	std::cout << MAG << "[INFO]output \"listen \" 0 " << tmpStr << reset << std::endl;
-	std::cout << MAG << "[INFO]output length " << tmpStr.length() << reset << std::endl;
+	// tmpStr = this->_configServ->getServConfigVal(0, "listen ");
+	// std::cout << MAG << "[INFO]output \"listen \" 0 " << tmpStr << reset << std::endl;
+	// std::cout << MAG << "[INFO]output length " << tmpStr.length() << reset << std::endl;
 
-	// Debug End this line
+	// // Debug End this line
 
 
-	// this->showMapFd();
+	this->showMapFd();
 
-	// // need to check amount Serv config before
-	// // if 0 then return
+	// need to check amount Serv config before
+	// if 0 then return
 
-	// // validate server config here !!!!!!!!!!!
+	// validate server config here !!!!!!!!!!!
 
-	// std::cout << MAG << "amout of serv config " << this->_configServ.getAmountServConfig() << reset << std::endl;
-	// for (int i=0; i<this->_configServ.getAmountServConfig(); i++) {
-	// 	this->createServ(this->_configServ.getServConfigVal(i, "listen"));
-	// }
+	std::cout << MAG << "amout of serv config " << this->_configServ->getAmountServConfig() << reset << std::endl;
+	for (int i=0; i<this->_configServ->getAmountServConfig(); i++) {
+		this->createServ(this->_configServ->getServConfigVal(i, "listen"));
+	}
 
-	// // epolll create
-	// // if flag = 0 => it is similar to epoll_create
-	// this->_epoll_fd = epoll_create1(0);
-	// if (this->_epoll_fd == -1) {
-	// 	std::cerr << RED << "Failed to create epoll file descriptor" << reset << std::endl;
-	// 	exit (EXIT_FAILURE);
-	// }
+	// epolll create
+	// if flag = 0 => it is similar to epoll_create
+	this->_epoll_fd = epoll_create1(0);
+	if (this->_epoll_fd == -1) {
+		std::cerr << RED << "Failed to create epoll file descriptor" << reset << std::endl;
+		exit (EXIT_FAILURE);
+	}
 
-	// // // Add Fd of server into epoll instance
-	// // for (int i=0; i<this->_configServ.getAmountServConfig(); i++) {
-	// // 	this->_event.data.fd = this->_servFd[i];
-	// // 	// event.events = EPOLLIN | EPOLLET;
-	// // 	this->_event.events = EPOLLIN | EPOLLOUT;
-	// // 	// event.events = EPOLLIN | EPOLLOUT | EPOLLET;
-
-	// // 	this->_tmpInt = epoll_ctl (this->_epoll_fd, EPOLL_CTL_ADD, this->_servFd[i], &(this->_event));
-	// // 	if (this->_tmpInt < 0) {
-	// // 		std::cerr << "Failed to add server file descriptor in instance epoll of server " << i << std::endl;
-	// // 	}
-	// // }
 	// // Add Fd of server into epoll instance
-	// for (std::map<int, char>::iterator it = this->_mapFd.begin(); it != this->_mapFd.end(); it++) {
-	// 	this->_event.data.fd = it->first;
+	// for (int i=0; i<this->_configServ.getAmountServConfig(); i++) {
+	// 	this->_event.data.fd = this->_servFd[i];
+	// 	// event.events = EPOLLIN | EPOLLET;
 	// 	this->_event.events = EPOLLIN | EPOLLOUT;
+	// 	// event.events = EPOLLIN | EPOLLOUT | EPOLLET;
 
-	// 	this->_tmpInt = epoll_ctl (this->_epoll_fd, EPOLL_CTL_ADD, it->first, &(this->_event));
+	// 	this->_tmpInt = epoll_ctl (this->_epoll_fd, EPOLL_CTL_ADD, this->_servFd[i], &(this->_event));
 	// 	if (this->_tmpInt < 0) {
-	// 		std::cerr << RED << "Failed to add server file descriptor in instance epoll of server " << it->first << reset << std::endl;
+	// 		std::cerr << "Failed to add server file descriptor in instance epoll of server " << i << std::endl;
 	// 	}
 	// }
+	// Add Fd of server into epoll instance
+	for (std::map<int, char>::iterator it = this->_mapFd.begin(); it != this->_mapFd.end(); it++) {
+		this->_event.data.fd = it->first;
+		this->_event.events = EPOLLIN | EPOLLOUT;
 
-	// this->showMapFd();
+		this->_tmpInt = epoll_ctl (this->_epoll_fd, EPOLL_CTL_ADD, it->first, &(this->_event));
+		if (this->_tmpInt < 0) {
+			std::cerr << RED << "Failed to add server file descriptor in instance epoll of server " << it->first << reset << std::endl;
+		}
+	}
 
-	// // Need to fix -> using new method
-	// this->_event_ret = (struct epoll_event *)calloc(MAXEVENTS, sizeof(struct epoll_event));
+	this->showMapFd();
 
-	// this->_servRunning = true;
+	// Need to fix -> using new method
+	this->_event_ret = (struct epoll_event *)calloc(MAXEVENTS, sizeof(struct epoll_event));
+
+	this->_servRunning = true;
 }
 
 void	ServHandle::servStart(void) {
