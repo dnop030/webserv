@@ -20,6 +20,7 @@ void	ServConfigDetail::saveOneBlockConfig(std::string const & block) {
 	this->delAllComment(&tmpBlock);
 	// std::cout << MAG << tmpBlock << reset;
 
+	// del server {}
 	// del charactor until 1st { (del including 1st {)
 	tmpBlock.erase(0, tmpBlock.find("{") + 1);
 
@@ -27,8 +28,37 @@ void	ServConfigDetail::saveOneBlockConfig(std::string const & block) {
 	tmpBlock.erase(tmpBlock.find_last_of("}"), tmpBlock.find_last_of("}") - tmpBlock.size());
 	// std::cout << MAG << tmpBlock << reset;
 
-	this->delFrontSpace(&tmpBlock);
-	std::cout << BLU << tmpBlock << reset;
+	// using loop by detecting ;
+	// while (tmpBlock.find(";") != std::string::npos) {
+		this->delFrontSpace(&tmpBlock);
+		std::cout << BLU << tmpBlock << reset;
+
+		tmpOneLine.clear();
+		tmpOneLine = tmpBlock.substr(0, tmpBlock.find(";"));
+		// std::cout << MAG << tmpOneLine << reset << std::endl;
+
+		if (tmpOneLine.find("location") != std::string::npos) {
+			// need to re substr for location
+			// due to location might consist of multiple line
+			tmpOneLine.clear();
+			this->storeLocationConfig(tmpBlock);
+			// std::cout << MAG << tmpOneLine << reset << std::endl;
+
+			// delete after store
+			// + 1 due to include what we want to delete
+			tmpBlock.erase(0, tmpBlock.find(";") + 1);
+		}
+		else {
+			// store to multimap
+			tmpOneLine.clear();
+			this->storeOneLineNormalConfig(tmpBlock);
+			// std::cout << MAG << tmpOneLine << reset << std::endl;
+
+			// delete after store
+			// + 1 due to include what we want to delete
+			tmpBlock.erase(0, tmpBlock.find("}") + 1);
+		}
+	// }
 
 
 
@@ -184,8 +214,62 @@ void	ServConfigDetail::delAllComment(std::string *str) {
 	}
 }
 
-void	ServConfigDetail::storeOneLineConfig(std::string *str) {
+void	ServConfigDetail::storeOneLineNormalConfig(std::string const & str) {
+	std::string	tmpStore = str.substr(0, str.find(";"));
+	std::cout << MAG << tmpStore << reset << std::endl;
+}
 
+void	ServConfigDetail::storeLocationConfig(std::string const & str) {
+	int	pos_space;
+	std::string	key;
+	std::string	val;
+	std::string	tmpStore = str.substr(0, str.find("}"));
+
+	tmpStore.erase(tmpStore.find("{"), 1);
+
+	pos_space = tmpStore.find(" ");
+	// std::cout << "space1 " << pos_space << std::endl;
+	pos_space = tmpStore.find(" ", pos_space + 1);
+	// std::cout << "space1 " << pos_space << std::endl;
+	key = tmpStore.substr(0, pos_space);
+	val = tmpStore.substr(pos_space, tmpStore.size() - pos_space);
+	// std::cout << "len bef del front space " << tmpStore.size() - pos_space << std::endl;
+	this->delFrontSpace(&val);
+	// std::cout << "key:" << key << MAG << "test msg" << reset << std::endl;
+	// std::cout << "val:" << val << std::endl;
+	// std::cout << "len val:" << val.size() << std::endl;
+	this->delIsCntrl(&val);
+	this->delFrontSpace(&val); // just in case any space in front
+	// std::cout << "key:" << key << MAG << "test msg" << reset << std::endl;
+	// std::cout << "val:" << val << std::endl;
+	this->_detail.insert(std::pair<std::string, std::string>(key, val));
+
+	// std::cout << GRN << tmpStore << reset;
+}
+
+void	ServConfigDetail::delIsCntrl(std::string *str) {
+	// while ((*str).find("\n") != std::string::npos) {
+	// 	(*str).erase((*str).find("\n"), 1);
+	// }
+
+	int	i = (*str).size();
+	// std::cout << "del new line" << std::endl;
+	// std::cout << "len " << (*str).size() << std::endl;
+
+	// // while (*str != std::string::npos) { // not working
+	// while (*str != "\0") {
+	// 	std::cout << *str << std::endl;
+	// 	str++;
+	// }
+	// std::cout << (*str);
+	while (i > 0) {
+		i--;
+		if (iscntrl((*str)[i]))
+			str->erase(i, 1);
+	}
+	// std::cout << "aft del iscntrl" << std::endl;
+	// std::cout << (*str) << std::endl;
+	// std::cout << "end print new line" << std::endl;
 }
 
 // void	ServConfigDetail::storeConfigLocation(std::string const & location) {
