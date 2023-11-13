@@ -10,6 +10,7 @@ class HttpResponse : public Http
 {
 	private:
 		int					_statusCode;
+		int					_checkCGI;
 		std::string 		_statusMessage;
 		std::string 		_fileResponse;
 		std::string 		_serverName;
@@ -24,6 +25,8 @@ class HttpResponse : public Http
 		int					_config_ser;
 		std::string			_config_location;
 		std::string			_config_root;
+		std::string			_config_cgi;
+		std::string			_config_cgi_path;
 		std::vector<std::string>	_config_condition;
 		// func check and set before send response
 		int					_checkPort();
@@ -34,6 +37,7 @@ class HttpResponse : public Http
 		void				_setRootPath();
 		void				_setFileResponse(std::string const &pathFile, std::string const &rootPath);
 		void				_setErrorPage();
+		void				_setCGI();
 		std::string			_setConfigCondition(std::string const &nameCondition);
 		std::string			_searchIndex(std::string const &pathFile);
 		std::string			_checkFile();

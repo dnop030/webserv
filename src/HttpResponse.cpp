@@ -3,6 +3,9 @@
 HttpResponse::HttpResponse()
 {
 	this->_config_ser = -1;
+	this->_statusCode = 200;
+	this->_checkCGI = 0;
+	this->_config_cgi_path = "";
 	this->_status[100] = "Continue";
 	this->_status[101] = "Switching Protocols";
 	this->_status[200] = "OK";
@@ -227,6 +230,24 @@ void	HttpResponse::_setErrorPage()
 	}
 }
 
+void	HttpResponse::_setCGI()
+{
+	std::string 				tmp;
+	std::vector<std::string>	arr_cgi;
+
+	this->_config_cgi = (this->_config_ser > -1) ? this->_config->getServConfigVal(this->_config_ser, "location_back /cgi_bins/.py") : "";
+	if (this->_config_cgi.length() > 0) {
+		tmp = this->_config_cgi;
+		arr_cgi = this->_spiltString(tmp, ";");
+		for (auto value: arr_cgi) {
+			if (value.substr(0, 6) == "is_cgi" && value.substr(7, 9) == "on")
+				this->_checkCGI = 1;
+			if (value.substr(0, 4) == "root")
+				this->_config_cgi_path = value.substr(5, value.length() - 5);
+		}
+	}
+}
+
 std::string	HttpResponse::_setResponseStream()
 {
 	std::ostringstream resStream;
@@ -252,6 +273,7 @@ std::string	HttpResponse::returnResponse()
 	try {
 		if (this->_checkPort() > -1 && this->_checkPath()) {
 			this->_setConfigCondition();
+			this->_setCGI();
 			this->_setErrorPage();
 			this->_checkMethod();
 			this->_setRootPath();
@@ -262,7 +284,6 @@ std::string	HttpResponse::returnResponse()
 	} catch (int status) {
 		this->_statusCode = status;
 		this->_fileResponse = this->_fileError[status];
-		std::cout << "test: " << this->_fileResponse << std::endl;
 	}
 
 	return (this->_setResponseStream());
