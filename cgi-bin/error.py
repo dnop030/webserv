@@ -2,6 +2,7 @@ import utils
 import re
 
 try:
+	#utils.parseEnv() => wait for parsing env
 	status = utils.getEnvValue("STATUS_CODE")
 	with open("../page/" + status + ".html", "r") as file:
 		err_file = file.read()

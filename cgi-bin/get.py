@@ -8,6 +8,7 @@ import os
 import utils
 
 try:
+	#utils.parseEnv() => wait for parsing env
 	#Open and read html file
 	with open("../page/" + utils.getEnvValue("FILENAME"), "r") as file:
 		body_field = file.read()

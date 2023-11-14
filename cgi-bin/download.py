@@ -4,6 +4,7 @@ import os
 import utils
 
 try:
+    #utils.parseEnv() => wait for parsing env
 	# Get the path to the file you want to send
 	dir_name = utils.getEnvValue("DIRECTORY_NAME")
 	filename = utils.getEnvValue("FILE_NAME")

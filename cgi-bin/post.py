@@ -6,6 +6,7 @@ import sys
 import utils
 
 try:
+	#utils.parseEnv() => wait for parsing env
 	dir_name = utils.getEnvValue("DIRECTORY_NAME")
 	# Create a new directory (if it doesn't exist)
 	new_dir = "../upload/" + dir_name

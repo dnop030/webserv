@@ -6,6 +6,7 @@ import sys
 import utils
 
 try:
+    #utils.parseEnv() => wait for parsing env
     dir_name = utils.getEnvValue("DIRECTORY_NAME")
     filename = utils.getEnvValue("FILE_NAME")
     file_path = os.path.join("../upload", dir_name, filename)
