@@ -7,10 +7,9 @@ CheckHeader::CheckHeader(Request &req) : _contentLang("*")
 		this->_req = new Request(req);
 		this->checkContentLength();
 		this->checkDate();
+		this->checkConnection();
 		this->contentNego();
 		this->addRespondHeader();
-		// std::cout << "@@@@@ Respond header @@@@@" << std::endl;
-		// this->_req->printMap(this->_respHeader);
 	}
 	catch (const LengthRequired &e)
 	{
@@ -24,7 +23,7 @@ CheckHeader::CheckHeader(Request &req) : _contentLang("*")
 	}
 }
 
-CheckHeader::CheckHeader(CheckHeader const &src)
+CheckHeader::CheckHeader(CheckHeader const &src) : _contentLang(src._contentLang)
 {
 	*this = src;
 }
@@ -44,6 +43,10 @@ CheckHeader &CheckHeader::operator=(CheckHeader const &src)
 		this->_t.tm_sec = src._t.tm_sec;
 		this->_t.tm_isdst = src._t.tm_isdst;
 		this->_contentLang = src._contentLang;
+		if (!this->_respHeader.empty())
+			this->_respHeader.clear();
+		for (std::map<std::string, std::string>::const_iterator it = src._respHeader.begin(); it != src._respHeader.end(); ++it)
+			this->_respHeader[it->first] = it->second;
 	}
 	return (*this);
 }
@@ -200,6 +203,18 @@ float CheckHeader::checkAcceptLanguage(std::string &str, float q)
 		return (q);
 	}
 	return (tmp_q);
+}
+
+void CheckHeader::checkConnection(void)
+{
+	if (this->_req->_header.find("Connection") == this->_req->_header.end())
+		addKey(this->_respHeader, "Connection", "keep-alive");
+	else
+	{
+		if (this->_req->_header["Connection"] != "close" && this->_req->_header["Connection"] != "keep-alive")
+			throw BadRequest();
+		addKey(this->_respHeader, "Connection", this->_req->_header["Connection"]);
+	}
 }
 
 void CheckHeader::contentNego(void)

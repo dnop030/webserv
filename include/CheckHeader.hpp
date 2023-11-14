@@ -22,6 +22,7 @@ public:
 
 	void checkContentLength(void);
 	void checkDate(void);
+	void checkConnection(void);
 	float checkAcceptLanguage(std::string &str, float q);
 	void contentNego(void);
 	void ft_error(std::string *split);
