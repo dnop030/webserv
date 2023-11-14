@@ -89,23 +89,7 @@ void HttpHandle::printResponseHeader(void)
 	std::string tmp;
 	std::string date = currentDate();
 	addKey(this->_req->_respHeader, "Date", date);
-	tmp = "Date";
-	printKeyValue(this->_req->_respHeader, tmp);
-	tmp = "Allow";
-	printKeyValue(this->_req->_respHeader, tmp);
-	tmp = "Location";
-	printKeyValue(this->_req->_respHeader, tmp);
-	tmp = "Content-Type";
-	printKeyValue(this->_req->_respHeader, tmp);
-	tmp = "Content-Length";
-	printKeyValue(this->_req->_respHeader, tmp);
-	tmp = "Accept-Language";
-	printKeyValue(this->_req->_respHeader, tmp);
-	tmp = "Server";
-	printKeyValue(this->_req->_respHeader, tmp);
-	tmp = "Content-Location";
-	printKeyValue(this->_req->_respHeader, tmp);
-	tmp = "Last-Modified";
-	printKeyValue(this->_req->_respHeader, tmp);
-	std::cout << "\r\n";
+	std::vector<std::string> vec = {"Date", "Allow", "Location", "Connection", "Content-Type", "Content-Length", "Accept-Language", "Server", "Content-Location", "Last-Modified"};
+	for (std::vector<std::string>::iterator it = vec.begin(); it != vec.end(); ++it)
+		printKeyValue(this->_req->_respHeader, *it);
 }
