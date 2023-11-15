@@ -5,6 +5,7 @@
 #include "ConfigFileHandle.hpp"
 #include <fstream>
 #include <sstream>
+#include <unistd.h>
 
 class HttpResponse : public Http
 {
