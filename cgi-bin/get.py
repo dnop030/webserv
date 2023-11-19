@@ -20,7 +20,6 @@ try:
 	print("Connection: " + utils.getEnvValue("CONNECTION") + "\r\n")
 	print("Content-Type: " + utils.getEnvValue("CONTENT_TYPE") + "\r\n")
 	print("Content-Length: " + len(body_field) + "\r\n")
-	print("Location: " + "http://" + utils.getEnvValue("HOSTNAME") + "/page/" + utils.getEnvValue("FILENAME") + "\r\n")
 	# utils.printHeader("Accept-Language: ", "HTTP_ACCEPT_LANGUAGE")
 	# utils.printHeader("Server: ", "SERVER_SOFTWARE")
 	# utils.printHeader("Content-Location: ", "CONTENT_LOCATION")

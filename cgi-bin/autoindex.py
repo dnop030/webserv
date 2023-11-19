@@ -32,7 +32,6 @@ try:
     print("Connection: " + utils.getEnvValue("CONNECTION") + "\r\n")
     print("Content-Type: " + utils.getEnvValue("CONTENT_TYPE") + "\r\n")
     print("Content-Length: " + len(content) + "\r\n")
-    print("Location: " + "http://" + utils.getEnvValue("HOSTNAME") + "/page/" + utils.getEnvValue("FILENAME") + "\r\n")
     print(content)
 
 except utils.InternalServerError:
