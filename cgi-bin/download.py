@@ -6,9 +6,9 @@ import utils
 try:
     #utils.parseEnv() => wait for parsing env
 	# Get the path to the file you want to send
-	dir_name = utils.getEnvValue("DIRECTORY_NAME")
+	path = utils.getEnvValue("PATH")
 	filename = utils.getEnvValue("FILE_NAME")
-	file_path = os.path.join("../upload", dir_name, filename)
+	file_path = os.path.join("../upload", path, filename)
 
 	# Set the Content-Disposition header
 	content_disposition = f'attachment; filename="{filename}"'

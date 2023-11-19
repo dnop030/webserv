@@ -7,9 +7,9 @@ import utils
 
 try:
     #utils.parseEnv() => wait for parsing env
-    dir_name = utils.getEnvValue("DIRECTORY_NAME")
+    path = utils.getEnvValue("PATH")
     filename = utils.getEnvValue("FILE_NAME")
-    file_path = os.path.join("../upload", dir_name, filename)
+    file_path = os.path.join("../upload", path, filename)
 
     # Check if the file exists
     if os.path.exists(file_path):

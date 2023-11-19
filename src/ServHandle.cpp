@@ -7,11 +7,13 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-ServHandle::ServHandle(void) {
+ServHandle::ServHandle(void)
+{
 	this->_configServ = new ConfigFileHandle();
 }
 
-ServHandle::~ServHandle(void) {
+ServHandle::~ServHandle(void)
+{
 	delete this->_configServ;
 }
 
@@ -19,32 +21,13 @@ void ServHandle::servCreate(char const *configFile)
 {
 
 	std::cout << MAG << "servCreate" << reset << std::endl;
-	// this->_configServ.readConfigFile(configFile);
 	this->_configServ->readConfigFile(configFile);
-
-	// // Debug
-	// this->_configServ->showDetailConfigFile();
-
-	// std::string	tmpStr;
-	// tmpStr = this->_configServ->getServConfigVal(0, "listen");
-	// std::cout << MAG << "[INFO]output \"listen\" 0 " << tmpStr << reset << std::endl;
-
-	// tmpStr = this->_configServ->getServConfigVal(0, "listen ");
-	// std::cout << MAG << "[INFO]output \"listen \" 0 " << tmpStr << reset << std::endl;
-	// std::cout << MAG << "[INFO]output length " << tmpStr.length() << reset << std::endl;
-
-	// // Debug End this line
-
 
 	this->showMapFd();
 
-	// need to check amount Serv config before
-	// if 0 then return
-
-	// validate server config here !!!!!!!!!!!
-
 	std::cout << MAG << "amout of serv config " << this->_configServ->getAmountServConfig() << reset << std::endl;
-	for (int i=0; i<this->_configServ->getAmountServConfig(); i++) {
+	for (int i = 0; i < this->_configServ->getAmountServConfig(); i++)
+	{
 		this->createServ(this->_configServ->getServConfigVal(i, "listen"));
 	}
 
@@ -57,18 +40,6 @@ void ServHandle::servCreate(char const *configFile)
 		exit(EXIT_FAILURE);
 	}
 
-	// // Add Fd of server into epoll instance
-	// for (int i=0; i<this->_configServ.getAmountServConfig(); i++) {
-	// 	this->_event.data.fd = this->_servFd[i];
-	// 	// event.events = EPOLLIN | EPOLLET;
-	// 	this->_event.events = EPOLLIN | EPOLLOUT;
-	// 	// event.events = EPOLLIN | EPOLLOUT | EPOLLET;
-
-	// 	this->_tmpInt = epoll_ctl (this->_epoll_fd, EPOLL_CTL_ADD, this->_servFd[i], &(this->_event));
-	// 	if (this->_tmpInt < 0) {
-	// 		std::cerr << "Failed to add server file descriptor in instance epoll of server " << i << std::endl;
-	// 	}
-	// }
 	// Add Fd of server into epoll instance
 	for (std::map<int, char>::iterator it = this->_mapFd.begin(); it != this->_mapFd.end(); it++)
 	{
@@ -122,6 +93,7 @@ void ServHandle::servStart(void)
 				// whether the package is good request or bad request
 				if (this->_event_ret[i].events & EPOLLIN)
 				{
+					std::cout << GRN << "I WANT TO SEE THS LINE HERE" << reset << std::endl;
 					std::cout << MAG << "[INFO] Found Rd on " << this->_event_ret[i].data.fd << reset << std::endl;
 					std::map<int, char>::iterator it;
 
@@ -385,41 +357,20 @@ void ServHandle::sockCliRd(int const &cliFd)
 	this->_buffRd[0] = '\0';
 	do
 	{
-		// Recv Work but no Wr Event
-		// // this->_valRd = recv(this->_infd, this->_buffRd, sizeof(this->_buffRd), 0);
-		// // this->_valRd = read(this->_infd, this->_buffRd, sizeof(this->_buffRd));
-		// this->_valRd = recv(this->_infd, this->_buffRd, BUFFPACK, 0);
-		// std::cout << "Recv " << this->_valRd << std::endl;
-		// if (this->_valRd > 0) {
-		// 	// printf("\n\n%s\n\n", this->_buffRd);
-		// 	// std::cout << this->_buffRd << std::endl;
-		// 	this->_tmpStdStr = this->_buffRd;
-		// 	this->_bufferPack += this->_tmpStdStr;
-		// 	// this->_bufferPack.append(this->_buffRd, this->_valRd);
-		// }
 
 		this->_valRd = recv(this->_infd, this->_buffRd, BUFFPACK, 0);
 		if (this->_valRd > 0)
-		{
-			// this->_tmpStdStr = this->_buffRd;
-			// this->_bufferPack.append(this->_tmpStdStr, this->_valRd);
 			this->_bufferPack.append(this->_buffRd, this->_valRd);
-		}
 	} while (this->_valRd > 0);
 	std::cout << CYN << "valRd " << this->_valRd << reset << std::endl;
-
-	// if (this->_valRd == -1) {
-	// 	// Handle error if needed
-	// 	perror("recv");
-	// }
 
 	std::cout << CYN << "Data in Package bufferPack" << reset << std::endl;
 	std::cout << CYN << this->_bufferPack << reset << std::endl
 			  << std::endl;
 
-	// Request rq(this->_bufferPack);
-	//  rq.parseRequest();
 	HttpHandle http(this->_bufferPack);
+	// If (http.getConnection() == "close")
+	//	set cliFd to cc
 
 	// if the size of receive package = 0
 	// means client send some Flag ex. FIN
@@ -466,14 +417,9 @@ void ServHandle::sockCliWr(int const &cliFd)
 
 	it = this->_httpRespose.find(cliFd);
 	if (it != this->_httpRespose.end())
-	{
-		// send(int fd, const void *buf, size_t n, int flags)
 		send(cliFd, it->second.c_str(), it->second.size(), 0);
-	}
 	else
-	{
 		std::cout << YEL << "[WARNING] Not found response for " << cliFd << reset << std::endl;
-	}
 }
 
 void ServHandle::closeSock(int fd)

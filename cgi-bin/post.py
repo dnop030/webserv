@@ -7,14 +7,13 @@ import utils
 
 try:
 	#utils.parseEnv() => wait for parsing env
-	dir_name = utils.getEnvValue("DIRECTORY_NAME")
+	path = utils.getEnvValue("PATH")
 	# Create a new directory (if it doesn't exist)
-	new_dir = "../upload/" + dir_name
-	os.makedirs(new_dir, exist_ok=True)
+	os.makedirs(path, exist_ok=True)
 
 	body = sys.stdin.read()
 	filename = utils.getEnvValue("FILE_NAME")
-	file_path = os.path.join(dir_name, filename)
+	file_path = os.path.join(path, filename)
 
 	with open(file_path, 'wb') as res_file:
 		file_path.write(body)
