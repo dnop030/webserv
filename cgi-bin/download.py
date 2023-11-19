@@ -8,7 +8,7 @@ try:
 	# Get the path to the file you want to send
 	path = utils.getEnvValue("PATH")
 	filename = utils.getEnvValue("FILE_NAME")
-	file_path = os.path.join("../upload", path, filename)
+	file_path = os.path.join(path, filename)
 
 	# Set the Content-Disposition header
 	content_disposition = f'attachment; filename="{filename}"'

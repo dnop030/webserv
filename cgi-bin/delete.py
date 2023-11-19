@@ -9,7 +9,7 @@ try:
     #utils.parseEnv() => wait for parsing env
     path = utils.getEnvValue("PATH")
     filename = utils.getEnvValue("FILE_NAME")
-    file_path = os.path.join("../upload", path, filename)
+    file_path = os.path.join(path, filename)
 
     # Check if the file exists
     if os.path.exists(file_path):
