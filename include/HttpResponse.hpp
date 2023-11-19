@@ -6,13 +6,15 @@
 #include <fstream>
 #include <sstream>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <stdio.h>
 
 class HttpResponse : public Http
 {
 	private:
 		int					_statusCode;
 		int					_checkCGI;
-		std::string 		_statusMessage;
 		std::string 		_fileResponse;
 		std::string 		_serverName;
 		std::string 		_path;
@@ -28,7 +30,12 @@ class HttpResponse : public Http
 		std::string			_config_root;
 		std::string			_config_cgi;
 		std::string			_config_cgi_path;
+		std::string			_config_cgi_ext;
+		std::string			_config_cgi_program;
 		std::vector<std::string>	_config_condition;
+		// set ENV and ARGV
+		std::string			_setArgvPath();
+		std::string			_setENVArgv(std::string const &name, std::string const &value);
 		// func check and set before send response
 		int					_checkPort();
 		int					_checkPath();

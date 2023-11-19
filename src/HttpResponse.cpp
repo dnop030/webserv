@@ -67,7 +67,7 @@ std::string	HttpResponse::_checkFile()
 
 	if (ifs.good()) {
 		std::string content((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
-		
+
 		return content;
 	} else {
 		this->_statusCode = 404;
@@ -234,6 +234,7 @@ void	HttpResponse::_setCGI()
 {
 	std::string 				tmp;
 	std::vector<std::string>	arr_cgi;
+	std::vector<std::string>	arr_cgi_program;
 
 	this->_config_cgi = (this->_config_ser > -1) ? this->_config->getServConfigVal(this->_config_ser, "location_back /cgi_bins/.py") : "";
 	if (this->_config_cgi.length() > 0) {
@@ -244,25 +245,86 @@ void	HttpResponse::_setCGI()
 				this->_checkCGI = 1;
 			if (value.substr(0, 4) == "root")
 				this->_config_cgi_path = value.substr(5, value.length() - 5);
+			if (value.substr(0, 12) == "cgi_executor") {
+				this->_config_cgi_ext = value.substr(13, value.length() - 12);
+				std::size_t found = this->_config_cgi_ext.find_last_of("/");
+				this->_config_cgi_program = this->_config_cgi_ext.substr(found + 1);
+			}
 		}
 	}
 }
 
+std::string	HttpResponse::_setENVArgv(std::string const &name, std::string const &value)
+{
+	return (name + "=" + value);
+}
+
+std::string	HttpResponse::_setArgvPath()
+{
+
+	return this->_config_cgi_path + "/get.py";
+}
+
 std::string	HttpResponse::_setResponseStream()
 {
-	std::ostringstream resStream;
-	std::string contentRes = this->_checkFile();
+	
+	// std::string			contentRes = this->_checkFile();
+	std::string			contentRes = "";
+	std::ostringstream	resStream;
 	std::map<std::string, std::string>::iterator it;
 
-	this->_setHeader("Content-Length:", std::to_string(contentRes.length()));
-	this->_setHeader("Content-Type:", "text/html");
-	this->_setHeader("Location-Header:", "TH");
+	if (this->_checkCGI) {
+		int 			n = 0;
+		int				fd[2];
+		char 			buffer[1024];
+		pid_t			pid;
+		std::string		path = this->_setArgvPath();
+		char *const		argv[] = {
+							const_cast<char *>(this->_config_cgi_program.data()), 
+							const_cast<char *>(path.data()), 
+							NULL
+						};
+		std::string		filename = this->_setENVArgv("FILENAME", this->_fileResponse);
+		std::string		statusCode = this->_setENVArgv("STATUS_CODE", std::to_string(this->_statusCode));
+		std::string		statusMessage = this->_setENVArgv("STATUS_MESSAGE", this->_status[this->_statusCode]);
+		char			*envp[] = {
+							const_cast<char *>(filename.data()),
+							const_cast<char *>(statusCode.data()),
+							const_cast<char *>(statusMessage.data()),
+							NULL
+						};
+		const char		*path_cmd = this->_config_cgi_ext.c_str();
 
-	resStream << "HTTP/1.1 " << this->_statusCode << " " << this->_status[this->_statusCode] << "\r\n";
-	for (it = this->_header.begin(); it != this->_header.end(); it++) {
-		resStream << it->first << " " << it->second << "\r\n";
-	}
-	resStream << "\r\n";
+		pipe(fd);
+		pid = fork();
+		if (pid == 0) {
+			close(fd[0]);
+			dup2(fd[1], 1);
+			close(fd[1]);
+			execve(path_cmd, argv, envp);
+		} else {
+			close(fd[1]);
+			waitpid(pid, NULL, 0);
+			contentRes = "";
+			while ((n = read(fd[0], buffer, 1024)) > 0) {
+				buffer[n] = '\0';
+				contentRes += buffer;
+			}
+			close(fd[0]);
+		}
+	} 
+	// else {
+		this->_setHeader("Content-Length:", std::to_string(contentRes.length()));
+		this->_setHeader("Content-Type:", "text/html");
+		this->_setHeader("Location-Header:", "TH");
+
+		resStream << "HTTP/1.1 " << this->_statusCode << " " << this->_status[this->_statusCode] << "\r\n";
+		for (it = this->_header.begin(); it != this->_header.end(); it++) {
+			resStream << it->first << " " << it->second << "\r\n";
+		}
+		resStream << "\r\n";
+	// }
+
 	resStream << contentRes;
 
 	return resStream.str();
