@@ -6,11 +6,13 @@ HttpResponse::HttpResponse()
 	this->_statusCode = 200;
 	this->_checkCGI = 0;
 	this->_config_cgi_path = "";
+	this->_url = "";
 	this->_status[100] = "Continue";
 	this->_status[101] = "Switching Protocols";
 	this->_status[200] = "OK";
 	this->_status[201] = "Created";
 	this->_status[202] = "Accepted";
+	this->_status[301] = "Moved Permanently";
 	this->_status[400] = "Bad Request";
 	this->_status[404] = "Not Found";
 	this->_status[405] = "Method Not Allowed";
@@ -41,6 +43,11 @@ HttpResponse	&HttpResponse::operator=(HttpResponse const &rhs)
 	return *this;
 }
 
+void	HttpResponse::setConnection(std::string const &connection)
+{
+	this->_connection = connection;
+}
+
 void	HttpResponse::setServername(std::string const &servername)
 {
 	this->_serverName = servername;
@@ -61,20 +68,14 @@ void	HttpResponse::setMethod(std::string const &method)
 	this->_method = method;
 }
 
-std::string	HttpResponse::_checkFile()
+void	HttpResponse::_checkFile()
 {
 	std::ifstream ifs(this->_fileResponse);
 
 	if (ifs.good()) {
-		std::string content((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
-
-		return content;
+		ifs.close();
 	} else {
-		this->_statusCode = 404;
-		std::ifstream t(this->_config_root + this->_fileError[this->_statusCode]);
-		std::string content((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
-		
-		return content;
+		throw(404);
 	}
 
 }
@@ -112,7 +113,7 @@ int	HttpResponse::_checkPath()
 	return this->_config_location.length();
 }
 
-void	HttpResponse::_setConfigCondition()
+void	HttpResponse::_setConfig()
 {
 	std::string condition = this->_config_location;
 	std::string delimiter = ";";
@@ -158,10 +159,9 @@ std::vector<std::string>	HttpResponse::_spiltString(std::string &str, std::strin
 
 void	HttpResponse::_checkMethod()
 {
-	std::string 				method;
+	std::string 				method = this->_setConfigCondition("allow_method");
 	std::vector<std::string>	allow_method;
 
-	method = this->_setConfigCondition("allow_method");
 	if (method != "allow_method") {
 		allow_method = this->_spiltString(method, " ");
 		for (auto value : allow_method) {
@@ -174,10 +174,9 @@ void	HttpResponse::_checkMethod()
 
 void	HttpResponse::_setRootPath()
 {
-	std::string 				path;
+	std::string 				path = this->_setConfigCondition("root");
 	std::vector<std::string>	config_path;
 
-	path = this->_setConfigCondition("root");
 	if (path.length()) {
 		config_path = this->_spiltString(path, " ");
 		this->_config_root = config_path[1];
@@ -188,10 +187,9 @@ void	HttpResponse::_setRootPath()
 
 std::string	HttpResponse::_searchIndex(std::string const &pathFile)
 {
-	std::string 				index;
+	std::string 				index = this->_setConfigCondition("index");
 	std::vector<std::string>	arr_index;
 
-	index = this->_setConfigCondition("index");
 	if (index != "index") {
 		arr_index = this->_spiltString(index, " ");
 		for (auto value : arr_index) {
@@ -215,6 +213,8 @@ void	HttpResponse::_setFileResponse(std::string const &pathFile, std::string con
 	} else {
 		this->_fileResponse = pathFile;
 	}
+
+	this->_checkFile();
 }
 
 void	HttpResponse::_setErrorPage()
@@ -261,14 +261,37 @@ std::string	HttpResponse::_setENVArgv(std::string const &name, std::string const
 
 std::string	HttpResponse::_setArgvPath()
 {
+	// do something
 
 	return this->_config_cgi_path + "/get.py";
 }
 
+void	HttpResponse::_setContentType()
+{
+	std::size_t found = this->_path.find_last_of(".");
+	std::string extension = this->_path.substr(found + 1);
+
+	if (extension == "html") {
+		this->_contentType = "text/html";
+	} else {
+		this->_contentType = "text/plain";
+	}
+}
+
+void	HttpResponse::_checkReturn()
+{
+	std::string re = this->_setConfigCondition("return");
+
+	if (re != "return") {
+		this->_url = re.substr(7, re.length() - 7);
+		throw (301);
+	}
+
+	std::cout << "check return: " << re << std::endl;
+}
+
 std::string	HttpResponse::_setResponseStream()
 {
-	
-	// std::string			contentRes = this->_checkFile();
 	std::string			contentRes = "";
 	std::ostringstream	resStream;
 	std::map<std::string, std::string>::iterator it;
@@ -287,10 +310,22 @@ std::string	HttpResponse::_setResponseStream()
 		std::string		filename = this->_setENVArgv("FILENAME", this->_fileResponse);
 		std::string		statusCode = this->_setENVArgv("STATUS_CODE", std::to_string(this->_statusCode));
 		std::string		statusMessage = this->_setENVArgv("STATUS_MESSAGE", this->_status[this->_statusCode]);
+		std::string		hostname = this->_setENVArgv("HOSTNAME", this->_serverName);
+		std::string		port = this->_setENVArgv("PORT", this->_port);
+		std::string		argvPath = this->_setENVArgv("PATH", this->_path);
+		std::string		url = this->_setENVArgv("URL", this->_url);
+		std::string		connection = this->_setENVArgv("CONNECTION", this->_connection);
+		std::string		contentType = this->_setENVArgv("CONTENTTYPE", this->_contentType);
 		char			*envp[] = {
 							const_cast<char *>(filename.data()),
 							const_cast<char *>(statusCode.data()),
 							const_cast<char *>(statusMessage.data()),
+							const_cast<char *>(hostname.data()),
+							const_cast<char *>(port.data()),
+							const_cast<char *>(argvPath.data()),
+							const_cast<char *>(connection.data()),
+							const_cast<char *>(contentType.data()),
+							const_cast<char *>(url.data()),
 							NULL
 						};
 		const char		*path_cmd = this->_config_cgi_ext.c_str();
@@ -334,18 +369,21 @@ std::string	HttpResponse::returnResponse()
 {
 	try {
 		if (this->_checkPort() > -1 && this->_checkPath()) {
-			this->_setConfigCondition();
+			this->_setConfig();
 			this->_setErrorPage();
 			this->_setCGI();
+			this->_url = "http://" + this->_serverName + ":" + this->_port + this->_path;
+			this->_checkReturn();
 			this->_checkMethod();
 			this->_setRootPath();
+			this->_setContentType();
 			this->_setFileResponse(this->_config_root + this->_path, this->_path);
 			this->_statusCode = 200;
 		} else
 			throw (404);
 	} catch (int status) {
 		this->_statusCode = status;
-		this->_fileResponse = this->_fileError[status];
+		this->_fileResponse = this->_config_root + this->_fileError[status];
 	}
 
 	return (this->_setResponseStream());

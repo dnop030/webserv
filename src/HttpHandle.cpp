@@ -19,6 +19,7 @@ HttpHandle::HttpHandle(std::string &buffer) : _statusCode(0), _buffer(buffer), _
 	this->response.setPath(this->_path);
 	this->response.setPort(this->_port);
 	this->response.setMethod(this->_method);
+	this->response.setConnection(this->_header["Connection"]);
 	this->printLine();
 }
 
