@@ -261,9 +261,18 @@ std::string	HttpResponse::_setENVArgv(std::string const &name, std::string const
 
 std::string	HttpResponse::_setArgvPath()
 {
-	// do something
+	std::string		name_cgi = "";
 
-	return this->_config_cgi_path + "/get.py";
+	if (this->_statusCode != 200)
+		name_cgi = "/error.py";
+	else if (this->_method == "GET")
+		name_cgi = "/get.py";
+	else if (this->_method == "POST")
+		name_cgi = "/post.py";
+	else if (this->_method == "DELETE")
+		name_cgi = "/delete.py";
+
+	return this->_config_cgi_path + name_cgi;
 }
 
 void	HttpResponse::_setContentType()
@@ -286,8 +295,6 @@ void	HttpResponse::_checkReturn()
 		this->_url = re.substr(7, re.length() - 7);
 		throw (301);
 	}
-
-	std::cout << "check return: " << re << std::endl;
 }
 
 std::string	HttpResponse::_setResponseStream()
