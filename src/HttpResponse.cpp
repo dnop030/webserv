@@ -271,11 +271,11 @@ void	HttpResponse::_setContentType()
 	std::size_t found = this->_path.find_last_of(".");
 	std::string extension = this->_path.substr(found + 1);
 
-	if (extension == "html") {
+	// if (extension == "html") {
 		this->_contentType = "text/html";
-	} else {
-		this->_contentType = "text/plain";
-	}
+	// } else {
+	// 	this->_contentType = "text/plain";
+	// }
 }
 
 void	HttpResponse::_checkReturn()
