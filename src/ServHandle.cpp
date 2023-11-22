@@ -25,6 +25,11 @@ void ServHandle::servCreate(char const *configFile)
 
 	this->showMapFd();
 
+	// need to check amount Serv config before
+	// if 0 then return
+
+	// validate server config here !!!!!!!!!!!
+
 	std::cout << MAG << "amout of serv config " << this->_configServ->getAmountServConfig() << reset << std::endl;
 	for (int i = 0; i < this->_configServ->getAmountServConfig(); i++)
 	{
@@ -371,6 +376,7 @@ void ServHandle::sockCliRd(int const &cliFd)
 	HttpHandle http(this->_bufferPack);
 	// If (http.getConnection() == "close")
 	//	set cliFd to cc
+	http.response.setConfig(this->_configServ);
 
 	// if the size of receive package = 0
 	// means client send some Flag ex. FIN
@@ -380,7 +386,8 @@ void ServHandle::sockCliRd(int const &cliFd)
 		// prepare the response and tie with client Fd
 		if (this->_httpRespose.find(cliFd) == this->_httpRespose.end())
 		{
-			this->_httpRespose.insert(std::pair<int, std::string>(cliFd, this->generateHttpResponse(200, "Ok", "Hello from server")));
+			this->_httpRespose.insert(std::pair<int, std::string>(cliFd, http.response.returnResponse()));
+			// this->_httpRespose.insert(std::pair<int, std::string>(cliFd, this->generateHttpResponse(200, "Ok", "Hello from server")));
 		}
 		else
 		{

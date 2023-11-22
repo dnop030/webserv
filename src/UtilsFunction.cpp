@@ -191,6 +191,8 @@ std::string currentDate(void)
 {
 	std::time_t currentTime = std::time(nullptr);
 	struct tm *localTime = std::gmtime(&currentTime);
+	std::string arr_mon[12] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+	std::string arr_day[7] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
 
 	int year;
 	std::string month;
@@ -208,46 +210,8 @@ std::string currentDate(void)
 		hour = (localTime->tm_hour + 7) % 12;
 		minute = localTime->tm_min;
 		second = localTime->tm_sec;
-
-		if (localTime->tm_mon + 1 == 1)
-			month = "Jan";
-		else if (localTime->tm_mon + 1 == 2)
-			month = "Feb";
-		else if (localTime->tm_mon + 1 == 3)
-			month = "Mar";
-		else if (localTime->tm_mon + 1 == 4)
-			month = "Apr";
-		else if (localTime->tm_mon + 1 == 5)
-			month = "May";
-		else if (localTime->tm_mon + 1 == 6)
-			month = "Jun";
-		else if (localTime->tm_mon + 1 == 7)
-			month = "Jul";
-		else if (localTime->tm_mon + 1 == 8)
-			month = "Aug";
-		else if (localTime->tm_mon + 1 == 9)
-			month = "Sep";
-		else if (localTime->tm_mon + 1 == 10)
-			month = "Oct";
-		else if (localTime->tm_mon + 1 == 11)
-			month = "Nov";
-		else if (localTime->tm_mon + 1 == 12)
-			month = "Dec";
-
-		if (localTime->tm_wday == 0)
-			w_day = "Sun";
-		else if (localTime->tm_wday == 1)
-			w_day = "Mon";
-		else if (localTime->tm_wday == 2)
-			w_day = "Tue";
-		else if (localTime->tm_wday == 3)
-			w_day = "Wed";
-		else if (localTime->tm_wday == 4)
-			w_day = "Thu";
-		else if (localTime->tm_wday == 5)
-			w_day = "Fri";
-		else if (localTime->tm_wday == 6)
-			w_day = "Sat";
+		month = arr_mon[localTime->tm_mon];
+		w_day = arr_day[localTime->tm_wday];
 	}
 	std::string res_hour;
 	std::string res_minute;

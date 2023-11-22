@@ -14,6 +14,12 @@ HttpHandle::HttpHandle(std::string &buffer) : _statusCode(0), _buffer(buffer), _
 	this->_bodyChunk = this->_req->getBodyChunk();
 	if (this->_header.find("Content-Length") != this->_header.end())
 		this->_contentLength = ft_stod(this->_header["Content-Length"]);
+	// necessary to check config file [reponse]
+	this->response.setServername(this->_hostname);
+	this->response.setPath(this->_path);
+	this->response.setPort(this->_port);
+	this->response.setMethod(this->_method);
+	this->response.setConnection(this->_header["Connection"]);
 	this->printLine();
 }
 
