@@ -348,7 +348,7 @@ std::string	HttpResponse::_setResponseStream()
 			close(fd[0]);
 		}
 	} 
-	// else {
+	else {
 		this->_setHeader("Content-Length:", std::to_string(contentRes.length()));
 		this->_setHeader("Content-Type:", "text/html");
 		this->_setHeader("Location-Header:", "TH");
@@ -358,7 +358,7 @@ std::string	HttpResponse::_setResponseStream()
 			resStream << it->first << " " << it->second << "\r\n";
 		}
 		resStream << "\r\n";
-	// }
+	}
 
 	resStream << contentRes;
 
