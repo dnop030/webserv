@@ -203,6 +203,7 @@ std::string const &ServConfigDetail::getVal(std::string const &val)
 	else
 	{
 		this->_tmpStr.clear();
+		std::cout << RED << "val is " << val << reset << std::endl;
 		std::cout << RED << "[INFO]NOT Found key:" << this->_tmpStr << reset << std::endl;
 		// return string that doesn't use
 		return (this->_tmpStr);
