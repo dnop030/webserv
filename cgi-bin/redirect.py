@@ -1,30 +1,11 @@
-#!/usr/bin/env python
-
-import os
-import cgi
-import sys
 import utils
 
 try:
-	#utils.parseEnv() => wait for parsing env
-	path = utils.getEnvValue("PATH")
-	# Create a new directory (if it doesn't exist)
-	os.makedirs(path, exist_ok=True)
-
-	body = sys.stdin.read()
-	filename = utils.getEnvValue("FILE_NAME")
-	file_path = os.path.join(path, filename)
-
-	with open(file_path, 'wb') as res_file:
-		file_path.write(body)
-		message = f"{filename} has been posted successfully."
-	print("HTTP/1.1 200 OK\r\n")
+	print("HTTP/1.1 301 Moved Permanently \r\n")
 	print("Connection: " + utils.getEnvValue("CONNECTION") + "\r\n")
 	print("Content-Type: text/plain\r\n")
-	print("Content-Length: " + str(len(message)) + "\r\n")
+	print("Location: " + "http://" + utils.getEnvValue("HOSTNAME") + ":" + utils.getEnvValue("PORT") + "/" + "\r\n")
 	print("\r\n")
-	print(message)
-
 except (utils.InternalServerError,  FileNotFoundError):
 	try:
 		with open("../page/500.html", "r") as file:
