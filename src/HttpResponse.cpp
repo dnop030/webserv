@@ -72,12 +72,10 @@ void	HttpResponse::_checkFile()
 {
 	std::ifstream ifs(this->_fileResponse);
 
-	if (ifs.good()) {
+	if (ifs.good())
 		ifs.close();
-	} else {
+	else
 		throw(404);
-	}
-
 }
 
 void	HttpResponse::setConfig(ConfigFileHandle *config)
@@ -122,6 +120,8 @@ void	HttpResponse::_setConfig()
 
 	while ((pos = condition.find(delimiter)) != std::string::npos) {
 		token = condition.substr(0, pos);
+		while(token.find(" ") == 0)
+			token.erase(0, 1);
 		this->_config_condition.push_back(token);
 		condition.erase(0, pos + delimiter.length());
 	}
@@ -149,6 +149,8 @@ std::vector<std::string>	HttpResponse::_spiltString(std::string &str, std::strin
 
 	while ((pos = str.find(delim)) != std::string::npos) {
 		token = str.substr(0, pos);
+		while(token.find(" ") == 0)
+			token.erase(0, 1);
 		arr_return.push_back(token);
 		str.erase(0, pos + delim.length());
 	}
@@ -202,7 +204,7 @@ std::string	HttpResponse::_searchIndex(std::string const &pathFile)
 			}
 		}
 	}
-
+	throw(404);
 	return pathFile;
 }
 
