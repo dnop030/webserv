@@ -5,6 +5,7 @@ HttpResponse::HttpResponse()
 	this->_config_ser = -1;
 	this->_statusCode = 200;
 	this->_checkCGI = 0;
+	this->_autoIndex = 0;
 	this->_config_cgi_path = "";
 	this->_url = "";
 	this->_status[100] = "Continue";
@@ -105,8 +106,17 @@ int	HttpResponse::_checkPath()
 	
 	this->_config_location = (this->_config_ser > -1) ? this->_config->getServConfigVal(this->_config_ser, "location " + this->_path) : "";
 
-	if (this->_config_location.length() == 0)
-		this->_config_location = (this->_config_ser > -1) ? this->_config->getServConfigVal(this->_config_ser, "location /") : "";
+	if (this->_config_location.length() == 0) {
+		std::string 				tmpPath = this->_path;
+		std::size_t 				found = tmpPath.find_last_of("/");
+		while (found != std::string::npos) {
+			tmpPath = tmpPath.substr(0, found);
+			this->_config_location = (this->_config_ser > -1) ? this->_config->getServConfigVal(this->_config_ser, "location " + tmpPath + "/") : "";
+			if (this->_config_location.length() > 0)
+				break ;
+			found = tmpPath.find_last_of("/");
+		}
+	}
 
 	return this->_config_location.length();
 }
@@ -265,8 +275,12 @@ std::string	HttpResponse::_setArgvPath()
 {
 	std::string		name_cgi = "";
 
-	if (this->_statusCode != 200)
-		name_cgi = "/error.py";
+	if (this->_statusCode != 200) {
+		if (this->_statusCode == 404 && this->_autoIndex == 1)
+			name_cgi = "/autoindex.py";
+		else
+			name_cgi = "/error.py";
+	}
 	else if (this->_method == "GET")
 		name_cgi = "/get.py";
 	else if (this->_method == "POST")
@@ -297,6 +311,14 @@ void	HttpResponse::_checkReturn()
 		this->_url = re.substr(7, re.length() - 7);
 		throw (301);
 	}
+}
+
+void	HttpResponse::_checkAutoIndex()
+{
+	std::string autoindex = this->_config->getServConfigVal(this->_config_ser, "autoindex");
+
+	if (autoindex.length() > 0 && autoindex.compare("on") == 0)
+		this->_autoIndex = 1;
 }
 
 std::string	HttpResponse::_setResponseStream()
@@ -378,6 +400,7 @@ std::string	HttpResponse::returnResponse()
 {
 	try {
 		if (this->_checkPort() > -1 && this->_checkPath()) {
+			this->_checkAutoIndex();
 			this->_setConfig();
 			this->_setErrorPage();
 			this->_setCGI();
