@@ -1,5 +1,21 @@
 #include "ServConfigDetail.hpp"
 
+void printMap(std::multimap<std::string, std::string> &map)
+{
+	std::cout << RED << "//////// print multimap /////////" << reset << std::endl;
+	std::multimap<std::string, std::string>::iterator it = map.begin();
+	while (it != map.end())
+	{
+		if (it->first == "location_back /cgi_bins/.py")
+			std::cout << YEL << "key: " << it->first << reset << std::endl;
+		else
+			std::cout << MAG << "key: " << it->first << reset << std::endl;
+		std::cout << MAG << "value: " << it->second << reset << std::endl;
+		++it;
+	}
+	std::cout << RED << "///////////////////////////////" << reset << std::endl;
+}
+
 ServConfigDetail::ServConfigDetail(void)
 {
 	// this->_amountLocation = 0;
@@ -50,6 +66,7 @@ void ServConfigDetail::saveOneBlockConfig(std::string const &block)
 			// due to location might consist of multiple line
 			tmpOneLine.clear();
 			this->storeLocationConfig(tmpBlock);
+			printMap(this->_detail);
 			// std::cout << MAG << tmpOneLine << reset << std::endl;
 
 			// delete after store
@@ -194,6 +211,10 @@ std::string const &ServConfigDetail::getVal(std::string const &val)
 	std::multimap<std::string, std::string>::iterator it;
 
 	std::cout << MAG << "[INFO]ServConfigDetail getVal" << reset << std::endl;
+	if (val == "location_back /cgi_bins/.py" && this->_detail.find(val) == this->_detail.end())
+	{
+		printMap(this->_detail);
+	}
 	it = this->_detail.find(val);
 	if (it != this->_detail.end())
 	{
@@ -275,8 +296,11 @@ void ServConfigDetail::storeLocationConfig(std::string const &str)
 	// std::cout << "val:" << val << std::endl;
 	// std::cout << "len val:" << val.size() << std::endl;
 	this->delIsCntrl(&val);
-	// std::cout << "key:" << key << MAG << "test msg" << reset << std::endl;
-	// std::cout << "val:" << val << std::endl;
+	if (key == "location_back /cgi_bins/.py")
+		std::cout << "xxxkey:" << key << MAG << "test msg" << reset << std::endl;
+	// std::cout << "xxxval:" << val << std::endl;
+	//  if (key == "location_back /cgi_bins/.py")
+	//  	exit(0);
 	this->_detail.insert(std::pair<std::string, std::string>(key, val));
 
 	// std::cout << GRN << tmpStore << reset;

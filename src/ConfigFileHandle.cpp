@@ -175,14 +175,16 @@ std::string const &ConfigFileHandle::getServConfigVal(int servNum, std::string c
 	std::map<unsigned int, ServConfigDetail *>::iterator it;
 
 	std::cout << MAG << "[INFO]configFileHandle getServConfigVal" << reset << std::endl;
-	//std::cout << GRN << "key in getServConfigVal(): " << key << reset << std::endl;
+	// std::cout << GRN << "key in getServConfigVal(): " << key << reset << std::endl;
 	it = this->_servConfig.find(servNum);
 	if (it != this->_servConfig.end())
 	{
+		std::cout << CYN << "key: " << key << reset << std::endl;
 		return (it->second->getVal(key));
 	}
 	else
 	{
+		std::cout << CYN << "key: " << key << reset << std::endl;
 		this->_tmpStr.clear();
 		return (this->_tmpStr);
 	}
