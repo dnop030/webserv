@@ -15,6 +15,7 @@ class HttpResponse : public Http
 	private:
 		int					_statusCode;
 		int					_checkCGI;
+		int					_autoIndex;
 		std::string 		_fileResponse;
 		std::string 		_serverName;
 		std::string 		_path;
@@ -44,6 +45,7 @@ class HttpResponse : public Http
 		int					_checkPath();
 		void				_setHeader(std::string const &key, std::string const &value);
 		void				_setConfig();
+		void				_checkAutoIndex();
 		void				_checkMethod();
 		void				_checkReturn();
 		void				_setRootPath();

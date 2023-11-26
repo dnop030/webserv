@@ -5,6 +5,7 @@ HttpResponse::HttpResponse()
 	this->_config_ser = -1;
 	this->_statusCode = 200;
 	this->_checkCGI = 0;
+	this->_autoIndex = 0;
 	this->_config_cgi_path = "";
 	this->_url = "";
 	this->_status[100] = "Continue";
@@ -293,8 +294,12 @@ std::string HttpResponse::_setArgvPath()
 {
 	std::string name_cgi = "";
 
-	if (this->_statusCode != 200)
-		name_cgi = "/error.py";
+	if (this->_statusCode != 200) {
+		if (this->_statusCode == 404 && this->_autoIndex == 1)
+			name_cgi = "/autoindex.py";
+		else
+			name_cgi = "/error.py";
+	}
 	else if (this->_method == "GET")
 		name_cgi = "/get.py";
 	else if (this->_method == "POST")
