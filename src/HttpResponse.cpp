@@ -103,7 +103,6 @@ int	HttpResponse::_checkPort()
 
 int	HttpResponse::_checkPath()
 {
-	
 	this->_config_location = (this->_config_ser > -1) ? this->_config->getServConfigVal(this->_config_ser, "location " + this->_path) : "";
 
 	if (this->_config_location.length() == 0) {
@@ -276,7 +275,7 @@ std::string	HttpResponse::_setArgvPath()
 	std::string		name_cgi = "";
 
 	if (this->_statusCode != 200) {
-		if (this->_statusCode == 404 && this->_autoIndex == 1)
+		if (this->_statusCode == 404 && this->_autoIndex == 1 && this->_path != "/favicon.ico")
 			name_cgi = "/autoindex.py";
 		else
 			name_cgi = "/error.py";
@@ -288,6 +287,7 @@ std::string	HttpResponse::_setArgvPath()
 	else if (this->_method == "DELETE")
 		name_cgi = "/delete.py";
 
+std::cout << "name_cgi: " << name_cgi << std::endl;
 	return this->_config_cgi_path + name_cgi;
 }
 
@@ -346,7 +346,7 @@ std::string	HttpResponse::_setResponseStream()
 		std::string		argvPath = this->_setENVArgv("PATH", this->_path);
 		std::string		url = this->_setENVArgv("URL", this->_url);
 		std::string		connection = this->_setENVArgv("CONNECTION", this->_connection);
-		std::string		contentType = this->_setENVArgv("CONTENTTYPE", this->_contentType);
+		std::string		contentType = this->_setENVArgv("CONTENT_TYPE", this->_contentType);
 		char			*envp[] = {
 							const_cast<char *>(filename.data()),
 							const_cast<char *>(statusCode.data()),
