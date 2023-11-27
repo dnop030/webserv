@@ -76,7 +76,10 @@ void HttpResponse::_checkFile()
 	if (ifs.good())
 		ifs.close();
 	else
+	{
+		std::cout << YEL << "Oh no!! get throw 404 in checkFile" << reset << std::endl;
 		throw(404);
+	}
 }
 
 void HttpResponse::setConfig(ConfigFileHandle *config)
@@ -143,6 +146,7 @@ std::string HttpResponse::_setConfigCondition(std::string const &nameCondition)
 	{
 		if (condition == value.substr(0, condition.length()))
 		{
+			std::cout << YEL << "value: " << value << reset << std::endl;
 			return value;
 		}
 	}
@@ -200,39 +204,65 @@ void HttpResponse::_setRootPath()
 	throw(500);
 }
 
+void printVector(const std::vector<std::string> &vec)
+{
+	std::vector<std::string>::const_iterator iter; // Iterator for vector
+
+	for (iter = vec.begin(); iter != vec.end(); ++iter)
+	{
+		std::cout << YEL << *iter << reset << std::endl; // Print each string element
+	}
+}
+
 std::string HttpResponse::_searchIndex(std::string const &pathFile)
 {
 	std::string index = this->_setConfigCondition("index");
 	std::vector<std::string> arr_index;
+	std::cout << YEL << "index: " << index << reset << std::endl;
 
 	if (index != "index")
 	{
+		std::cout << YEL << "In index condition" << index << reset << std::endl;
 		arr_index = this->_spiltString(index, " ");
+		// std::cout << YEL << "arr_index: " << reset << std::endl;
+		// printVector(arr_index);
 		for (auto value : arr_index)
 		{
+			std::cout << YEL << "pathFile: " << pathFile << reset << std::endl;
+			std::cout << YEL << "value: " << value << reset << std::endl;
 			if (value == "index")
 				continue;
+			std::cout << YEL << "pathFile + value: " << pathFile + value << reset << std::endl;
 			std::ifstream ifs(pathFile + value);
 			if (ifs.good())
 			{
+				std::cout << GRN << "ifs.good()" << std::endl;
 				ifs.close();
 				return (pathFile + value);
 			}
 		}
 	}
+	std::cout << YEL << "Oh no!! get throw 404 in searchIndex" << reset << std::endl;
 	throw(404);
 	return pathFile;
 }
 
 void HttpResponse::_setFileResponse(std::string const &pathFile, std::string const &rootPath)
 {
+	std::cout << GRN << "In setFileResponse" << reset << std::endl;
 	if (rootPath.compare("/") == 0)
 	{
+		std::cout << GRN << "rootPath is /" << reset << std::endl;
 		this->_fileResponse = this->_searchIndex(pathFile);
+		std::cout << GRN << "fileResponse as below" << reset << std::endl;
+		std::cout << GRN << this->_fileResponse << reset << std::endl;
 	}
 	else
 	{
+		std::cout << GRN << "rootPath: " << rootPath << reset << std::endl;
 		this->_fileResponse = pathFile;
+		std::cout << GRN << "fileResponse as below" << reset << std::endl;
+		std::cout << GRN << this->_fileResponse << reset << std::endl;
 	}
 
 	this->_checkFile();
@@ -294,7 +324,8 @@ std::string HttpResponse::_setArgvPath()
 {
 	std::string name_cgi = "";
 
-	if (this->_statusCode != 200) {
+	if (this->_statusCode != 200)
+	{
 		if (this->_statusCode == 404 && this->_autoIndex == 1)
 			name_cgi = "/autoindex.py";
 		else
@@ -335,12 +366,16 @@ void HttpResponse::_checkReturn()
 
 std::string HttpResponse::_setResponseStream()
 {
+	std::cout << GRN << "//////// In setResponseStream() ////////" << reset << std::endl;
+	std::cout << GRN << "/////////////////////" << reset << std::endl;
 	std::string contentRes = "";
 	std::ostringstream resStream;
 	std::map<std::string, std::string>::iterator it;
 
 	if (this->_checkCGI)
 	{
+		std::cout << GRN << "//////// In checkCGI ////////" << reset << std::endl;
+		std::cout << GRN << "/////////////////////" << reset << std::endl;
 		int n = 0;
 		int fd[2];
 		char buffer[1024];
@@ -372,10 +407,14 @@ std::string HttpResponse::_setResponseStream()
 			NULL};
 		const char *path_cmd = this->_config_cgi_ext.c_str();
 
+		std::cout << GRN << "//////// Before pipe and fork ////////" << reset << std::endl;
+		std::cout << GRN << "/////////////////////" << reset << std::endl;
 		pipe(fd);
 		pid = fork();
 		if (pid == 0)
 		{
+			std::cout << GRN << "//////// Pid equal 0 ////////" << reset << std::endl;
+			std::cout << GRN << "/////////////////////" << reset << std::endl;
 			close(fd[0]);
 			dup2(fd[1], 1);
 			close(fd[1]);
@@ -383,6 +422,8 @@ std::string HttpResponse::_setResponseStream()
 		}
 		else
 		{
+			std::cout << GRN << "//////// In condition to read buffer to contentRes ////////" << reset << std::endl;
+			std::cout << GRN << "/////////////////////" << reset << std::endl;
 			close(fd[1]);
 			waitpid(pid, NULL, 0);
 			contentRes = "";
@@ -407,7 +448,8 @@ std::string HttpResponse::_setResponseStream()
 		}
 		resStream << "\r\n";
 	}
-
+	std::cout << GRN << "contentRes as below" << reset << std::endl;
+	std::cout << GRN << contentRes << reset << std::endl;
 	resStream << contentRes;
 
 	return resStream.str();

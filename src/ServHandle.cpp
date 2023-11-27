@@ -386,6 +386,8 @@ void ServHandle::sockCliRd(int const &cliFd)
 		// prepare the response and tie with client Fd
 		if (this->_httpRespose.find(cliFd) == this->_httpRespose.end())
 		{
+			// std::cout << GRN << "In sockCliRd response.returnResponse as below" << std::endl;
+			// std::cout << GRN <<  << std::endl;
 			this->_httpRespose.insert(std::pair<int, std::string>(cliFd, http.response.returnResponse()));
 			// this->_httpRespose.insert(std::pair<int, std::string>(cliFd, this->generateHttpResponse(200, "Ok", "Hello from server")));
 		}
@@ -424,7 +426,12 @@ void ServHandle::sockCliWr(int const &cliFd)
 
 	it = this->_httpRespose.find(cliFd);
 	if (it != this->_httpRespose.end())
+	{
+		std::cout << GRN << "cliFD: " << cliFd << reset << std::endl;
+		std::cout << GRN << "buffer as below" << reset << std::endl;
+		std::cout << GRN << it->second.c_str() << reset << std::endl;
 		send(cliFd, it->second.c_str(), it->second.size(), 0);
+	}
 	else
 		std::cout << YEL << "[WARNING] Not found response for " << cliFd << reset << std::endl;
 }
