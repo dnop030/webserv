@@ -274,12 +274,8 @@ std::string	HttpResponse::_setArgvPath()
 {
 	std::string		name_cgi = "";
 
-	if (this->_statusCode != 200) {
-		if (this->_statusCode == 404 && this->_autoIndex == 1 && this->_path != "/favicon.ico")
-			name_cgi = "/autoindex.py";
-		else
-			name_cgi = "/error.py";
-	}
+	if (this->_statusCode == 404 && this->_autoIndex == 1 && this->_path != "/favicon.ico")
+		name_cgi = "/autoindex.py";
 	else if (this->_method == "GET")
 		name_cgi = "/get.py";
 	else if (this->_method == "POST")
@@ -287,7 +283,6 @@ std::string	HttpResponse::_setArgvPath()
 	else if (this->_method == "DELETE")
 		name_cgi = "/delete.py";
 
-std::cout << "name_cgi: " << name_cgi << std::endl;
 	return this->_config_cgi_path + name_cgi;
 }
 
