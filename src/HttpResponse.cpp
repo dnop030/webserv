@@ -422,8 +422,8 @@ std::string HttpResponse::_setResponseStream()
 		}
 		else
 		{
-			std::cout << GRN << "//////// In condition to read buffer to contentRes ////////" << reset << std::endl;
-			std::cout << GRN << "/////////////////////" << reset << std::endl;
+			// std::cout << GRN << "//////// In condition to read buffer to contentRes ////////" << reset << std::endl;
+			// std::cout << GRN << "/////////////////////" << reset << std::endl;
 			close(fd[1]);
 			waitpid(pid, NULL, 0);
 			contentRes = "";
