@@ -276,7 +276,7 @@ std::string	HttpResponse::_setArgvPath()
 
 	if (this->_statusCode == 404 && this->_autoIndex == 1 && this->_path != "/favicon.ico")
 		name_cgi = "/autoindex.py";
-	else if (this->_method == "GET")
+	else if (this->_method == "GET" || this->_statusCode != 200)
 		name_cgi = "/get.py";
 	else if (this->_method == "POST")
 		name_cgi = "/post.py";
