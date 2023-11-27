@@ -26,6 +26,16 @@ try:
 	# utils.printHeader("Last-Modified: ", "LAST_MODIFICATION")
 	print("\r\n")
 	print(body_field)
+# 	print(f"""
+# <p>FILENAME: {os.environ["FILENAME"]}</p>
+#     <p>HOSTNAME: {os.environ["HOSTNAME"]}</p>
+#     <p>PORT: {os.environ["PORT"]}</p>
+#     <p>PATH: {os.environ["PATH"]}</p>
+#     <p>CONTENTTYPE: {os.environ["CONTENTTYPE"]}</p>
+#     <p>URL: {os.environ["URL"]}</p>
+#     <p>CONNECTION: {os.environ["CONNECTION"]}</p>
+#     <p>STATUS_CODE: {os.environ["STATUS_CODE"]}</p>
+#     <p>STATUS_MESSAGE: {os.environ["STATUS_MESSAGE"]}</p>""")
 except (utils.InternalServerError,  FileNotFoundError):
 	try:
 		with open("../page/500.html", "r") as file:
