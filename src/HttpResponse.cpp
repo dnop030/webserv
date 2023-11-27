@@ -76,7 +76,7 @@ void	HttpResponse::_checkFile()
 	if (ifs.good())
 		ifs.close();
 	else
-		throw(404);
+		throw (404);
 }
 
 void	HttpResponse::setConfig(ConfigFileHandle *config)
@@ -214,8 +214,8 @@ std::string	HttpResponse::_searchIndex(std::string const &pathFile)
 			}
 		}
 	}
-	throw(404);
-	return pathFile;
+
+	throw (404);
 }
 
 void	HttpResponse::_setFileResponse(std::string const &pathFile, std::string const &rootPath)
@@ -380,6 +380,10 @@ std::string	HttpResponse::_setResponseStream()
 		}
 	} 
 	else {
+		std::ifstream ifs(this->_fileResponse);
+		std::string content((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
+		
+		contentRes = content;
 		this->_setHeader("Content-Length:", std::to_string(contentRes.length()));
 		this->_setHeader("Content-Type:", "text/html");
 		this->_setHeader("Location-Header:", "TH");
