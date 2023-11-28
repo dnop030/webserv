@@ -99,3 +99,11 @@ void HttpHandle::printResponseHeader(void)
 	for (std::vector<std::string>::iterator it = vec.begin(); it != vec.end(); ++it)
 		printKeyValue(this->_req->_respHeader, *it);
 }
+
+std::string HttpHandle::getConnection()
+{
+	if (this->_header.find("Connection") == this->_header.end())
+		return ("keep-alive");
+	else
+		return (this->_header["Connection"]);
+}

@@ -28,62 +28,66 @@
 #include "unistd.h"
 
 #include "ConfigFileHandle.hpp"
+#include "HttpHandle.hpp"
 
 #define MAXEVENTS 128
 #define BUFFPACK 2048
 
 class ServHandle
 {
-	public:
-		ServHandle(void);
-		~ServHandle(void);
+public:
+	ServHandle(void);
+	~ServHandle(void);
 
-		void	servCreate(char const * configFile);
-		void	servStart(void);
-		void	servStop(void);
+	void servCreate(char const *configFile);
+	void servStart(void);
+	void servStop(void);
 
-	private:
-		ServHandle(ServHandle const & r);
-		ServHandle &operator=(ServHandle const & r);
+private:
+	ServHandle(ServHandle const &r);
+	ServHandle &operator=(ServHandle const &r);
 
-		void	createServ(std::string const & config);
-		void	showMapFd(void);
+	void createServ(std::string const &config);
+	void showMapFd(void);
 
-		void	sockServRd(int const & servFd);
-		void	sockServWr(int const & servFd);
-		void	sockCliRd(int const & cliFd);
-		void	sockCliWr(int const & cliFd);
+	void sockServRd(int const &servFd);
+	void sockServWr(int const &servFd);
+	void sockCliRd(int const &cliFd);
+	void sockCliWr(int const &cliFd);
 
-		void	closeSock(int fd);
+	void closeSock(int fd);
 
-		std::string	generateHttpResponse(int statusCode, std::string const & statusMessage, std::string const & content);
+	std::string generateHttpResponse(int statusCode, std::string const &statusMessage, std::string const &content);
 
-		bool						_servRunning;
+	void ConnectionHandle(HttpHandle &http, int const &cliFd);
+	void ConnectionClose(void);
 
-		// ConfigFileHandle			_configServ;
-		ConfigFileHandle			*_configServ;
+	bool _servRunning;
 
-		// using only when create socket server
-		std::map<int, char>			_mapFd;
+	// ConfigFileHandle			_configServ;
+	ConfigFileHandle *_configServ;
 
-		struct sockaddr_in			_address;
-		int							_fd;
+	// using only when create socket server
+	std::map<int, std::string> _mapFd;
 
-		int							_epoll_fd;
-		struct epoll_event			_event;
-		struct epoll_event			*_event_ret;
+	struct sockaddr_in _address;
+	int _fd;
 
-		struct sockaddr				_inAddr;
-		socklen_t					_inLen;
-		int							_infd;
-		char						_buffRd[BUFFPACK];
-		std::string					_bufferPack;
-		int							_valRd;
-		std::string					_bufferSend;
-		std::map<int, std::string>	_httpRespose;
+	int _epoll_fd;
+	struct epoll_event _event;
+	struct epoll_event *_event_ret;
 
-		int							_tmpInt;
-		std::string					_tmpStdStr;
+	struct sockaddr _inAddr;
+	socklen_t _inLen;
+	int _infd;
+	char _buffRd[BUFFPACK];
+	std::string _bufferPack;
+	int _valRd;
+	std::string _bufferSend;
+	std::map<int, std::string> _httpRespose;
+
+	int _tmpInt;
+	std::string _tmpStdStr;
 };
 
 #endif
