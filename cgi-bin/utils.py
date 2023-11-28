@@ -24,3 +24,10 @@ def parseEnv(input):
 		if env_var:
 			key, value = env_var.split("=")
 			os.environ[key] = value
+
+def printHeaderBody(dic_header, body, status_code, status_message):
+	print(f"HTTP/1.1 {status_code} {status_message}\r")
+	for k, v in dic_header.items():
+		print(f"{k}: {v}\r")
+	print("\r")
+	print(body)
