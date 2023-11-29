@@ -10,7 +10,7 @@ def generate_autoindex(path):
 				<title>AutoIndex</title>
 			</head>
 			<body>
-				<h1>Index of {path}</h1>
+				<h1>Auto index</h1>
 			<ul>"""
 
 	try:
