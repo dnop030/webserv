@@ -49,6 +49,11 @@ void	HttpResponse::setConnection(std::string const &connection)
 	this->_connection = connection;
 }
 
+void	HttpResponse::setBody(std::string const &body)
+{
+	this->_body = body;
+}
+
 void	HttpResponse::setServername(std::string const &servername)
 {
 	this->_serverName = servername;
@@ -274,14 +279,14 @@ std::string	HttpResponse::_setArgvPath()
 {
 	std::string		name_cgi = "";
 
-	if (this->_statusCode == 404 && this->_autoIndex == 1 && this->_path != "/favicon.ico")
+	if (this->_method == "GET" && this->_statusCode == 404 && this->_autoIndex == 1 && this->_path != "/favicon.ico")
 		name_cgi = "/autoindex.py";
-	else if (this->_method == "GET" || this->_statusCode != 200)
-		name_cgi = "/get.py";
-	else if (this->_method == "POST")
+	else if (this->_method == "POST" && this->_statusCode != 405)
 		name_cgi = "/post.py";
 	else if (this->_method == "DELETE")
 		name_cgi = "/delete.py";
+	else if (this->_method == "GET" || this->_statusCode != 200)
+		name_cgi = "/get.py";
 
 	return this->_config_cgi_path + name_cgi;
 }
@@ -346,6 +351,12 @@ std::string	HttpResponse::_setResponseStream()
 		std::string		url = this->_setENVArgv("URL", this->_url);
 		std::string		connection = this->_setENVArgv("CONNECTION", this->_connection);
 		std::string		contentType = this->_setENVArgv("CONTENT_TYPE", this->_contentType);
+		std::string		body = this->_setENVArgv("BODY", this->_body);
+std::cout << "method: " << this->_method << std::endl;
+std::cout << "statusCode: " << this->_statusCode << std::endl;
+std::cout << "path: " << path << std::endl;
+std::cout << "root_path: " << this->_config_root << std::endl;
+std::cout << "body: " << this->_body << std::endl;
 		char			*envp[] = {
 							const_cast<char *>(filename.data()),
 							const_cast<char *>(statusCode.data()),
@@ -357,6 +368,7 @@ std::string	HttpResponse::_setResponseStream()
 							const_cast<char *>(contentType.data()),
 							const_cast<char *>(url.data()),
 							const_cast<char *>(root_path.data()),
+							const_cast<char *>(body.data()),
 							NULL
 						};
 		const char		*path_cmd = this->_config_cgi_ext.c_str();
@@ -415,8 +427,10 @@ std::string	HttpResponse::returnResponse()
 			this->_setContentType();
 			this->_setFileResponse(this->_config_root + this->_path, this->_path);
 			this->_statusCode = 200;
-		} else
+		} else {
+std::cout << "check port" << std::endl;
 			throw (404);
+		}
 	} catch (int status) {
 		this->_statusCode = status;
 		this->_fileResponse = this->_config_root + this->_fileError[status];

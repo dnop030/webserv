@@ -6,6 +6,7 @@ import utils
 try:
 	with open(utils.getEnvValue("FILENAME"), "r") as file:
 		body_field = file.read()
+		file.close()
 	dic_header = {
 		"Connection" : utils.getEnvValue("CONNECTION"),
 		"Content-Type" : utils.getEnvValue("CONTENT_TYPE"),
@@ -15,6 +16,7 @@ try:
 except (utils.InternalServerError,  FileNotFoundError):
 	with open("./page/error/500.html", "r") as file:
 		err_page = file.read()
+		file.close()
 	dic_header = {
 		"Connection" : utils.getEnvValue("CONNECTION"),
 		"Content-Type" : utils.getEnvValue("CONTENT_TYPE"),
