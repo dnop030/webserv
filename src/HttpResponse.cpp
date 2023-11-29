@@ -294,7 +294,10 @@ void	HttpResponse::_setContentType()
 	if (extension == "/" || extension == "html") {
 		this->_contentType = "text/html";
 	} else {
-		this->_contentType = "text/plain";
+		if (this->_autoIndex == 1)
+			this->_contentType = "text/html";
+		else
+			this->_contentType = "text/plain";
 	}
 }
 
@@ -339,6 +342,7 @@ std::string	HttpResponse::_setResponseStream()
 		std::string		hostname = this->_setENVArgv("HOSTNAME", this->_serverName);
 		std::string		port = this->_setENVArgv("PORT", this->_port);
 		std::string		argvPath = this->_setENVArgv("PATH", this->_path);
+		std::string		root_path = this->_setENVArgv("ROOT_PATH", this->_config_root);
 		std::string		url = this->_setENVArgv("URL", this->_url);
 		std::string		connection = this->_setENVArgv("CONNECTION", this->_connection);
 		std::string		contentType = this->_setENVArgv("CONTENT_TYPE", this->_contentType);
@@ -352,6 +356,7 @@ std::string	HttpResponse::_setResponseStream()
 							const_cast<char *>(connection.data()),
 							const_cast<char *>(contentType.data()),
 							const_cast<char *>(url.data()),
+							const_cast<char *>(root_path.data()),
 							NULL
 						};
 		const char		*path_cmd = this->_config_cgi_ext.c_str();
