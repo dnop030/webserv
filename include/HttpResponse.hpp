@@ -25,6 +25,7 @@ class HttpResponse : public Http
 		std::string			_connection;
 		std::string			_url;
 		std::string			_body;
+		std::string			_filenameDelete;
 		ConfigFileHandle	*_config;
 		std::map<int, std::string>			_status;
 		std::map<int, std::string>			_fileError;

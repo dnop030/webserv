@@ -8,6 +8,7 @@ HttpResponse::HttpResponse()
 	this->_autoIndex = 0;
 	this->_config_cgi_path = "";
 	this->_url = "";
+	this->_filenameDelete = "";
 	this->_status[100] = "Continue";
 	this->_status[101] = "Switching Protocols";
 	this->_status[200] = "OK";
@@ -191,11 +192,18 @@ void	HttpResponse::_checkMethod()
 void	HttpResponse::_setRootPath()
 {
 	std::string 				path = this->_setConfigCondition("root");
+	std::string 				tmp;
 	std::vector<std::string>	config_path;
+	std::vector<std::string>	filename_delete;
 
 	if (path.length()) {
 		config_path = this->_spiltString(path, " ");
 		this->_config_root = config_path[1];
+		if (this->_method == "DELETE") {
+			tmp = this->_path;
+			filename_delete = this->_spiltString(tmp, "/");
+			this->_filenameDelete = filename_delete[filename_delete.size() - 1];
+		}
 		return ;
 	}
 	throw(500);
@@ -352,10 +360,14 @@ std::string	HttpResponse::_setResponseStream()
 		std::string		connection = this->_setENVArgv("CONNECTION", this->_connection);
 		std::string		contentType = this->_setENVArgv("CONTENT_TYPE", this->_contentType);
 		std::string		body = this->_setENVArgv("BODY", this->_body);
+		std::string		filenameDelete = this->_setENVArgv("FILENAME_DELETE", this->_filenameDelete);
 std::cout << "method: " << this->_method << std::endl;
 std::cout << "statusCode: " << this->_statusCode << std::endl;
 std::cout << "path: " << path << std::endl;
 std::cout << "root_path: " << this->_config_root << std::endl;
+std::cout << "url: " << this->_url << std::endl;
+std::cout << "argvPath: " << this->_path << std::endl;
+std::cout << "filenameDelete: " << this->_filenameDelete << std::endl;
 std::cout << "body: " << this->_body << std::endl;
 		char			*envp[] = {
 							const_cast<char *>(filename.data()),
@@ -369,6 +381,7 @@ std::cout << "body: " << this->_body << std::endl;
 							const_cast<char *>(url.data()),
 							const_cast<char *>(root_path.data()),
 							const_cast<char *>(body.data()),
+							const_cast<char *>(filenameDelete.data()),
 							NULL
 						};
 		const char		*path_cmd = this->_config_cgi_ext.c_str();
