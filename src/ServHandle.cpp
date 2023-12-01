@@ -137,11 +137,12 @@ void ServHandle::servStart(void)
 						std::cout << RED << "[ERROR] fake fd num " << this->_event_ret[i].data.fd << reset << std::endl;
 					}
 
-					if (this->_event_ret)
-						std::cout << std::endl
-								  << MAG << "[INFO]event flag " << this->_event_ret[i].events << " on " << this->_event_ret[i].data.fd << " fd after Rd" << reset << std::endl;
+					// if (this->_event_ret)
+					std::cout << std::endl
+							  << MAG << "[INFO]event flag " << this->_event_ret[i].events << " on " << this->_event_ret[i].data.fd << " fd after Rd" << reset << std::endl;
 				}
-				if (this->_event_ret && (this->_event_ret[i].events & EPOLLOUT) && (this->_httpRespose.size() > 0))
+				// if (this->_event_ret && (this->_event_ret[i].events & EPOLLOUT) && (this->_httpRespose.size() > 0))
+				if ((this->_event_ret[i].events & EPOLLOUT) && (this->_httpRespose.size() > 0))
 				{
 					std::cout << MAG << "[INFO] Found Wr on " << this->_event_ret[i].data.fd << reset << std::endl;
 					std::map<int, std::string>::iterator it;
