@@ -219,12 +219,12 @@ void ServHandle::servStop(void)
 		perror("close when Server Stop ");
 	}
 
-	// if (this->_event_ret != NULL)
-	// {
-	// 	free(this->_event_ret);
-	// 	this->_event_ret = NULL;
-	// }
-	free(this->_event_ret);
+	if (this->_event_ret != NULL)
+	{
+		free(this->_event_ret);
+		this->_event_ret = NULL;
+	}
+	// free(this->_event_ret);
 
 	this->_servRunning = false;
 }

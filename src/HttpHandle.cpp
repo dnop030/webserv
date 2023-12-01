@@ -60,9 +60,9 @@ void HttpHandle::printLine(void)
 	std::cout << "Method: " << this->_method << std::endl;
 	std::cout << "<<<<<<<<< Header as below >>>>>>>>>>" << std::endl;
 	this->_req->printMap(this->_header);
-	std::cout << "<<<<<<<<< Body as below >>>>>>>>>>\n"
+	std::cout << "x<<<<<<<<< Body as below >>>>>>>>>>\n"
 			  << this->_body << std::endl;
-	std::cout << "\n<<<<<<<<< Body in chunk as below >>>>>>>>>>" << std::endl;
+	std::cout << "<<<<<<<<< Body in chunk as below >>>>>>>>>>" << std::endl;
 	for (std::vector<std::string>::iterator it = this->_bodyChunk.begin(); it != this->_bodyChunk.end(); ++it)
 		std::cout << *it << "\n\nnewline\n"
 				  << std::endl;

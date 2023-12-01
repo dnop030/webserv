@@ -567,6 +567,7 @@ void Request::parseBody(void)
 	if (this->_method != "POST")
 		return;
 	FormData form(*this);
+	this->_body = form.getPureBody(this->_body);
 	if (this->_statusCode == 400)
 		throw BadRequest();
 	if (!this->_body.empty() && this->_header.find("Content-Length") != this->_header.end())
