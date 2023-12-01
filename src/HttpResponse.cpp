@@ -76,10 +76,7 @@ void HttpResponse::_checkFile()
 	if (ifs.good())
 		ifs.close();
 	else
-	{
-		std::cout << YEL << "Oh no!! get throw 404 in checkFile" << reset << std::endl;
-		throw(404);
-	}
+		throw (404);
 }
 
 void HttpResponse::setConfig(ConfigFileHandle *config)
@@ -108,7 +105,6 @@ int HttpResponse::_checkPort()
 
 int HttpResponse::_checkPath()
 {
-
 	this->_config_location = (this->_config_ser > -1) ? this->_config->getServConfigVal(this->_config_ser, "location " + this->_path) : "";
 
 	// std::cout << RED << "this->_config_ser: " << this->_config_ser << reset << std::endl;
@@ -242,9 +238,8 @@ std::string HttpResponse::_searchIndex(std::string const &pathFile)
 			}
 		}
 	}
-	std::cout << YEL << "Oh no!! get throw 404 in searchIndex" << reset << std::endl;
-	throw(404);
-	return pathFile;
+
+	throw (404);
 }
 
 void HttpResponse::_setFileResponse(std::string const &pathFile, std::string const &rootPath)
@@ -324,14 +319,9 @@ std::string HttpResponse::_setArgvPath()
 {
 	std::string name_cgi = "";
 
-	if (this->_statusCode != 200)
-	{
-		if (this->_statusCode == 404 && this->_autoIndex == 1)
-			name_cgi = "/autoindex.py";
-		else
-			name_cgi = "/error.py";
-	}
-	else if (this->_method == "GET")
+	if (this->_statusCode == 404 && this->_autoIndex == 1 && this->_path != "/favicon.ico")
+		name_cgi = "/autoindex.py";
+	else if (this->_method == "GET" || this->_statusCode != 200)
 		name_cgi = "/get.py";
 	else if (this->_method == "POST")
 		name_cgi = "/post.py";
@@ -346,11 +336,11 @@ void HttpResponse::_setContentType()
 	std::size_t found = this->_path.find_last_of(".");
 	std::string extension = this->_path.substr(found + 1);
 
-	// if (extension == "html") {
-	this->_contentType = "text/html";
-	// } else {
-	// 	this->_contentType = "text/plain";
-	// }
+	if (extension == "/" || extension == "html") {
+		this->_contentType = "text/html";
+	} else {
+		this->_contentType = "text/plain";
+	}
 }
 
 void HttpResponse::_checkReturn()
@@ -372,43 +362,40 @@ std::string HttpResponse::_setResponseStream()
 	std::ostringstream resStream;
 	std::map<std::string, std::string>::iterator it;
 
-	if (this->_checkCGI)
-	{
-		std::cout << GRN << "//////// In checkCGI ////////" << reset << std::endl;
-		std::cout << GRN << "/////////////////////" << reset << std::endl;
-		int n = 0;
-		int fd[2];
-		char buffer[1024];
-		pid_t pid;
-		std::string path = this->_setArgvPath();
-		char *const argv[] = {
-			const_cast<char *>(this->_config_cgi_program.data()),
-			const_cast<char *>(path.data()),
-			NULL};
-		std::string filename = this->_setENVArgv("FILENAME", this->_fileResponse);
-		std::string statusCode = this->_setENVArgv("STATUS_CODE", std::to_string(this->_statusCode));
-		std::string statusMessage = this->_setENVArgv("STATUS_MESSAGE", this->_status[this->_statusCode]);
-		std::string hostname = this->_setENVArgv("HOSTNAME", this->_serverName);
-		std::string port = this->_setENVArgv("PORT", this->_port);
-		std::string argvPath = this->_setENVArgv("PATH", this->_path);
-		std::string url = this->_setENVArgv("URL", this->_url);
-		std::string connection = this->_setENVArgv("CONNECTION", this->_connection);
-		std::string contentType = this->_setENVArgv("CONTENTTYPE", this->_contentType);
-		char *envp[] = {
-			const_cast<char *>(filename.data()),
-			const_cast<char *>(statusCode.data()),
-			const_cast<char *>(statusMessage.data()),
-			const_cast<char *>(hostname.data()),
-			const_cast<char *>(port.data()),
-			const_cast<char *>(argvPath.data()),
-			const_cast<char *>(connection.data()),
-			const_cast<char *>(contentType.data()),
-			const_cast<char *>(url.data()),
-			NULL};
-		const char *path_cmd = this->_config_cgi_ext.c_str();
+	if (this->_checkCGI) {
+		int 			n = 0;
+		int				fd[2];
+		char 			buffer[1024];
+		pid_t			pid;
+		std::string		path = this->_setArgvPath();
+		char *const		argv[] = {
+							const_cast<char *>(this->_config_cgi_program.data()),
+							const_cast<char *>(path.data()),
+							NULL
+						};
+		std::string		filename = this->_setENVArgv("FILENAME", this->_fileResponse);
+		std::string		statusCode = this->_setENVArgv("STATUS_CODE", std::to_string(this->_statusCode));
+		std::string		statusMessage = this->_setENVArgv("STATUS_MESSAGE", this->_status[this->_statusCode]);
+		std::string		hostname = this->_setENVArgv("HOSTNAME", this->_serverName);
+		std::string		port = this->_setENVArgv("PORT", this->_port);
+		std::string		argvPath = this->_setENVArgv("PATH", this->_path);
+		std::string		url = this->_setENVArgv("URL", this->_url);
+		std::string		connection = this->_setENVArgv("CONNECTION", this->_connection);
+		std::string		contentType = this->_setENVArgv("CONTENT_TYPE", this->_contentType);
+		char			*envp[] = {
+							const_cast<char *>(filename.data()),
+							const_cast<char *>(statusCode.data()),
+							const_cast<char *>(statusMessage.data()),
+							const_cast<char *>(hostname.data()),
+							const_cast<char *>(port.data()),
+							const_cast<char *>(argvPath.data()),
+							const_cast<char *>(connection.data()),
+							const_cast<char *>(contentType.data()),
+							const_cast<char *>(url.data()),
+							NULL
+						};
+		const char		*path_cmd = this->_config_cgi_ext.c_str();
 
-		std::cout << GRN << "//////// Before pipe and fork ////////" << reset << std::endl;
-		std::cout << GRN << "/////////////////////" << reset << std::endl;
 		pipe(fd);
 		pid = fork();
 		if (pid == 0)
@@ -435,8 +422,11 @@ std::string HttpResponse::_setResponseStream()
 			close(fd[0]);
 		}
 	}
-	else
-	{
+	else {
+		std::ifstream ifs(this->_fileResponse);
+		std::string content((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
+
+		contentRes = content;
 		this->_setHeader("Content-Length:", std::to_string(contentRes.length()));
 		this->_setHeader("Content-Type:", "text/html");
 		this->_setHeader("Location-Header:", "TH");

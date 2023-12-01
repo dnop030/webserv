@@ -46,7 +46,7 @@ void ServHandle::servCreate(char const *configFile)
 	}
 
 	// Add Fd of server into epoll instance
-	for (std::map<int, char>::iterator it = this->_mapFd.begin(); it != this->_mapFd.end(); it++)
+	for (std::map<int, std::string>::iterator it = this->_mapFd.begin(); it != this->_mapFd.end(); it++)
 	{
 		this->_event.data.fd = it->first;
 		this->_event.events = EPOLLIN | EPOLLOUT;
@@ -100,7 +100,7 @@ void ServHandle::servStart(void)
 				{
 					std::cout << GRN << "I WANT TO SEE THS LINE HERE" << reset << std::endl;
 					std::cout << MAG << "[INFO] Found Rd on " << this->_event_ret[i].data.fd << reset << std::endl;
-					std::map<int, char>::iterator it;
+					std::map<int, std::string>::iterator it;
 
 					it = this->_mapFd.find(this->_event_ret[i].data.fd);
 					if (it != this->_mapFd.end())
@@ -108,7 +108,7 @@ void ServHandle::servStart(void)
 
 						// cannot using keyword after actioun Rd
 						// Due to every Rd packages
-						if (it->second == 's')
+						if (it->second == "s")
 						{
 							// go to server Rd Accept
 							this->sockServRd(it->first);
@@ -137,13 +137,14 @@ void ServHandle::servStart(void)
 						std::cout << RED << "[ERROR] fake fd num " << this->_event_ret[i].data.fd << reset << std::endl;
 					}
 
-					std::cout << std::endl
-							  << MAG << "[INFO]event flag " << this->_event_ret[i].events << " on " << this->_event_ret[i].data.fd << " fd after Rd" << reset << std::endl;
+					if (this->_event_ret)
+						std::cout << std::endl
+								  << MAG << "[INFO]event flag " << this->_event_ret[i].events << " on " << this->_event_ret[i].data.fd << " fd after Rd" << reset << std::endl;
 				}
-				if ((this->_event_ret[i].events & EPOLLOUT) && (this->_httpRespose.size() > 0))
+				if (this->_event_ret && (this->_event_ret[i].events & EPOLLOUT) && (this->_httpRespose.size() > 0))
 				{
 					std::cout << MAG << "[INFO] Found Wr on " << this->_event_ret[i].data.fd << reset << std::endl;
-					std::map<int, char>::iterator it;
+					std::map<int, std::string>::iterator it;
 
 					it = this->_mapFd.find(this->_event_ret[i].data.fd);
 					std::cout << std::endl
@@ -152,7 +153,7 @@ void ServHandle::servStart(void)
 					{
 						std::cout << std::endl
 								  << YEL << "Fd Bef Wr is " << it->first << std::endl;
-						if (it->second == 's')
+						if (it->second == "s")
 						{
 							// go to server Wr What???
 							this->sockServWr(it->first);
@@ -204,7 +205,7 @@ void ServHandle::servStart(void)
 void ServHandle::servStop(void)
 {
 
-	std::map<int, char>::iterator it;
+	std::map<int, std::string>::iterator it;
 
 	std::cout << MAG << "[INFO] Server stop" << reset << std::endl;
 	while (this->_mapFd.size() != 0)
@@ -219,12 +220,12 @@ void ServHandle::servStop(void)
 		perror("close when Server Stop ");
 	}
 
-	// if (this->_event_ret != NULL)
-	// {
-	// 	free(this->_event_ret);
-	// 	this->_event_ret = NULL;
-	// }
-	free(this->_event_ret);
+	if (this->_event_ret != NULL)
+	{
+		free(this->_event_ret);
+		this->_event_ret = NULL;
+	}
+	// free(this->_event_ret);
 
 	this->_servRunning = false;
 }
@@ -234,7 +235,7 @@ void ServHandle::createServ(std::string const &config)
 
 	int opt = 1;
 
-	std::map<int, char>::iterator it = this->_mapFd.begin();
+	std::map<int, std::string>::iterator it = this->_mapFd.begin();
 
 	this->_address.sin_family = AF_INET;
 	this->_address.sin_addr.s_addr = INADDR_ANY;
@@ -271,7 +272,7 @@ void ServHandle::createServ(std::string const &config)
 	it = this->_mapFd.find(this->_fd);
 	if (it == this->_mapFd.end())
 	{
-		this->_mapFd.insert(std::pair<int, char>(this->_fd, 's'));
+		this->_mapFd.insert(std::pair<int, std::string>(this->_fd, "s"));
 	}
 	else
 	{
@@ -282,7 +283,7 @@ void ServHandle::createServ(std::string const &config)
 
 void ServHandle::showMapFd(void)
 {
-	std::map<int, char>::iterator it = this->_mapFd.begin();
+	std::map<int, std::string>::iterator it = this->_mapFd.begin();
 
 	std::cout << std::endl
 			  << "Show Map Fd" << std::endl;
@@ -298,7 +299,7 @@ void ServHandle::showMapFd(void)
 void ServHandle::sockServRd(int const &servFd)
 {
 
-	std::map<int, char>::iterator it;
+	std::map<int, std::string>::iterator it;
 	this->_infd = accept(servFd, NULL, NULL);
 	if (this->_infd == -1)
 	{
@@ -338,7 +339,7 @@ void ServHandle::sockServRd(int const &servFd)
 	it = this->_mapFd.find(this->_infd);
 	if (it == this->_mapFd.end())
 	{
-		this->_mapFd.insert(std::pair<int, char>(this->_infd, 'c'));
+		this->_mapFd.insert(std::pair<int, std::string>(this->_infd, "c"));
 	}
 	else
 	{
@@ -374,8 +375,7 @@ void ServHandle::sockCliRd(int const &cliFd)
 			  << std::endl;
 
 	HttpHandle http(this->_bufferPack);
-	// If (http.getConnection() == "close")
-	//	set cliFd to cc
+	this->ConnectionHandle(http, cliFd);
 	http.response.setConfig(this->_configServ);
 
 	// if the size of receive package = 0
@@ -431,6 +431,7 @@ void ServHandle::sockCliWr(int const &cliFd)
 		std::cout << GRN << "buffer as below" << reset << std::endl;
 		std::cout << GRN << it->second.c_str() << reset << std::endl;
 		send(cliFd, it->second.c_str(), it->second.size(), 0);
+		this->ConnectionClose();
 	}
 	else
 		std::cout << YEL << "[WARNING] Not found response for " << cliFd << reset << std::endl;
@@ -452,7 +453,7 @@ void ServHandle::closeSock(int fd)
 	}
 
 	// clear fd _mapFd
-	std::map<int, char>::iterator it = this->_mapFd.find(fd);
+	std::map<int, std::string>::iterator it = this->_mapFd.find(fd);
 	this->_tmpInt = it->first;
 	if (it != this->_mapFd.end())
 	{
@@ -491,4 +492,38 @@ std::string ServHandle::generateHttpResponse(int statusCode, std::string const &
 	responseStream << content;
 
 	return responseStream.str();
+}
+
+void ServHandle::ConnectionHandle(HttpHandle &http, int const &cliFd)
+{
+	// if (this->_mapFd.find(cliFd) != this->_mapFd.end())
+	// {
+	// 	std::cout << "Show fd value" << std::endl;
+	// 	std::cout << cliFd << " " << this->_mapFd[cliFd] << std::endl;
+	// }
+	if (http.getConnection() == "close")
+	{
+		//	set cliFd to cc
+		if (this->_mapFd.find(cliFd) != this->_mapFd.end())
+			this->_mapFd[cliFd] = "cc";
+		std::cout << "Show fd value" << std::endl;
+		std::cout << cliFd << " " << this->_mapFd[cliFd] << std::endl;
+		std::cout << RED << "Connection is closed!!!!" << reset << std::endl;
+	}
+	else
+		std::cout << GRN << "Connection is alive!!!!" << reset << std::endl;
+}
+
+void ServHandle::ConnectionClose(void)
+{
+	std::map<int, std::string>::iterator it = this->_mapFd.begin();
+
+	while (it != this->_mapFd.end())
+	{
+		if (it->second == "cc")
+			this->closeSock(it->first);
+		it++;
+	}
+	std::cout << GRN << "Show MapFd in ConnectionClose()" << reset << std::endl;
+	this->showMapFd();
 }

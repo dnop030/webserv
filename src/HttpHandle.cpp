@@ -60,9 +60,9 @@ void HttpHandle::printLine(void)
 	std::cout << "Method: " << this->_method << std::endl;
 	std::cout << "<<<<<<<<< Header as below >>>>>>>>>>" << std::endl;
 	this->_req->printMap(this->_header);
-	std::cout << "<<<<<<<<< Body as below >>>>>>>>>>\n"
+	std::cout << "x<<<<<<<<< Body as below >>>>>>>>>>\n"
 			  << this->_body << std::endl;
-	std::cout << "\n<<<<<<<<< Body in chunk as below >>>>>>>>>>" << std::endl;
+	std::cout << "<<<<<<<<< Body in chunk as below >>>>>>>>>>" << std::endl;
 	for (std::vector<std::string>::iterator it = this->_bodyChunk.begin(); it != this->_bodyChunk.end(); ++it)
 		std::cout << *it << "\n\nnewline\n"
 				  << std::endl;
@@ -98,4 +98,12 @@ void HttpHandle::printResponseHeader(void)
 	std::vector<std::string> vec = {"Date", "Allow", "Location", "Connection", "Content-Type", "Content-Length", "Accept-Language", "Server", "Content-Location", "Last-Modified"};
 	for (std::vector<std::string>::iterator it = vec.begin(); it != vec.end(); ++it)
 		printKeyValue(this->_req->_respHeader, *it);
+}
+
+std::string HttpHandle::getConnection()
+{
+	if (this->_header.find("Connection") == this->_header.end())
+		return ("keep-alive");
+	else
+		return (this->_header["Connection"]);
 }
