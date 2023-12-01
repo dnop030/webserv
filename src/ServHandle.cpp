@@ -154,6 +154,9 @@ void	ServHandle::servStart(void) {
 						else {
 							// go to Wr Response
 							this->sockCliWr(it->first);
+
+
+
 							std::cout << std::endl << YEL << "End sockCliWr" << reset << std::endl;
 							// continue;
 						}
@@ -163,6 +166,7 @@ void	ServHandle::servStart(void) {
 						// forget to del response after Wr ?????????????????????????????????????
 						std::map<int, std::string>::iterator	itHttpResponse = this->_httpRespose.find(it->first);
 						if (itHttpResponse != this->_httpRespose.end()) {
+							// debug msg
 							std::cout << YEL << "Del Response" << std::endl << itHttpResponse->second << reset << std::endl << std::endl;
 							this->_httpRespose.erase(itHttpResponse);
 						}
@@ -342,6 +346,7 @@ void	ServHandle::sockCliRd(int const & cliFd) {
 	// 	perror("recv");
 	// }
 
+	// perhaps debug msg
 	std::cout << CYN << "Data in Package bufferPack" << reset << std::endl;
 	std::cout << CYN << this->_bufferPack << reset << std::endl << std::endl;
 
@@ -361,17 +366,17 @@ void	ServHandle::sockCliRd(int const & cliFd) {
 		this->closeSock(cliFd);
 	}
 
-	// show response after receive request
-	std::cout << std::endl << "Show Response in CliRd" << std::endl;
-	{
-		std::map<int, std::string>::iterator	iterResponse = this->_httpRespose.begin();
+	// // show response after receive request
+	// std::cout << std::endl << "Show Response in CliRd" << std::endl;
+	// {
+	// 	std::map<int, std::string>::iterator	iterResponse = this->_httpRespose.begin();
 
-		while (iterResponse != this->_httpRespose.end()) {
-			std::cout << iterResponse->first << " " << iterResponse->second << std::endl;
-			iterResponse++;
-		}
-		std::cout << "-------------" << std::endl << std::endl;
-	}
+	// 	while (iterResponse != this->_httpRespose.end()) {
+	// 		std::cout << iterResponse->first << " " << iterResponse->second << std::endl;
+	// 		iterResponse++;
+	// 	}
+	// 	std::cout << "-------------" << std::endl << std::endl;
+	// }
 }
 
 void	ServHandle::sockCliWr(int const & cliFd) {
