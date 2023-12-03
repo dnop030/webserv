@@ -30,7 +30,7 @@ all: $(NAME)
 
 # Main target
 $(NAME): $(OBJS)
-	$(CXX) $(CXXFLAGS) -fsanitize=address -o $(NAME) $(OBJS)
+	$(CXX) $(CXXFLAGS) -fsanitize=address -fno-omit-frame-pointer -o $(NAME) $(OBJS)
 	@echo $(GREEN) "\n\tProject is compiled\n" ${END}
 
 # Rule for generating dependency and object files

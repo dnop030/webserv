@@ -35,6 +35,8 @@ public:
 
 	std::string mapToJason(void);
 
+	std::string getPureBody(std::string &body);
+
 	class BadRequest : public std::exception
 	{
 	public:
