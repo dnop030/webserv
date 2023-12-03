@@ -1,10 +1,10 @@
 #include "Http.hpp"
 
-Http::Http() : _body("")
+Http::Http() : _body(""), _filename("")
 {
 }
 
-Http::Http(Http const &src) : _body(src._body)
+Http::Http(Http const &src) : _body(src._body), _filename(src._filename)
 {
 	*this = src;
 }
@@ -62,6 +62,11 @@ std::map<std::string, std::string> Http::getHeader()
 std::string Http::getBody()
 {
 	return (this->_body);
+}
+
+std::string Http::getFilename()
+{
+	return (this->_filename);
 }
 
 std::vector<std::string> Http::getBodyChunk()

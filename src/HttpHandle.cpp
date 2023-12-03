@@ -11,6 +11,7 @@ HttpHandle::HttpHandle(std::string &buffer) : _statusCode(0), _buffer(buffer), _
 	this->_query = this->_req->getQuery();
 	this->_header = this->_req->getHeader();
 	this->_body = this->_req->getBody();
+	this->_filename = this->_req->getFilename();
 	this->_bodyChunk = this->_req->getBodyChunk();
 	if (this->_header.find("Content-Length") != this->_header.end())
 		this->_contentLength = ft_stod(this->_header["Content-Length"]);
@@ -62,6 +63,7 @@ void HttpHandle::printLine(void)
 	this->_req->printMap(this->_header);
 	std::cout << "x<<<<<<<<< Body as below >>>>>>>>>>\n"
 			  << this->_body << std::endl;
+	std::cout << "File name: " << this->_filename << std::endl;
 	std::cout << "<<<<<<<<< Body in chunk as below >>>>>>>>>>" << std::endl;
 	for (std::vector<std::string>::iterator it = this->_bodyChunk.begin(); it != this->_bodyChunk.end(); ++it)
 		std::cout << *it << "\n\nnewline\n"
