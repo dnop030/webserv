@@ -6,18 +6,15 @@ import sys
 import utils
 
 try:
-	# #utils.parseEnv() => wait for parsing env
 	path = utils.getEnvValue("ROOT_PATH")
-	# # Create a new directory (if it doesn't exist)
 	os.makedirs(path, exist_ok=True)
-
-	# body = sys.stdin.read()
-	filename = "test.txt"
+	filename = utils.getEnvValue("UPLOAD_FILENAME")
 	file_path = os.path.join(path, filename)
 	message = ""
 	
 	with open(file_path, "w") as w_file:
-		w_file.write(utils.getEnvValue("BODY"))
+		for line in sys.stdin:
+			w_file.write(line)
 		message = f"{filename} has been posted successfully."
 	
 	

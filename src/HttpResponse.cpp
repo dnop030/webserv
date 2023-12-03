@@ -9,6 +9,7 @@ HttpResponse::HttpResponse()
 	this->_config_cgi_path = "";
 	this->_url = "";
 	this->_filenameDelete = "";
+	this->_filename = "";
 	this->_status[100] = "Continue";
 	this->_status[101] = "Switching Protocols";
 	this->_status[200] = "OK";
@@ -73,6 +74,11 @@ void HttpResponse::setPort(std::string const &port)
 void HttpResponse::setMethod(std::string const &method)
 {
 	this->_method = method;
+}
+
+void HttpResponse::setFileName(std::string const &filename)
+{
+	this->_filename = filename;
 }
 
 void HttpResponse::_checkFile()
@@ -355,6 +361,7 @@ std::string HttpResponse::_setResponseStream()
 	if (this->_checkCGI) {
 		int 			n = 0;
 		int				fd[2];
+		int				post[2];
 		char 			buffer[1024];
 		pid_t			pid;
 		std::string		path = this->_setArgvPath();
@@ -375,14 +382,8 @@ std::string HttpResponse::_setResponseStream()
 		std::string		contentType = this->_setENVArgv("CONTENT_TYPE", this->_contentType);
 		std::string		body = this->_setENVArgv("BODY", this->_body);
 		std::string		filenameDelete = this->_setENVArgv("FILENAME_DELETE", this->_filenameDelete);
-std::cout << "method: " << this->_method << std::endl;
-std::cout << "statusCode: " << this->_statusCode << std::endl;
-std::cout << "path: " << path << std::endl;
-std::cout << "root_path: " << this->_config_root << std::endl;
-std::cout << "url: " << this->_url << std::endl;
-std::cout << "argvPath: " << this->_path << std::endl;
-std::cout << "filenameDelete: " << this->_filenameDelete << std::endl;
-std::cout << "body: " << this->_body << std::endl;
+		std::string		upfilename = this->_setENVArgv("UPLOAD_FILENAME", this->_filename);
+
 		char			*envp[] = {
 							const_cast<char *>(filename.data()),
 							const_cast<char *>(statusCode.data()),
@@ -396,21 +397,35 @@ std::cout << "body: " << this->_body << std::endl;
 							const_cast<char *>(root_path.data()),
 							const_cast<char *>(body.data()),
 							const_cast<char *>(filenameDelete.data()),
+							const_cast<char *>(upfilename.data()),
 							NULL
 						};
 		const char		*path_cmd = this->_config_cgi_ext.c_str();
 
 		pipe(fd);
+		if (this->_method == "POST") {
+			pipe(post);
+			write(post[1], this->_body.c_str(), this->_body.length());
+		}
 		pid = fork();
 		if (pid == 0)
 		{
 			close(fd[0]);
 			dup2(fd[1], 1);
 			close(fd[1]);
+			if (this->_method == "POST") {
+				close(post[1]);
+				dup2(post[0], 0);
+				close(post[0]);
+			}
 			execve(path_cmd, argv, envp);
 		}
 		else
 		{
+			if (this->_method == "POST") {
+				close(post[0]);
+				close(post[1]);
+			}
 			close(fd[1]);
 			waitpid(pid, NULL, 0);
 			contentRes = "";

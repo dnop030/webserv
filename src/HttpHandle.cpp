@@ -22,7 +22,8 @@ HttpHandle::HttpHandle(std::string &buffer) : _statusCode(0), _buffer(buffer), _
 	this->response.setMethod(this->_method);
 	this->response.setConnection(this->_header["Connection"]);
 	this->response.setBody(this->_body);
-	this->printLine();
+	this->response.setFileName(this->_filename);
+	// this->printLine();
 }
 
 HttpHandle::~HttpHandle()

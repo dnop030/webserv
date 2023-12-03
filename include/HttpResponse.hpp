@@ -26,6 +26,7 @@ class HttpResponse : public Http
 		std::string			_url;
 		std::string			_body;
 		std::string			_filenameDelete;
+		std::string			_filename;
 		ConfigFileHandle	*_config;
 		std::map<int, std::string>			_status;
 		std::map<int, std::string>			_fileError;
@@ -74,6 +75,7 @@ class HttpResponse : public Http
 		void			setConfig(ConfigFileHandle *config);
 		void			setConnection(std::string const &connection);
 		void			setBody(std::string const &body);
+		void			setFileName(std::string const &filename);
 		std::string		returnResponse();
 };
 
