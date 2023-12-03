@@ -404,8 +404,15 @@ std::string HttpResponse::_setResponseStream()
 		{
 			std::cout << GRN << "//////// Pid equal 0 ////////" << reset << std::endl;
 			std::cout << GRN << "/////////////////////" << reset << std::endl;
-			close(fd[0]);
-			dup2(fd[1], 1);
+			if (close(fd[0]) < 0)
+			{
+				std::cout << RED << "///////// fail to close fd[0] //////////" << reset << std::endl;
+			}
+			std::cout << GRN << "//////// after close fd[0] ////////" << reset << std::endl;
+			if (dup2(fd[1], 1) < 0)
+			{
+				std::cout << RED << "///////// dup2 < 0 //////////" << reset << std::endl;
+			}
 			std::cout << GRN << "//////// After dup2() ////////" << reset << std::endl;
 			close(fd[1]);
 			execve(path_cmd, argv, envp);
