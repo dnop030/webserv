@@ -272,6 +272,13 @@ std::string FormData::getPureBody(std::string &body)
 	return (this->_form[0]["body"]);
 }
 
+std::string FormData::getFileName(std::string &filename)
+{
+	if (this->_form.empty() || this->_form[0].find("filename") == this->_form[0].end())
+		return (filename);
+	return (this->_form[0]["filename"]);
+}
+
 // std::string FormData::mapToJason(void)
 // {
 // 	std::string serializedData = "{";

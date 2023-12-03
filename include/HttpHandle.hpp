@@ -19,6 +19,7 @@ private:
 	std::string _path;
 	std::string _fragment;
 	std::string _body;
+	std::string _filename;
 	std::map<std::string, std::string> _query;
 	std::map<std::string, std::string> _header;
 	std::vector<std::string> _bodyChunk;

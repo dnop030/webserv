@@ -568,6 +568,7 @@ void Request::parseBody(void)
 		return;
 	FormData form(*this);
 	this->_body = form.getPureBody(this->_body);
+	this->_filename = form.getFileName(this->_filename);
 	if (this->_statusCode == 400)
 		throw BadRequest();
 	if (!this->_body.empty() && this->_header.find("Content-Length") != this->_header.end())
