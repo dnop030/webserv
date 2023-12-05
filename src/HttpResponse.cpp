@@ -91,6 +91,14 @@ void HttpResponse::_checkFile()
 		throw(404);
 }
 
+void	HttpResponse::_checkAutoIndex()
+{
+	std::string autoindex = this->_config->getServConfigVal(this->_config_ser, "autoindex");
+
+	if (autoindex.length() > 0 && autoindex.compare("on") == 0)
+		this->_autoIndex = 1;
+}
+
 void HttpResponse::setConfig(ConfigFileHandle *config)
 {
 	this->_config = config;
@@ -115,13 +123,22 @@ int HttpResponse::_checkPort()
 	return (this->_config_ser);
 }
 
-int HttpResponse::_checkPath()
+int	HttpResponse::_checkPath()
 {
 	this->_config_location = (this->_config_ser > -1) ? this->_config->getServConfigVal(this->_config_ser, "location " + this->_path) : "";
 
-	if (this->_config_location.length() == 0)
-		this->_config_location = (this->_config_ser > -1) ? this->_config->getServConfigVal(this->_config_ser, "location /") : "";
-std::cout << "_checkPath()" << this->_config_location << std::endl;
+	if (this->_config_location.length() == 0) {
+		std::string 				tmpPath = this->_path;
+		std::size_t 				found = tmpPath.find_last_of("/");
+		while (found != std::string::npos) {
+			tmpPath = tmpPath.substr(0, found);
+			this->_config_location = (this->_config_ser > -1) ? this->_config->getServConfigVal(this->_config_ser, "location " + tmpPath + "/") : "";
+			if (this->_config_location.length() > 0)
+				break ;
+			found = tmpPath.find_last_of("/");
+		}
+	}
+
 	return this->_config_location.length();
 }
 
@@ -469,6 +486,7 @@ std::string HttpResponse::returnResponse()
 	{
 		if (this->_checkPort() > -1 && this->_checkPath())
 		{
+			this->_checkAutoIndex();
 			this->_setConfig();
 			this->_setErrorPage();
 			this->_setCGI();
