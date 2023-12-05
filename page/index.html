@@ -8,7 +8,7 @@
 <body>
 	<h1>Webser</h1>
 	<h5>for test post</h5>
-	<form action="http://localhost:9091/upload/" enctype="multipart/form-data" method="POST">
+	<form action="http://localhost:9091/upload/" enctype="multipart/form-data" method="post">
 		<input type="file" name="file">
 		<button type="submit" id="submit">submit</button>
 	</form>
@@ -16,28 +16,43 @@
 	<hr>
 	<br>
 	<h5>for test delete</h5>
-	<form action="http://localhost:9091/upload/" method="delete">
-		<input type="text" name="namefile" id="namefile">
+	<form>
+		<input type="text" name="namefile" id="namefileDelete">
 		<button type="submit" id="submitDelete">submit</button>
 	</form>
+	<br>
+	<hr>
+	<br>
+	<h5>for test download</h5>
+	<input type="text" name="namefile" id="namefileDownload">
+	<button id="setFileName">set file name</button>
+	<a download id="buttonDownload">download file</a>
 
     <!-- script -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script> <!-- cdn axios -->
     <script>
-		const submit = document.getElementById("submitDelete");
-		const namefile = document.getElementById("namefile");
+		const submitDelete = document.getElementById("submitDelete");
+		const namefileDelete = document.getElementById("namefileDelete");
 
-		submit.addEventListener("click", (e) => {
+		submitDelete.addEventListener("click", (e) => {
 			e.preventDefault(); // not refresh page
 
 		axios.request({
 				method: "DELETE",
-				url: `http://localhost:9091/upload/${namefile.value}`,
+				url: `http://localhost:9091/upload/${namefileDelete.value}`,
 			}).then(function (response) {
 				console.log(response.data);
 			}).catch(function (error) {
 				console.log(error);
 			});
+		});
+
+		const setFileName = document.getElementById("setFileName");
+		const namefileDownload = document.getElementById("namefileDownload");
+		const buttonDownload = document.getElementById("buttonDownload");
+
+		setFileName.addEventListener("click", (e) => {
+			buttonDownload.href = `http://localhost:9091/upload:9091/${namefileDownload.value}`;
 		});
 	</script>
 </body>

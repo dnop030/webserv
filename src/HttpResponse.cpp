@@ -404,6 +404,9 @@ std::string HttpResponse::_setResponseStream()
 		std::string		upfilename = this->_setENVArgv("UPLOAD_FILENAME", this->_filename);
 std::cout << "root_path: " << this->_config_root << std::endl;
 std::cout << "port: " << this->_port << std::endl;
+std::cout << "path: " << this->_path << std::endl;
+std::cout << "pathFile: " << path << std::endl;
+std::cout << "method: " << this->_method << std::endl;
 		char			*envp[] = {
 							const_cast<char *>(filename.data()),
 							const_cast<char *>(statusCode.data()),
