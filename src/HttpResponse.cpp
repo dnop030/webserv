@@ -121,7 +121,7 @@ int HttpResponse::_checkPath()
 
 	if (this->_config_location.length() == 0)
 		this->_config_location = (this->_config_ser > -1) ? this->_config->getServConfigVal(this->_config_ser, "location /") : "";
-
+std::cout << "_checkPath()" << this->_config_location << std::endl;
 	return this->_config_location.length();
 }
 
@@ -203,6 +203,8 @@ void HttpResponse::_setRootPath()
 	{
 		config_path = this->_spiltString(path, " ");
 		this->_config_root = config_path[1];
+std::cout << "_setRootPath -> path: " << path << std::endl;
+std::cout << "_setRootPath -> config_root: " << this->_config_root << std::endl;
 		if (this->_method == "DELETE") {
 			tmp = this->_path;
 			filename_delete = this->_spiltString(tmp, "/");
@@ -383,7 +385,8 @@ std::string HttpResponse::_setResponseStream()
 		std::string		body = this->_setENVArgv("BODY", this->_body);
 		std::string		filenameDelete = this->_setENVArgv("FILENAME_DELETE", this->_filenameDelete);
 		std::string		upfilename = this->_setENVArgv("UPLOAD_FILENAME", this->_filename);
-
+std::cout << "root_path: " << this->_config_root << std::endl;
+std::cout << "port: " << this->_port << std::endl;
 		char			*envp[] = {
 							const_cast<char *>(filename.data()),
 							const_cast<char *>(statusCode.data()),
@@ -444,7 +447,7 @@ std::string HttpResponse::_setResponseStream()
 
 		contentRes = content;
 		this->_setHeader("Content-Length:", std::to_string(contentRes.length()));
-		this->_setHeader("Content-Type:", "text/html");
+		this->_setHeader("Content-Type:", "application/octet-stream");
 		this->_setHeader("Location-Header:", "TH");
 
 		resStream << "HTTP/1.1 " << this->_statusCode << " " << this->_status[this->_statusCode] << "\r\n";
@@ -452,6 +455,7 @@ std::string HttpResponse::_setResponseStream()
 		{
 			resStream << it->first << " " << it->second << "\r\n";
 		}
+		resStream << "Content-Disposition: attachment; filename=test.html\r\n";
 		resStream << "\r\n";
 	}
 	resStream << contentRes;

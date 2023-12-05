@@ -4,41 +4,28 @@ import os
 import utils
 
 try:
-    #utils.parseEnv() => wait for parsing env
-	# Get the path to the file you want to send
-	path = utils.getEnvValue("PATH")
-	filename = utils.getEnvValue("FILE_NAME")
+	path = utils.getEnvValue("ROOT_PATH") + ":" + utils.getEnvValue("PORT")
+	filename = utils.getEnvValue("UPLOAD_FILENAME")
 	file_path = os.path.join(path, filename)
-
-	# Set the Content-Disposition header
-	content_disposition = f'attachment; filename="{filename}"'
-
-	# Set the Content-Type header based on the file type
-	content_type = utils.getEnvValue("CONTENT_TYPE")
-
-	# Print the HTTP headers
-	with open(file_path, 'rb') as file:
-		res = file.read
-	print("HTTP/1.1 200 OK\r\n")
-	print("Connection: " + utils.getEnvValue("CONNECTION") + "\r\n")
-	print("Content-Type: " + content_type)
-	print("Content-Length: " + len(res))
-	print(f'Content-Disposition: {content_disposition}' + "\r\n")
-	print("\r\n")  # End of headers
-	# Read and send the file content
-	print(res)
-
-
-except utils.InternalServerError:
-    try:
-        with open("../page/500.html", "r") as file:
-            err_page = file.read()
-        print("HTTP/1.1 500 Internal Server Error\r\n")
-        print("Connection: " + utils.getEnvValue("CONNECTION") + "\r\n")
-        print("Content-Type: text/html\r\n")
-        print("Content-Length: " + str(len(err_page)) + "\r\n")
-        print("\r\n")
-        print(err_page)
-    except Exception as e:
-        print(f"Find Error!!! => f{e}")
+	read_file = ""
+	
+	with open(file_path, "r") as file:
+		read_file = file.read()
+		file.close()	
+	dic_header = {
+		"Connection" : utils.getEnvValue("CONNECTION"),
+		"Content-Type" : "application/octet-stream",
+		"Content-Length" : len(read_file) + 1,
+		"Content-Disposition" : f'attachment; filename="{filename}"'
+	}
+	utils.printHeaderBody(dic_header, read_file, "200", "ok")
+except (utils.InternalServerError,  FileNotFoundError):
+	with open("./page/error/404.html", "r") as file:
+		err_page = file.read()
+	dic_header = {
+		"Connection" : utils.getEnvValue("CONNECTION"),
+		"Content-Type" : "text/html",
+		"Content-Length" : len(err_page) + 1,
+	}
+	utils.printHeaderBody(dic_header, err_page, "404", "Not Found")
 

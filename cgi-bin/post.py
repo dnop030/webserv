@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 
 import os
-import cgi
 import sys
 import utils
 
 try:
-	path = utils.getEnvValue("ROOT_PATH")
+	path = utils.getEnvValue("ROOT_PATH") + ":" + utils.getEnvValue("PORT")
 	os.makedirs(path, exist_ok=True)
 	filename = utils.getEnvValue("UPLOAD_FILENAME")
 	file_path = os.path.join(path, filename)
