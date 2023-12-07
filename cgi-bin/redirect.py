@@ -1,11 +1,12 @@
 import utils
 
 try:
-	print("HTTP/1.1 301 Moved Permanently \r\n")
-	print("Connection: " + utils.getEnvValue("CONNECTION") + "\r\n")
-	print("Content-Type: text/plain\r\n")
-	print("Location: " + "http://" + utils.getEnvValue("HOSTNAME") + ":" + utils.getEnvValue("PORT") + "/" + "\r\n")
-	print("\r\n")
+	body_field = ""
+	dic_header = {
+		"Content-Length" : len(body_field),
+		"Location" : utils.getEnvValue("REDIRECT"),
+	}
+	utils.printHeaderBody(dic_header, body_field, utils.getEnvValue("STATUS_CODE"), utils.getEnvValue("STATUS_MESSAGE"))
 except (utils.InternalServerError,  FileNotFoundError):
 	with open("./page/error/500.html", "r") as file:
 		err_page = file.read()

@@ -10,6 +10,7 @@ HttpResponse::HttpResponse()
 	this->_url = "";
 	this->_filenameDelete = "";
 	this->_filename = "";
+	this->_return = "";
 	this->_status[100] = "Continue";
 	this->_status[101] = "Switching Protocols";
 	this->_status[200] = "OK";
@@ -142,6 +143,19 @@ int	HttpResponse::_checkPath()
 	return this->_config_location.length();
 }
 
+void HttpResponse::_checkReturn()
+{
+	std::string re = this->_setConfigCondition("return");
+	std::vector<std::string> arr_return;
+
+	if (re != "return")
+	{
+		arr_return = this->_spiltString(re, " ");
+		this->_return = arr_return[1];
+		throw(301);
+	}
+}
+
 void HttpResponse::_setConfig()
 {
 	std::string condition = this->_config_location;
@@ -220,8 +234,6 @@ void HttpResponse::_setRootPath()
 	{
 		config_path = this->_spiltString(path, " ");
 		this->_config_root = config_path[1];
-std::cout << "_setRootPath -> path: " << path << std::endl;
-std::cout << "_setRootPath -> config_root: " << this->_config_root << std::endl;
 		if (this->_method == "DELETE") {
 			tmp = this->_path;
 			filename_delete = this->_spiltString(tmp, "/");
@@ -338,6 +350,8 @@ std::string HttpResponse::_setArgvPath()
 		name_cgi = "/post.py";
 	else if (this->_method == "DELETE")
 		name_cgi = "/delete.py";
+	else if (this->_method == "GET" && this->_statusCode == 301)
+		name_cgi = "/redirect.py";
 	else if (this->_method == "GET" || this->_statusCode != 200)
 		name_cgi = "/get.py";
 
@@ -357,17 +371,6 @@ void HttpResponse::_setContentType()
 			this->_contentType = "text/html";
 		else
 			this->_contentType = "text/plain";
-	}
-}
-
-void HttpResponse::_checkReturn()
-{
-	std::string re = this->_setConfigCondition("return");
-
-	if (re != "return")
-	{
-		this->_url = re.substr(7, re.length() - 7);
-		throw(301);
 	}
 }
 
@@ -402,11 +405,8 @@ std::string HttpResponse::_setResponseStream()
 		std::string		body = this->_setENVArgv("BODY", this->_body);
 		std::string		filenameDelete = this->_setENVArgv("FILENAME_DELETE", this->_filenameDelete);
 		std::string		upfilename = this->_setENVArgv("UPLOAD_FILENAME", this->_filename);
-std::cout << "root_path: " << this->_config_root << std::endl;
-std::cout << "port: " << this->_port << std::endl;
-std::cout << "path: " << this->_path << std::endl;
-std::cout << "pathFile: " << path << std::endl;
-std::cout << "method: " << this->_method << std::endl;
+		std::string		redirect = this->_setENVArgv("REDIRECT", this->_return);
+
 		char			*envp[] = {
 							const_cast<char *>(filename.data()),
 							const_cast<char *>(statusCode.data()),
@@ -421,6 +421,7 @@ std::cout << "method: " << this->_method << std::endl;
 							const_cast<char *>(body.data()),
 							const_cast<char *>(filenameDelete.data()),
 							const_cast<char *>(upfilename.data()),
+							const_cast<char *>(redirect.data()),
 							NULL
 						};
 		const char		*path_cmd = this->_config_cgi_ext.c_str();
@@ -467,15 +468,18 @@ std::cout << "method: " << this->_method << std::endl;
 
 		contentRes = content;
 		this->_setHeader("Content-Length:", std::to_string(contentRes.length()));
-		this->_setHeader("Content-Type:", "application/octet-stream");
-		this->_setHeader("Location-Header:", "TH");
+		if (this->_statusCode != 301) {
+			this->_setHeader("Content-Type:", "text/html");
+			this->_setHeader("Location-Header:", "TH");
+		} else {
+			this->_setHeader("Location:", this->_return);
+		}
 
 		resStream << "HTTP/1.1 " << this->_statusCode << " " << this->_status[this->_statusCode] << "\r\n";
 		for (it = this->_header.begin(); it != this->_header.end(); it++)
 		{
 			resStream << it->first << " " << it->second << "\r\n";
 		}
-		resStream << "Content-Disposition: attachment; filename=test.html\r\n";
 		resStream << "\r\n";
 	}
 	resStream << contentRes;
