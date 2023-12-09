@@ -126,11 +126,16 @@ int HttpResponse::_checkPort()
 
 int HttpResponse::_checkPath()
 {
-	this->_config_location = (this->_config_ser > -1) ? this->_config->getServConfigVal(this->_config_ser, "location " + this->_path) : "";
+	std::string tmp = this->_path;
+	std::vector<std::string> path_trim = this->_spiltString(tmp, ":");
+
+	if (path_trim.size() > 1)
+		path_trim[0] += "/";
+	this->_config_location = (this->_config_ser > -1) ? this->_config->getServConfigVal(this->_config_ser, "location " + path_trim[0]) : "";
 
 	if (this->_config_location.length() == 0)
 	{
-		std::string tmpPath = this->_path;
+		std::string tmpPath = path_trim[0];
 		std::size_t found = tmpPath.find_last_of("/");
 		while (found != std::string::npos)
 		{
