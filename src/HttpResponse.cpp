@@ -478,11 +478,36 @@ std::string HttpResponse::_setResponseStream()
 	}
 	else
 	{
-		std::cout << YEL << "In else" << reset << std::endl;
-		std::ifstream ifs(this->_fileResponse);
-		std::string content((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
+		if (this->_method == "DELETE") {
+			std::string del_filename = this->_fileResponse;
+			remove(del_filename.c_str());
+			contentRes = this->_filenameDelete + " has been deleted successfully.";
+		} else if (this->_method == "POST" && this->_statusCode != 405) {
+			struct stat		statbuf;
+			std::string 	path_upload = this->_config_root + this->_path;
+			std::string 	path_file = path_upload + this->_filename;
+			std::ifstream	ifs;
+			if (stat(path_upload.c_str(), &statbuf) != 0)
+				mkdir(path_upload.c_str(), 0764);
+			ifs.open(path_file, std::ifstream::in);
+			if (ifs.good() == false) {
+				ifs.close();
+				std::ofstream ofs(path_file);
+				ofs << this->_body;
+				ofs.close();
+				this->_statusCode = 201;
+				contentRes = this->_filename + " has been uploaded successfully.";
+			} else {
+				ifs.close();
+				this->_statusCode = 400;
+				contentRes = this->_filename + " already exists.";
+			}
+		} else {
+			std::ifstream ifs(this->_fileResponse);
+			std::string content((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
+			contentRes = content;
+		}
 
-		contentRes = content;
 		this->_setHeader("Content-Length:", std::to_string(contentRes.length()));
 		if (this->_statusCode != 301)
 		{

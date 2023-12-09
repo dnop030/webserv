@@ -8,9 +8,9 @@
 <body>
 	<h1>Webser</h1>
 	<h5>for test post</h5>
-	<form action="http://localhost:9091/upload/" enctype="multipart/form-data" method="post">
-		<input type="file" name="file">
-		<button type="submit" id="submit">submit</button>
+	<form>
+		<input type="file" name="file" id="file">
+		<button type="submit" id="submitUpload">submit</button>
 	</form>
 	<br>
 	<hr>
@@ -31,6 +31,30 @@
     <!-- script -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script> <!-- cdn axios -->
     <script>
+		const local_port = window.location.port;
+
+		const submitUpload = document.getElementById("submitUpload");
+
+		submitUpload.addEventListener("click", (e) => {
+			e.preventDefault(); // not refresh page
+			let formData = new FormData();
+			let fileField = document.querySelector("input[type='file']");
+			formData.append("file", fileField.files[0]);
+
+			axios.request({
+				method: "POST",
+				url: `http://localhost:${local_port}/upload:${local_port}/`,
+				data: formData,
+				headers: {
+					"Content-Type": "multipart/form-data",
+				},
+			}).then(function (response) {
+				console.log(response.data);
+			}).catch(function (error) {
+				console.log(error);
+			});
+		});
+
 		const submitDelete = document.getElementById("submitDelete");
 		const namefileDelete = document.getElementById("namefileDelete");
 
@@ -39,7 +63,7 @@
 
 		axios.request({
 				method: "DELETE",
-				url: `http://localhost:9091/upload/${namefileDelete.value}`,
+				url: `http://localhost:${local_port}/upload:${local_port}/${namefileDelete.value}`,
 			}).then(function (response) {
 				console.log(response.data);
 			}).catch(function (error) {
@@ -52,7 +76,7 @@
 		const buttonDownload = document.getElementById("buttonDownload");
 
 		setFileName.addEventListener("click", (e) => {
-			buttonDownload.href = `http://localhost:9091/upload:9091/${namefileDownload.value}`;
+			buttonDownload.href = `http://localhost:${local_port}/upload:${local_port}/${namefileDownload.value}`;
 		});
 	</script>
 </body>
