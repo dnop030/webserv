@@ -6,57 +6,54 @@
     <title>webser</title>
 </head>
 <body>
-    <h1>Webser</h1>
-    <form id="testApi">
-        <select id="method">
-            <option value="GET">GET</option>
-            <option value="POST">POST</option>
-            <option value="PUT">PUT</option>
-            <option value="DELETE">DELETE</option>
-        </select>
-        <input type="text" name="url" id="url" placeholder="url for test">
-		<input type="text" name="port" id="port" placeholder="port" onkeypress="return onlyNumberKey(event)">
-        <button type="submit" id="submit">submit</button>
-    </form>
-    <!-- show result -->
-    <div id="output"></div>
+	<h1>Webser</h1>
+	<h5>for test post</h5>
+	<form action="http://localhost:9091/upload/" enctype="multipart/form-data" method="post">
+		<input type="file" name="file">
+		<button type="submit" id="submit">submit</button>
+	</form>
+	<br>
+	<hr>
+	<br>
+	<h5>for test delete</h5>
+	<form>
+		<input type="text" name="namefile" id="namefileDelete">
+		<button type="submit" id="submitDelete">submit</button>
+	</form>
+	<br>
+	<hr>
+	<br>
+	<h5>for test download</h5>
+	<input type="text" name="namefile" id="namefileDownload">
+	<button id="setFileName">set file name</button>
+	<a download id="buttonDownload">download file</a>
 
     <!-- script -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script> <!-- cdn axios -->
     <script>
-		const method = document.getElementById("method");
-		const port = document.getElementById("port");
-		const url = document.getElementById("url");
-		const submit = document.getElementById("submit");
-		const output = document.getElementById('output');
+		const submitDelete = document.getElementById("submitDelete");
+		const namefileDelete = document.getElementById("namefileDelete");
 
-		submit.addEventListener("click", (e) => {
-		e.preventDefault(); // not refresh page
-
-		const v_method = method.value ? method.value : "GET";
-		const v_port = port.value ? port.value : "443";
-		const v_url = url.value ? url.value : "https://127.0.0.1";
+		submitDelete.addEventListener("click", (e) => {
+			e.preventDefault(); // not refresh page
 
 		axios.request({
-				method: v_method,
-				url: v_url + ":" + v_port,
+				method: "DELETE",
+				url: `http://localhost:9091/upload/${namefileDelete.value}`,
 			}).then(function (response) {
-				// console.log(response); // show all response
-				// let txt = JSON.stringify(response.data); // convert JSON to string
-				// output.innerHTML = txt; // open when response is JSON
-				output.innerHTML = response.data; // open when response is text
+				console.log(response.data);
 			}).catch(function (error) {
 				console.log(error);
 			});
 		});
 
-		const onlyNumberKey = (evt) => {            
-			let ASCIICode = (evt.which) ? evt.which : evt.keyCode
+		const setFileName = document.getElementById("setFileName");
+		const namefileDownload = document.getElementById("namefileDownload");
+		const buttonDownload = document.getElementById("buttonDownload");
 
-			if (ASCIICode > 31 && (ASCIICode < 48 || ASCIICode > 57))
-				return false;
-			return true;
-		}
+		setFileName.addEventListener("click", (e) => {
+			buttonDownload.href = `http://localhost:9091/upload:9091/${namefileDownload.value}`;
+		});
 	</script>
 </body>
 </html>

@@ -219,6 +219,7 @@ std::string const &ServConfigDetail::getVal(std::string const &val)
 	if (it != this->_detail.end())
 	{
 		std::cout << MAG << "[INFO]Found key" << reset << std::endl;
+		std::cout << YEL << "val: " << val << reset << std::endl;
 		return (it->second);
 	}
 	else

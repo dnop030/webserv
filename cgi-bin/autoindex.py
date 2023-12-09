@@ -1,48 +1,47 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
 import utils
 
 def generate_autoindex(path):
-    content = "<html><head><title>AutoIndex</title></head><body><h1>Index of {path}</h1><ul>".format(path=path)
+	content = f"""
+			<html>
+			<head>
+				<title>AutoIndex</title>
+			</head>
+			<body>
+				<h1>Auto index</h1>
+			<ul>"""
 
-    try:
-        dir = os.listdir(path)
-        for sub_dir in dir:
-            full_path = os.path.join(path, sub_dir)
-            if os.path.isdir(full_path):
-                content += "<li>{sub_dir}/</li>".format(sub_dir=sub_dir)
-    except OSError:
-       raise utils.InternalServerError
+	try:
+		dir = os.listdir(path)
+		for sub_dir in dir:
+			full_path = os.path.join(path, sub_dir)
+			if os.path.isdir(full_path):
+				content += f"<li>{sub_dir}/</li>"
+			else:
+				content += f"<li>{sub_dir}</li>"
+	except OSError:
+		raise utils.InternalServerError
 
-    content += "</ul></body></html>"
-    return content
+	content += "</ul></body></html>"
+	return content
 
 try:
-    #utils.parseEnv() => wait for parsing env
+	content = generate_autoindex(utils.getEnvValue("ROOT_PATH"))
 
-    # Set the directory you want to generate autoindex for
-    dir_path = utils.getEnvValue("PATH")
-
-    # Generate and print the autoindex content
-    content = generate_autoindex(dir_path)
-
-    # Print the HTTP headers
-    print("HTTP/1.1 200 OK\r\n")
-    print("Connection: " + utils.getEnvValue("CONNECTION") + "\r\n")
-    print("Content-Type: " + utils.getEnvValue("CONTENT_TYPE") + "\r\n")
-    print("Content-Length: " + len(content) + "\r\n")
-    print(content)
-
-except utils.InternalServerError:
-    try:
-        with open("../page/500.html", "r") as file:
-            err_page = file.read()
-        print("HTTP/1.1 500 Internal Server Error\r\n")
-        print("Connection: " + utils.getEnvValue("CONNECTION") + "\r\n")
-        print("Content-Type: text/html\r\n")
-        print("Content-Length: " + str(len(err_page)) + "\r\n")
-        print("\r\n")
-        print(err_page)
-    except Exception as e:
-        print(f"Find Error!!! => f{e}")
+	dic_header = {
+		"Connection" : utils.getEnvValue("CONNECTION"),
+		"Content-Type" : utils.getEnvValue("CONTENT_TYPE"),
+		"Content-Length" : len(content) + 1,
+	}
+	utils.printHeaderBody(dic_header, content, utils.getEnvValue("STATUS_CODE"), utils.getEnvValue("STATUS_MESSAGE"))
+except (utils.InternalServerError,  FileNotFoundError):
+	with open("./page/error/500.html", "r") as file:
+		err_page = file.read()
+	dic_header = {
+		"Connection" : utils.getEnvValue("CONNECTION"),
+		"Content-Type" : utils.getEnvValue("CONTENT_TYPE"),
+		"Content-Length" : len(err_page) + 1,
+	}
+	utils.printHeaderBody(dic_header, err_page, "500", "Internal Server Error")

@@ -24,6 +24,10 @@ class HttpResponse : public Http
 		std::string			_contentType;
 		std::string			_connection;
 		std::string			_url;
+		std::string			_body;
+		std::string			_filenameDelete;
+		std::string			_filename;
+		std::string			_return;
 		ConfigFileHandle	*_config;
 		std::map<int, std::string>			_status;
 		std::map<int, std::string>			_fileError;
@@ -43,11 +47,11 @@ class HttpResponse : public Http
 		// func check and set before send response
 		int					_checkPort();
 		int					_checkPath();
+		void				_checkReturn();
 		void				_setHeader(std::string const &key, std::string const &value);
 		void				_setConfig();
 		void				_checkAutoIndex();
 		void				_checkMethod();
-		void				_checkReturn();
 		void				_setRootPath();
 		void				_setFileResponse(std::string const &pathFile, std::string const &rootPath);
 		void				_setErrorPage();
@@ -71,6 +75,8 @@ class HttpResponse : public Http
 		void			setMethod(std::string const &method);
 		void			setConfig(ConfigFileHandle *config);
 		void			setConnection(std::string const &connection);
+		void			setBody(std::string const &body);
+		void			setFileName(std::string const &filename);
 		std::string		returnResponse();
 };
 
