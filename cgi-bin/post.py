@@ -22,7 +22,7 @@ try:
 		"Content-Type" : utils.getEnvValue("CONTENT_TYPE"),
 		"Content-Length" : len(message) + 1,
 	}
-	utils.printHeaderBody(dic_header, message, "200", "ok")
+	utils.printHeaderBody(dic_header, message, "201", "Created")
 
 except (utils.InternalServerError,  FileNotFoundError):
 	with open("./page/error/500.html", "r") as file:
