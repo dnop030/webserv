@@ -25,8 +25,10 @@ HttpResponse::HttpResponse()
 	this->_status[500] = "Internal Server Error";
 	this->_status[501] = "Not Implemented";
 	this->_status[505] = "HTTP Version not supported";
+	this->_fileError[400] = "/error/400.html";
 	this->_fileError[404] = "/error/404.html";
 	this->_fileError[405] = "/error/405.html";
+	this->_fileError[413] = "/error/413.html";
 	this->_fileError[500] = "/error/500.html";
 }
 
@@ -360,7 +362,7 @@ std::string HttpResponse::_setArgvPath()
 
 	if (this->_method == "GET" && this->_statusCode == 404 && this->_autoIndex == 1 && this->_path != "/favicon.ico")
 		name_cgi = "/autoindex.py";
-	else if (this->_method == "POST" && this->_statusCode != 405)
+	else if (this->_method == "POST" && this->_statusCode != 405 && this->_statusCode != 413)
 		name_cgi = "/post.py";
 	else if (this->_method == "DELETE")
 		name_cgi = "/delete.py";
@@ -386,7 +388,20 @@ void HttpResponse::_setContentType()
 		if (this->_autoIndex == 1)
 			this->_contentType = "text/html";
 		else
-			this->_contentType = "text/plain";
+			this->_contentType = "text/html";
+	}
+}
+
+void HttpResponse::_checkBodySize()
+{
+	std::string body_size = this->_setConfigCondition("client_max_body_size");
+	std::vector<std::string> arr_body_size;
+
+	if (body_size != "client_max_body_size")
+	{
+		arr_body_size = this->_spiltString(body_size, " ");
+		if (std::stoi(arr_body_size[1]) < this->_body.length())
+			throw(413);
 	}
 }
 
@@ -398,16 +413,12 @@ std::string HttpResponse::_setResponseStream()
 
 	if (this->_checkCGI)
 	{
-		std::cout << YEL << "In this->_checkCGI" << reset << std::endl;
 		int n = 0;
 		int fd[2];
 		int post[2];
 		char buffer[1024];
 		pid_t pid;
 		std::string path = this->_setArgvPath();
-		std::cout << YEL << "path: " << path << reset << std::endl;
-		std::cout << YEL << "method: " << this->_method << reset << std::endl;
-		std::cout << YEL << "After setArgvPath" << reset << std::endl;
 		char *const argv[] = {
 			const_cast<char *>(this->_config_cgi_program.data()),
 			const_cast<char *>(path.data()),
@@ -426,7 +437,6 @@ std::string HttpResponse::_setResponseStream()
 		std::string filenameDelete = this->_setENVArgv("FILENAME_DELETE", this->_filenameDelete);
 		std::string upfilename = this->_setENVArgv("UPLOAD_FILENAME", this->_filename);
 		std::string redirect = this->_setENVArgv("REDIRECT", this->_return);
-
 		char *envp[] = {
 			const_cast<char *>(filename.data()),
 			const_cast<char *>(statusCode.data()),
@@ -445,7 +455,6 @@ std::string HttpResponse::_setResponseStream()
 			NULL};
 		const char *path_cmd = this->_config_cgi_ext.c_str();
 
-		std::cout << YEL << "Before pipe()" << reset << std::endl;
 		pipe(fd);
 		if (this->_method == "POST")
 		{
@@ -494,7 +503,7 @@ std::string HttpResponse::_setResponseStream()
 			remove(del_filename.c_str());
 			contentRes = this->_filenameDelete + " has been deleted successfully.";
 		}
-		else if (this->_method == "POST" && this->_statusCode != 405)
+		else if (this->_method == "POST" && this->_statusCode != 405 && this->_statusCode != 413)
 		{
 			struct stat statbuf;
 			std::string path_upload = this->_config_root + this->_path;
@@ -564,6 +573,10 @@ std::string HttpResponse::returnResponse()
 			this->_checkMethod();
 			this->_setRootPath();
 			this->_setContentType();
+			if (this->_method == "POST")
+			{
+				this->_checkBodySize();
+			}
 			this->_setFileResponse(this->_config_root + this->_path, this->_path);
 			this->_statusCode = 200;
 		}
@@ -576,6 +589,7 @@ std::string HttpResponse::returnResponse()
 	{
 		this->_statusCode = status;
 		this->_fileResponse = this->_config_root + this->_fileError[status];
+		std::cout << "this->_fileResponse: " << this->_fileResponse << std::endl;
 	}
 
 	return (this->_setResponseStream());

@@ -9,11 +9,18 @@ try:
 	os.makedirs(path, exist_ok=True)
 	filename = utils.getEnvValue("UPLOAD_FILENAME")
 	file_path = os.path.join(path, filename)
+	status = 201
+	status_message = "Created"
 	message = ""
 	
-	with open(file_path, "w") as w_file:
-		for line in sys.stdin:
-			w_file.write(line)
+	if (os.path.isfile(file_path)):
+		message = f"{filename} already exists."
+		status = "400"
+		status_message = "Bad Request"
+	else:
+		with open(file_path, "w") as w_file:
+			for line in sys.stdin:
+				w_file.write(line)
 		message = f"{filename} has been posted successfully."
 	
 	
@@ -22,7 +29,7 @@ try:
 		"Content-Type" : utils.getEnvValue("CONTENT_TYPE"),
 		"Content-Length" : len(message) + 1,
 	}
-	utils.printHeaderBody(dic_header, message, "201", "Created")
+	utils.printHeaderBody(dic_header, message, status, status_message)
 
 except (utils.InternalServerError,  FileNotFoundError):
 	with open("./page/error/500.html", "r") as file:
