@@ -59,6 +59,7 @@ class HttpResponse : public Http
 		void				_setCGI();
 		void				_setContentType();
 		void				_checkFile();
+		void				_checkBodySize();
 		std::string			_setConfigCondition(std::string const &nameCondition);
 		std::string			_searchIndex(std::string const &pathFile);
 		std::string			_setResponseStream();
