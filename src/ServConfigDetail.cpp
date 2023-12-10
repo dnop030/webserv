@@ -43,9 +43,9 @@ void ServConfigDetail::saveOneBlockConfig(std::string const &block)
 	// del server {}
 	// del charactor until 1st { (del including 1st {)
 	tmpBlock.erase(0, tmpBlock.find("{") + 1);
-
 	// del } until the end of file
-	tmpBlock.erase(tmpBlock.find_last_of("}"), tmpBlock.find_last_of("}") - tmpBlock.size());
+	if (tmpBlock.find_last_of("}") != std::string::npos)
+		tmpBlock.erase(tmpBlock.find_last_of("}"), tmpBlock.find_last_of("}") - tmpBlock.size());
 	// std::cout << MAG << tmpBlock << reset;
 
 	// using loop by detecting ;
