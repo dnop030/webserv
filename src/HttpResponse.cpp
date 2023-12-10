@@ -445,6 +445,7 @@ std::string HttpResponse::_setResponseStream()
 			NULL};
 		const char *path_cmd = this->_config_cgi_ext.c_str();
 
+		std::cout << YEL << "Before pipe()" << reset << std::endl;
 		pipe(fd);
 		if (this->_method == "POST")
 		{
