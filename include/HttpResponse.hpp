@@ -17,6 +17,7 @@ class HttpResponse : public Http
 		int					_statusCode;
 		int					_checkCGI;
 		int					_autoIndex;
+		std::string			_suffixCGI;
 		std::string 		_fileResponse;
 		std::string 		_serverName;
 		std::string 		_path;

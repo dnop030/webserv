@@ -90,8 +90,10 @@ void HttpResponse::_checkFile()
 
 	if (ifs.good())
 		ifs.close();
-	else
+	else {
+std::cout << "(_checkFile) this->_fileResponse: " << this->_fileResponse << std::endl;
 		throw(404);
+	}
 }
 
 void HttpResponse::_checkAutoIndex()
@@ -297,9 +299,11 @@ void HttpResponse::_setFileResponse(std::string const &pathFile, std::string con
 	if (rootPath.compare("/") == 0)
 	{
 		this->_fileResponse = this->_searchIndex(pathFile);
+		std::cout << "if" << std::endl;
 	}
 	else
 	{
+		std::cout << "else" << std::endl;
 		this->_fileResponse = pathFile;
 	}
 
@@ -327,7 +331,15 @@ void HttpResponse::_setCGI()
 	std::vector<std::string> arr_cgi;
 	std::vector<std::string> arr_cgi_program;
 
-	this->_config_cgi = (this->_config_ser > -1) ? this->_config->getServConfigVal(this->_config_ser, "location_back /cgi_bins/.py") : "";
+	this->_config_cgi = "";
+	if (this->_config_ser > -1) {
+		this->_config_cgi = this->_config->getServConfigVal(this->_config_ser, "location_back /cgi-bins/.py");
+		this->_suffixCGI = "py";
+	}
+	if (this->_config_cgi.length() == 0) {
+		this->_config_cgi = this->_config->getServConfigVal(this->_config_ser, "location_back /cgi-bins/.php");
+		this->_suffixCGI = "php";
+	}
 
 	if (this->_config_cgi.length() > 0)
 	{
@@ -351,8 +363,6 @@ void HttpResponse::_setCGI()
 
 std::string HttpResponse::_setENVArgv(std::string const &name, std::string const &value)
 {
-	// std::cout << YEL << "name: " << name << reset << std::endl;
-	// std::cout << YEL << "val: " << value << reset << std::endl;
 	return (name + "=" + value);
 }
 
@@ -361,17 +371,18 @@ std::string HttpResponse::_setArgvPath()
 	std::string name_cgi = "";
 
 	if (this->_method == "GET" && this->_statusCode == 404 && this->_autoIndex == 1 && this->_path != "/favicon.ico")
-		name_cgi = "/autoindex.py";
+		name_cgi = "autoindex";
 	else if (this->_method == "POST" && this->_statusCode != 405 && this->_statusCode != 413)
-		name_cgi = "/post.py";
+		name_cgi = "post";
 	else if (this->_method == "DELETE")
-		name_cgi = "/delete.py";
+		name_cgi = "delete";
 	else if (this->_method == "GET" && this->_statusCode == 301)
-		name_cgi = "/redirect.py";
+		name_cgi = "redirect";
 	else if (this->_method == "GET" || this->_statusCode != 200)
-		name_cgi = "/get.py";
-
-	return this->_config_cgi_path + name_cgi;
+		name_cgi = "get";
+std::cout << "this->_method: " << this->_method << ", this->_statusCode: " << this->_statusCode << ", name_cgi: " << name_cgi << std::endl;
+std::cout << "this->_fileResponse: " << this->_fileResponse << std::endl;
+	return this->_config_cgi_path + "/" + name_cgi + "." + this->_suffixCGI;
 }
 
 void HttpResponse::_setContentType()
@@ -589,7 +600,7 @@ std::string HttpResponse::returnResponse()
 	{
 		this->_statusCode = status;
 		this->_fileResponse = this->_config_root + this->_fileError[status];
-		std::cout << "this->_fileResponse: " << this->_fileResponse << std::endl;
+		// std::cout << "this->_fileResponse: " << this->_fileResponse << std::endl;
 	}
 
 	return (this->_setResponseStream());
