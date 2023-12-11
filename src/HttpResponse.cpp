@@ -2,29 +2,39 @@
 
 HttpResponse::HttpResponse()
 {
-	this->_config_ser = -1;
 	this->_statusCode = 200;
 	this->_checkCGI = 0;
 	this->_autoIndex = 0;
 	this->_config_cgi_path = "";
 	this->_url = "";
 	this->_filenameDelete = "";
-	this->_filename = "";
 	this->_return = "";
-	this->_status[100] = "Continue";
-	this->_status[101] = "Switching Protocols";
+
+	// default request
+	this->_body = "";
+	this->_config = NULL;
+	this->_connection = "";
+	this->_filename = "";
+	this->_method = "";
+	this->_path = "";
+	this->_port = "";
+	this->_serverName = "";
+	// default serve
+	this->_config_ser = -1;
+	this->_config_root = "./page"; // default root
+	this->_config_location = "";
+
+	// default status
 	this->_status[200] = "OK";
 	this->_status[201] = "Created";
-	this->_status[202] = "Accepted";
 	this->_status[301] = "Moved Permanently";
 	this->_status[400] = "Bad Request";
 	this->_status[404] = "Not Found";
 	this->_status[405] = "Method Not Allowed";
-	this->_status[411] = "Length Required";
 	this->_status[413] = "Request Entity Too Large";
 	this->_status[500] = "Internal Server Error";
-	this->_status[501] = "Not Implemented";
-	this->_status[505] = "HTTP Version not supported";
+
+	// default error page
 	this->_fileError[400] = "/error/400.html";
 	this->_fileError[404] = "/error/404.html";
 	this->_fileError[405] = "/error/405.html";
@@ -36,17 +46,111 @@ HttpResponse::~HttpResponse()
 {
 }
 
-HttpResponse::HttpResponse(HttpResponse const &rhs)
+/////////////
+// PRIVATE //
+/////////////
+
+// utils
+
+std::vector<std::string> HttpResponse::_spiltString(std::string &str, std::string const &delim)
 {
-	*this = rhs;
+	size_t pos = 0;
+	std::string token;
+	std::vector<std::string> arr_return;
+
+	while ((pos = str.find(delim)) != std::string::npos)
+	{
+		token = str.substr(0, pos);
+		while (token.find(" ") == 0)
+			token.erase(0, 1);
+		arr_return.push_back(token);
+		str.erase(0, pos + delim.length());
+	}
+	arr_return.push_back(str);
+
+	return arr_return;
 }
 
-HttpResponse &HttpResponse::operator=(HttpResponse const &rhs)
+// set ARGV and ENV for CGI
+
+std::string HttpResponse::_setArgvPath()
 {
-	if (this == &rhs)
-		return *this;
-	// do something
-	return *this;
+	std::string name_cgi = "";
+
+	if (this->_method == "GET" && this->_statusCode == 404 && this->_autoIndex == 1 && this->_path != "/favicon.ico")
+		name_cgi = "autoindex";
+	else if (this->_method == "POST" && this->_statusCode != 405 && this->_statusCode != 413)
+		name_cgi = "post";
+	else if (this->_method == "DELETE")
+		name_cgi = "delete";
+	else if (this->_method == "GET" && this->_statusCode == 301)
+		name_cgi = "redirect";
+	else if (this->_method == "GET" || this->_statusCode != 200)
+		name_cgi = "get";
+
+	return this->_config_cgi_path + "/" + name_cgi + "." + this->_suffixCGI;
+}
+
+std::string HttpResponse::_setENVArgv(std::string const &name, std::string const &value)
+{
+	return (name + "=" + value);
+}
+
+// setting serve
+
+int HttpResponse::_checkPort()
+{
+	unsigned int amount_ser = this->_config->getAmountServConfig();
+
+	for (unsigned int i = 0; i < amount_ser; i++) {
+		if (this->_port.compare(this->_config->getServConfigVal(i, "listen")) == 0) {
+			this->_config_ser = i;
+			break;
+		}
+	}
+
+	return (this->_config_ser);
+}
+
+int HttpResponse::_checkPath()
+{
+	std::string 				tmp = this->_path;
+	std::vector<std::string>	path_trim = this->_spiltString(tmp, ":");
+
+	if (path_trim.size() > 1)
+		path_trim[0] += "/";
+	this->_config_location = this->_config->getServConfigVal(this->_config_ser, "location " + path_trim[0]);
+
+	if (this->_config_location.length() == 0)
+	{
+		std::string tmpPath = path_trim[0];
+		std::size_t found = tmpPath.find_last_of("/");
+
+		while (found != std::string::npos)
+		{
+			tmpPath = tmpPath.substr(0, found);
+			this->_config_location = this->_config->getServConfigVal(this->_config_ser, "location " + tmpPath + "/");
+			if (this->_config_location.length() > 0)
+				break;
+			found = tmpPath.find_last_of("/");
+		}
+	}
+
+	return this->_config_location.length();
+}
+
+////////////
+// PUBLIC //
+////////////
+
+void HttpResponse::setBody(std::string const &body)
+{
+	this->_body = body;
+}
+
+void HttpResponse::setConfig(ConfigFileHandle *config)
+{
+	this->_config = config;
 }
 
 void HttpResponse::setConnection(std::string const &connection)
@@ -54,14 +158,14 @@ void HttpResponse::setConnection(std::string const &connection)
 	this->_connection = connection;
 }
 
-void HttpResponse::setBody(std::string const &body)
+void HttpResponse::setFileName(std::string const &filename)
 {
-	this->_body = body;
+	this->_filename = filename;
 }
 
-void HttpResponse::setServername(std::string const &servername)
+void HttpResponse::setMethod(std::string const &method)
 {
-	this->_serverName = servername;
+	this->_method = method;
 }
 
 void HttpResponse::setPath(std::string const &path)
@@ -74,15 +178,75 @@ void HttpResponse::setPort(std::string const &port)
 	this->_port = port;
 }
 
-void HttpResponse::setMethod(std::string const &method)
+void HttpResponse::setServername(std::string const &servername)
 {
-	this->_method = method;
+	this->_serverName = servername;
 }
 
-void HttpResponse::setFileName(std::string const &filename)
+std::string HttpResponse::returnResponse()
 {
-	this->_filename = filename;
+	this->printSetForRequest();
+	try
+	{
+		if (this->_checkPort() > -1 && this->_checkPath()) {
+			this->_checkAutoIndex();
+			this->_setConfig();
+			this->_setErrorPage();
+			this->_setCGI();
+			this->_url = "http://" + this->_serverName + ":" + this->_port + this->_path;
+			this->_checkReturn();
+			this->_checkMethod();
+			this->_setRootPath();
+			this->_setContentType();
+			if (this->_method == "POST")
+			{
+				this->_checkBodySize();
+			}
+			this->_setFileResponse(this->_config_root + this->_path, this->_path);
+			this->_statusCode = 200;
+		}
+		else
+			throw(404);
+	} catch (int status) {
+		this->_statusCode = status;
+		this->_fileResponse = this->_config_root + this->_fileError[status];
+	}
+
+	return (this->_setResponseStream());
 }
+
+//////////
+// TEST //
+//////////
+
+
+void HttpResponse::printVector(const std::vector<std::string> &vec)
+{
+	std::vector<std::string>::const_iterator iter;
+
+	for (iter = vec.begin(); iter != vec.end(); ++iter) {
+		std::cout << *iter << std::endl;
+	}
+}
+
+void HttpResponse::printSetForRequest()
+{
+	std::cout << "this->_body: " << this->_body << std::endl;
+	std::cout << "this->_connection: " << this->_connection << std::endl;
+	std::cout << "this->_filename: " << this->_filename << std::endl;
+	std::cout << "this->_method: " << this->_method << std::endl;
+	std::cout << "this->_path: " << this->_path << std::endl;
+	std::cout << "this->_port: " << this->_port << std::endl;
+	std::cout << "this->_serverName: " << this->_serverName << std::endl;
+}
+
+
+
+
+
+
+
+
 
 void HttpResponse::_checkFile()
 {
@@ -104,54 +268,9 @@ void HttpResponse::_checkAutoIndex()
 		this->_autoIndex = 1;
 }
 
-void HttpResponse::setConfig(ConfigFileHandle *config)
-{
-	this->_config = config;
-}
-
 void HttpResponse::_setHeader(std::string const &key, std::string const &value)
 {
 	this->_header[key] = value;
-}
-
-int HttpResponse::_checkPort()
-{
-	unsigned int amount_ser = this->_config->getAmountServConfig();
-	for (int i = 0; i < amount_ser; i++)
-	{
-		if (this->_port.compare(this->_config->getServConfigVal(i, "listen")) == 0)
-		{
-			this->_config_ser = i;
-			break;
-		}
-	}
-	return (this->_config_ser);
-}
-
-int HttpResponse::_checkPath()
-{
-	std::string tmp = this->_path;
-	std::vector<std::string> path_trim = this->_spiltString(tmp, ":");
-
-	if (path_trim.size() > 1)
-		path_trim[0] += "/";
-	this->_config_location = (this->_config_ser > -1) ? this->_config->getServConfigVal(this->_config_ser, "location " + path_trim[0]) : "";
-
-	if (this->_config_location.length() == 0)
-	{
-		std::string tmpPath = path_trim[0];
-		std::size_t found = tmpPath.find_last_of("/");
-		while (found != std::string::npos)
-		{
-			tmpPath = tmpPath.substr(0, found);
-			this->_config_location = (this->_config_ser > -1) ? this->_config->getServConfigVal(this->_config_ser, "location " + tmpPath + "/") : "";
-			if (this->_config_location.length() > 0)
-				break;
-			found = tmpPath.find_last_of("/");
-		}
-	}
-
-	return this->_config_location.length();
 }
 
 void HttpResponse::_checkReturn()
@@ -198,25 +317,6 @@ std::string HttpResponse::_setConfigCondition(std::string const &nameCondition)
 	return condition;
 }
 
-std::vector<std::string> HttpResponse::_spiltString(std::string &str, std::string const &delim)
-{
-	size_t pos = 0;
-	std::string token;
-	std::vector<std::string> arr_return;
-
-	while ((pos = str.find(delim)) != std::string::npos)
-	{
-		token = str.substr(0, pos);
-		while (token.find(" ") == 0)
-			token.erase(0, 1);
-		arr_return.push_back(token);
-		str.erase(0, pos + delim.length());
-	}
-	arr_return.push_back(str);
-
-	return arr_return;
-}
-
 void HttpResponse::_checkMethod()
 {
 	// std::cout << YEL << "In _checkMethod()" << reset << std::endl;
@@ -258,16 +358,6 @@ void HttpResponse::_setRootPath()
 		return;
 	}
 	throw(500);
-}
-
-void printVector(const std::vector<std::string> &vec)
-{
-	std::vector<std::string>::const_iterator iter; // Iterator for vector
-
-	for (iter = vec.begin(); iter != vec.end(); ++iter)
-	{
-		std::cout << YEL << *iter << reset << std::endl; // Print each string element
-	}
 }
 
 std::string HttpResponse::_searchIndex(std::string const &pathFile)
@@ -359,30 +449,6 @@ void HttpResponse::_setCGI()
 			}
 		}
 	}
-}
-
-std::string HttpResponse::_setENVArgv(std::string const &name, std::string const &value)
-{
-	return (name + "=" + value);
-}
-
-std::string HttpResponse::_setArgvPath()
-{
-	std::string name_cgi = "";
-
-	if (this->_method == "GET" && this->_statusCode == 404 && this->_autoIndex == 1 && this->_path != "/favicon.ico")
-		name_cgi = "autoindex";
-	else if (this->_method == "POST" && this->_statusCode != 405 && this->_statusCode != 413)
-		name_cgi = "post";
-	else if (this->_method == "DELETE")
-		name_cgi = "delete";
-	else if (this->_method == "GET" && this->_statusCode == 301)
-		name_cgi = "redirect";
-	else if (this->_method == "GET" || this->_statusCode != 200)
-		name_cgi = "get";
-std::cout << "this->_method: " << this->_method << ", this->_statusCode: " << this->_statusCode << ", name_cgi: " << name_cgi << std::endl;
-std::cout << "this->_fileResponse: " << this->_fileResponse << std::endl;
-	return this->_config_cgi_path + "/" + name_cgi + "." + this->_suffixCGI;
 }
 
 void HttpResponse::_setContentType()
@@ -567,41 +633,4 @@ std::string HttpResponse::_setResponseStream()
 	resStream << contentRes;
 
 	return resStream.str();
-}
-
-std::string HttpResponse::returnResponse()
-{
-	try
-	{
-		if (this->_checkPort() > -1 && this->_checkPath())
-		{
-			this->_checkAutoIndex();
-			this->_setConfig();
-			this->_setErrorPage();
-			this->_setCGI();
-			this->_url = "http://" + this->_serverName + ":" + this->_port + this->_path;
-			this->_checkReturn();
-			this->_checkMethod();
-			this->_setRootPath();
-			this->_setContentType();
-			if (this->_method == "POST")
-			{
-				this->_checkBodySize();
-			}
-			this->_setFileResponse(this->_config_root + this->_path, this->_path);
-			this->_statusCode = 200;
-		}
-		else
-		{
-			throw(404);
-		}
-	}
-	catch (int status)
-	{
-		this->_statusCode = status;
-		this->_fileResponse = this->_config_root + this->_fileError[status];
-		// std::cout << "this->_fileResponse: " << this->_fileResponse << std::endl;
-	}
-
-	return (this->_setResponseStream());
 }
