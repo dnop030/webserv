@@ -56,6 +56,18 @@ HttpResponse::~HttpResponse()
 
 // utils
 
+int HttpResponse::_checkFileExits(const std::string &file_name)
+{
+	std::ifstream ifs(file_name);
+
+	if (ifs.good()) {
+		ifs.close();
+		return (1);
+	}
+
+	return (0);
+}
+
 void HttpResponse::_checkFile()
 {
 	std::ifstream ifs(this->_fileResponse);
@@ -285,6 +297,59 @@ void HttpResponse::_setFileResponse(std::string const &pathFile, std::string con
 		this->_checkFile();
 }
 
+void HttpResponse::_checkFilenameDD() 
+{
+	if (this->_filenameDD.length() > 0) {
+		this->_fileResponse = this->_config_root + ":" + this->_port + "/" + this->_filenameDD;
+		if (this->_checkFileExits(this->_fileResponse)) {
+			this->_contentType = "application/octet-stream";
+			this->_setHeader("Content-Disposition:", "attachment; filename=" + this->_filenameDD);
+		} else {
+			this->_statusCode = 404;
+			this->_fileResponse = "./page" + this->_fileError[404];
+		}
+	}
+}
+
+std::string HttpResponse::_methodDelete()
+{
+	std::string del_filename = this->_config_root + ":" + this->_port + "/" + this->_filenameDD;
+
+	if (this->_checkFileExits(del_filename)) {
+		remove(del_filename.c_str());
+
+		return this->_filenameDD + " has been deleted successfully.";
+	} else
+		this->_statusCode = 404;
+
+	return "";
+}
+
+std::string HttpResponse::_methodPost()
+{
+	struct stat 	statbuf;
+	std::string		path_upload = this->_config_root + ":"+ this->_port;
+	std::string		path_file = path_upload + "/" + this->_filename;
+	std::ifstream	ifs;
+
+	if (stat(path_upload.c_str(), &statbuf) != 0)
+		mkdir(path_upload.c_str(), 0764);
+
+	ifs.open(path_file, std::ifstream::in);
+	if (ifs.good()) {
+		ifs.close();
+		this->_statusCode = 400;
+
+		return "";
+	}
+	std::ofstream ofs(path_file);
+	ofs << this->_body;
+	ofs.close();
+	this->_statusCode = 201;
+
+	return this->_filename + " has been uploaded successfully.";
+}
+
 ////////////
 // PUBLIC //
 ////////////
@@ -502,41 +567,13 @@ std::string HttpResponse::_setResponseStream()
 			close(fd[0]);
 		}
 	}
-	else
-	{
+	else {
 		if (this->_method == "DELETE")
-		{
-			std::string del_filename = this->_fileResponse;
-			remove(del_filename.c_str());
-			contentRes = this->_filenameDD + " has been deleted successfully.";
-		}
+			contentRes = this->_methodDelete();
 		else if (this->_method == "POST" && this->_statusCode != 405 && this->_statusCode != 413)
-		{
-			struct stat statbuf;
-			std::string path_upload = this->_config_root + this->_path;
-			std::string path_file = path_upload + this->_filename;
-			std::ifstream ifs;
-			if (stat(path_upload.c_str(), &statbuf) != 0)
-				mkdir(path_upload.c_str(), 0764);
-			ifs.open(path_file, std::ifstream::in);
-			if (ifs.good() == false)
-			{
-				ifs.close();
-				std::ofstream ofs(path_file);
-				ofs << this->_body;
-				ofs.close();
-				this->_statusCode = 201;
-				contentRes = this->_filename + " has been uploaded successfully.";
-			}
-			else
-			{
-				ifs.close();
-				this->_statusCode = 400;
-				contentRes = this->_filename + " already exists.";
-			}
-		}
-		else
-		{
+			contentRes = this->_methodPost();
+		else {
+			this->_checkFilenameDD();
 			std::ifstream ifs(this->_fileResponse);
 			std::string content((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
 			contentRes = content;

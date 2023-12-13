@@ -43,6 +43,7 @@ class HttpResponse : public Http
 		std::string			_config_suffix_cgi;
 		std::map<std::string, std::string>	_config_cgi;
 		// utils
+		int							_checkFileExits(std::string const &file_name);
 		void						_checkFile();
 		void						_setHeader(std::string const &key, std::string const &value);
 		std::string					_searchIndex(std::string const &pathFile);
@@ -58,7 +59,9 @@ class HttpResponse : public Http
 		void				_checkAllowMethod();
 		void				_checkBodySize();
 		void				_setFileResponse(std::string const &pathFile, std::string const &rootPath);
-
+		void 				_checkFilenameDD();
+		std::string			_methodDelete();
+		std::string			_methodPost();
 
 		
 		
