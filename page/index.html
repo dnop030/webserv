@@ -43,7 +43,7 @@
 
 			axios.request({
 				method: "POST",
-				url: `http://localhost:${local_port}/upload:${local_port}/`,
+				url: `http://localhost:${local_port}/upload/`,
 				data: formData,
 				headers: {
 					"Content-Type": "multipart/form-data",
@@ -63,7 +63,7 @@
 
 		axios.request({
 				method: "DELETE",
-				url: `http://localhost:${local_port}/upload:${local_port}/${namefileDelete.value}`,
+				url: `http://localhost:${local_port}/upload/?file=${namefileDelete.value}`,
 			}).then(function (response) {
 				console.log(response.data);
 			}).catch(function (error) {
@@ -76,7 +76,7 @@
 		const buttonDownload = document.getElementById("buttonDownload");
 
 		setFileName.addEventListener("click", (e) => {
-			buttonDownload.href = `http://localhost:${local_port}/upload:${local_port}/${namefileDownload.value}`;
+			buttonDownload.href = `http://localhost:${local_port}/upload/?file=${namefileDownload.value}`;
 		});
 	</script>
 </body>

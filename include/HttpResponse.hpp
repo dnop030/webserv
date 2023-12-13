@@ -28,8 +28,14 @@ class HttpResponse : public Http
 		// default error page
 		std::map<int, std::string>	_fileError;
 		// default response
+		int					_statusCode;
 		int					_autoIndex;
+		std::string			_return;
+		std::string			_filenameDD; // filename for (delete or download)
+		std::string			_contentType;
+		std::string 		_fileResponse;
 		std::map<std::string, std::string>	_all_config;
+		std::map<std::string, std::string>	_header;
 		// default config serve
 		int					_config_ser;
 		std::string			_config_root;
@@ -37,40 +43,30 @@ class HttpResponse : public Http
 		std::string			_config_suffix_cgi;
 		std::map<std::string, std::string>	_config_cgi;
 		// utils
+		void						_checkFile();
+		void						_setHeader(std::string const &key, std::string const &value);
+		std::string					_searchIndex(std::string const &pathFile);
 		std::vector<std::string>	_spiltString(std::string &str, std::string const &delim);
 		// setting serve
 		int					_checkPort();
 		int					_checkPath();
 		int					_checkAutoIndex();
+		void				_setRootPath();
 		void				_setConfig();
+		void				_setCGI();
+		void				_checkReturn();
+		void				_checkAllowMethod();
+		void				_checkBodySize();
+		void				_setFileResponse(std::string const &pathFile, std::string const &rootPath);
 
 
-
-
-		int					_statusCode;
-		std::string 		_fileResponse;
-		std::string			_contentType;
-		std::string			_url;
-		std::string			_filenameDelete;
-		std::string			_return;
-		std::map<std::string, std::string>	_header;
-		// read from ConfigFileHandle
-		std::vector<std::string>	_config_condition; // del
+		
+		
 		// set ENV and ARGV
 		std::string			_setArgvPath();
 		std::string			_setENVArgv(std::string const &name, std::string const &value);
-		// func check and set before send response
-		void				_checkReturn();
-		void				_checkMethod();
-		void				_checkFile();
-		void				_checkBodySize();
-		void				_setHeader(std::string const &key, std::string const &value);
-		void				_setRootPath();
-		void				_setFileResponse(std::string const &pathFile, std::string const &rootPath);
-		void				_setCGI();
-		void				_setContentType();
-		std::string			_setConfigCondition(std::string const &nameCondition);
-		std::string			_searchIndex(std::string const &pathFile);
+		// func check and set before send response	
+		
 		std::string			_setResponseStream();
 
 	public:
@@ -91,9 +87,10 @@ class HttpResponse : public Http
 
 		std::string		returnResponse();
 
-		// test
+		// test del
 		void printVector(const std::vector<std::string> &vec);
 		void printSetForRequest();
+		void printSetForResponse();
 };
 
 #endif
