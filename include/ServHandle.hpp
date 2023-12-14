@@ -39,7 +39,7 @@ public:
 	ServHandle(void);
 	~ServHandle(void);
 
-	void servCreate(char const *configFile);
+	int servCreate(char const *configFile);
 	void servStart(void);
 	void servStop(void);
 
@@ -61,6 +61,8 @@ private:
 
 	void ConnectionHandle(HttpHandle &http, int const &cliFd);
 	void ConnectionClose(void);
+
+	int	ChkDupPort(void);
 
 	bool _servRunning;
 
