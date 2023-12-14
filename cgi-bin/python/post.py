@@ -7,7 +7,7 @@ import utils
 try:
 	path = utils.getEnvValue("ROOT_PATH") + ":" + utils.getEnvValue("PORT")
 	os.makedirs(path, exist_ok=True)
-	filename = utils.getEnvValue("UPLOAD_FILENAME")
+	filename = utils.getEnvValue("FILENAME_UPLOAD")
 	file_path = os.path.join(path, filename)
 	status = 201
 	status_message = "Created"

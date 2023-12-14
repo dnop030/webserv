@@ -46,30 +46,25 @@ class HttpResponse : public Http
 		int							_checkFileExits(std::string const &file_name);
 		void						_checkFile();
 		void						_setHeader(std::string const &key, std::string const &value);
+		std::string					_setENVArgv(std::string const &name, std::string const &value);
 		std::string					_searchIndex(std::string const &pathFile);
 		std::vector<std::string>	_spiltString(std::string &str, std::string const &delim);
 		// setting serve
 		int					_checkPort();
 		int					_checkPath();
 		int					_checkAutoIndex();
-		void				_setRootPath();
 		void				_setConfig();
-		void				_setCGI();
 		void				_checkReturn();
+		void				_setRootPath();
+		void				_setCGI();
 		void				_checkAllowMethod();
 		void				_checkBodySize();
 		void				_setFileResponse(std::string const &pathFile, std::string const &rootPath);
 		void 				_checkFilenameDD();
 		std::string			_methodDelete();
 		std::string			_methodPost();
-
-		
-		
-		// set ENV and ARGV
-		std::string			_setArgvPath();
-		std::string			_setENVArgv(std::string const &name, std::string const &value);
-		// func check and set before send response	
-		
+		std::string			_setArgvPath();		
+		std::string			_cgi();
 		std::string			_setResponseStream();
 
 	public:
@@ -94,6 +89,7 @@ class HttpResponse : public Http
 		void printVector(const std::vector<std::string> &vec);
 		void printSetForRequest();
 		void printSetForResponse();
+		void printSetForCgi(const std::string &name_cgi);
 };
 
 #endif

@@ -8,13 +8,13 @@ if (!file_exists($path)) {
 	mkdir($path, 0764, true);
 }
 
-$file_path = $path . '/'. getenv('UPLOAD_FILENAME');
+$file_path = $path . '/'. getenv('FILENAME_UPLOAD');
 $status = 201;
 $status_message = 'Created';
 $message = '';
 
 if (file_exists($file_path)) {
-	$message = getenv('UPLOAD_FILENAME') . ' already exists';
+	$message = getenv('FILENAME_UPLOAD') . ' already exists';
 	$status = 400;
 	$status_message = 'Bad Request';
 } else {
@@ -25,7 +25,7 @@ if (file_exists($file_path)) {
 	$input = fgets(STDIN);
 	fwrite($ofile, $input);
 	fclose($ofile);
-	$message = getenv('UPLOAD_FILENAME') . ' has been uploaded successfully.';
+	$message = getenv('FILENAME_UPLOAD') . ' has been uploaded successfully.';
 }
 
 $dic_header = [

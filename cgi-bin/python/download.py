@@ -5,13 +5,16 @@ import utils
 
 try:
 	path = utils.getEnvValue("ROOT_PATH") + ":" + utils.getEnvValue("PORT")
-	filename = utils.getEnvValue("UPLOAD_FILENAME")
+	filename = utils.getEnvValue("FILENAME_DOWNLOAD")
 	file_path = os.path.join(path, filename)
 	read_file = ""
 	
-	with open(file_path, "r") as file:
-		read_file = file.read()
-		file.close()	
+	if (os.path.isfile(file_path)):
+		with open(file_path, "r") as file:
+			read_file = file.read()
+			file.close()
+	else:
+		raise utils.InternalServerError
 	dic_header = {
 		"Connection" : utils.getEnvValue("CONNECTION"),
 		"Content-Type" : "application/octet-stream",

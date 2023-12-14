@@ -80,6 +80,11 @@ void HttpResponse::_setHeader(std::string const &key, std::string const &value)
 	this->_header[key] = value;
 }
 
+std::string HttpResponse::_setENVArgv(std::string const &name, std::string const &value)
+{
+	return (name + "=" + value);
+}
+
 std::string HttpResponse::_searchIndex(std::string const &pathFile)
 {
 	auto index = this->_all_config.find("index");
@@ -117,31 +122,6 @@ std::vector<std::string> HttpResponse::_spiltString(std::string &str, std::strin
 	arr_return.push_back(str);
 
 	return arr_return;
-}
-
-// set ARGV and ENV for CGI
-
-std::string HttpResponse::_setArgvPath()
-{
-	std::string name_cgi = "";
-
-	if (this->_method == "GET" && this->_statusCode == 404 && this->_autoIndex == 1 && this->_path != "/favicon.ico")
-		name_cgi = "autoindex";
-	else if (this->_method == "POST" && this->_statusCode != 405 && this->_statusCode != 413)
-		name_cgi = "post";
-	else if (this->_method == "DELETE")
-		name_cgi = "delete";
-	else if (this->_method == "GET" && this->_statusCode == 301)
-		name_cgi = "redirect";
-	else if (this->_method == "GET" || this->_statusCode != 200)
-		name_cgi = "get";
-
-	return this->_config_cgi["root"] + "/" + name_cgi + "." + this->_config_suffix_cgi;
-}
-
-std::string HttpResponse::_setENVArgv(std::string const &name, std::string const &value)
-{
-	return (name + "=" + value);
 }
 
 // setting serve
@@ -216,6 +196,30 @@ void HttpResponse::_setConfig()
 	}
 }
 
+void HttpResponse::_checkReturn()
+{
+	auto re = this->_all_config.find("return");
+
+	if (re != this->_all_config.end()) {
+		this->_return = re->second;
+		throw(301);
+	}
+}
+
+void HttpResponse::_setRootPath()
+{
+	auto root = this->_all_config.find("root");
+
+	if (root == this->_all_config.end())
+		throw(500);
+	this->_config_root = root->second;
+	if ((this->_method == "DELETE")|| (this->_method == "GET" && this->_path.find("?file=") != std::string::npos)) {
+		std::vector<std::string>  filename = this->_spiltString(this->_path, "=");
+		
+		this->_filenameDD = filename[filename.size() - 1];
+	}
+}
+
 void HttpResponse::_setCGI()
 {
 	std::string 				config_cgi = this->_config->getServConfigVal(this->_config_ser, "location_back /cgi-bins/.py");
@@ -246,16 +250,6 @@ void HttpResponse::_setCGI()
 	}
 }
 
-void HttpResponse::_checkReturn()
-{
-	auto re = this->_all_config.find("return");
-
-	if (re != this->_all_config.end()) {
-		this->_return = re->second;
-		throw(301);
-	}
-}
-
 void HttpResponse::_checkAllowMethod()
 {
 	auto method = this->_all_config.find("allow_method");
@@ -263,20 +257,6 @@ void HttpResponse::_checkAllowMethod()
 	if (method != this->_all_config.end()) {
 		if (method->second.find(this->_method) == std::string::npos)
 			throw(405);
-	}
-}
-
-void HttpResponse::_setRootPath()
-{
-	auto root = this->_all_config.find("root");
-
-	if (root == this->_all_config.end())
-		throw(500);
-	this->_config_root = root->second;
-	if ((this->_method == "DELETE")|| (this->_method == "GET" && this->_path.find("?file=") != std::string::npos)) {
-		std::vector<std::string>  filename = this->_spiltString(this->_path, "=");
-		
-		this->_filenameDD = filename[filename.size() - 1];
 	}
 }
 
@@ -350,6 +330,142 @@ std::string HttpResponse::_methodPost()
 	return this->_filename + " has been uploaded successfully.";
 }
 
+std::string HttpResponse::_setArgvPath()
+{
+	std::string name_cgi = "";
+
+	if (this->_statusCode == 404 && this->_autoIndex == 1)
+		name_cgi = "autoindex";
+	else if (this->_method == "DELETE")
+		name_cgi = "delete";
+	else if (this->_filenameDD.length() > 0)
+		name_cgi = "download";
+	else if (this->_method == "POST" && this->_statusCode != 405 && this->_statusCode != 413)
+		name_cgi = "post";
+	else if (this->_statusCode == 301)
+		name_cgi = "redirect";
+	else
+		name_cgi = "get";
+
+printSetForCgi(name_cgi); // del
+	return this->_config_cgi["root"] + "/" + name_cgi + "." + this->_config_suffix_cgi;
+}
+
+std::string HttpResponse::_cgi()
+{
+	int			n = 0;
+	int			fd[2];
+	int			post[2];
+	char		buffer[1024];
+	pid_t		pid;
+	std::string	path = this->_setArgvPath();
+	char *const argv[] = {
+					const_cast<char *>(this->_config_cgi["program"].data()),
+					const_cast<char *>(path.data()),
+					NULL
+				};
+	std::string	filename = this->_setENVArgv("FILENAME", this->_fileResponse);
+	std::string	statusCode = this->_setENVArgv("STATUS_CODE", std::to_string(this->_statusCode));
+	std::string	statusMessage = this->_setENVArgv("STATUS_MESSAGE", this->_status[this->_statusCode]);
+	std::string	port = this->_setENVArgv("PORT", this->_port);
+	std::string	root_path = this->_setENVArgv("ROOT_PATH", this->_config_root);
+	std::string	connection = this->_setENVArgv("CONNECTION", this->_connection);
+	std::string	contentType = this->_setENVArgv("CONTENT_TYPE", this->_contentType);
+	std::string	filenameDelete = this->_setENVArgv("FILENAME_DELETE", this->_filenameDD);
+	std::string	filenameDownload = this->_setENVArgv("FILENAME_DOWNLOAD", this->_filenameDD);
+	std::string	filenameUpload = this->_setENVArgv("FILENAME_UPLOAD", this->_filename);
+	std::string	redirect = this->_setENVArgv("REDIRECT", this->_return);
+	std::string	contentRes = "";
+	char 		*envp[] = {
+					const_cast<char *>(filename.data()),
+					const_cast<char *>(statusCode.data()),
+					const_cast<char *>(statusMessage.data()),
+					const_cast<char *>(port.data()),
+					const_cast<char *>(connection.data()),
+					const_cast<char *>(contentType.data()),
+					const_cast<char *>(root_path.data()),
+					const_cast<char *>(filenameDelete.data()),
+					const_cast<char *>(filenameDownload.data()),
+					const_cast<char *>(filenameUpload.data()),
+					const_cast<char *>(redirect.data()),
+					NULL
+				};
+	const char	*path_cmd = this->_config_cgi["path_cmd"].c_str();
+
+	pipe(fd);
+	if (this->_method == "POST") {
+		pipe(post);
+		write(post[1], this->_body.c_str(), this->_body.length());
+	}
+	pid = fork();
+	if (pid == 0) {
+		close(fd[0]);
+		dup2(fd[1], 1);
+		close(fd[1]);
+		if (this->_method == "POST") {
+			close(post[1]);
+			dup2(post[0], 0);
+			close(post[0]);
+		}
+		execve(path_cmd, argv, envp);
+	} else {
+		if (this->_method == "POST") {
+			close(post[0]);
+			close(post[1]);
+		}
+		close(fd[1]);
+		waitpid(pid, NULL, 0);
+		while ((n = read(fd[0], buffer, 1024)) > 0) {
+			buffer[n] = '\0';
+			contentRes += buffer;
+		}
+		close(fd[0]);
+	}
+
+	return contentRes;
+}
+
+std::string HttpResponse::_setResponseStream()
+{
+	std::string contentRes = "";
+	std::ostringstream resStream;
+	std::map<std::string, std::string>::iterator it;
+
+	if (this->_config_cgi["is_cgi"] == "on")
+		contentRes = this->_cgi();
+	else {
+		if (this->_method == "DELETE")
+			contentRes = this->_methodDelete();
+		else if (this->_method == "POST" && this->_statusCode != 405 && this->_statusCode != 413)
+			contentRes = this->_methodPost();
+		else {
+			this->_checkFilenameDD();
+			std::ifstream ifs(this->_fileResponse);
+			std::string content((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
+			contentRes = content;
+		}
+
+		this->_setHeader("Content-Length:", std::to_string(contentRes.length()));
+		if (this->_statusCode != 301) {
+			this->_setHeader("Connection:", this->_connection);
+			this->_setHeader("Content-Type:", this->_contentType);
+			this->_setHeader("Location-Header:", "TH");
+		} else {
+			this->_setHeader("Location:", this->_return);
+		}
+
+		resStream << "HTTP/1.1 " << this->_statusCode << " " << this->_status[this->_statusCode] << "\r\n";
+		for (it = this->_header.begin(); it != this->_header.end(); it++) {
+			resStream << it->first << " " << it->second << "\r\n";
+		}
+		resStream << "\r\n";
+	}
+	resStream << contentRes;
+
+	return resStream.str();
+}
+
+
 ////////////
 // PUBLIC //
 ////////////
@@ -400,9 +516,9 @@ this->printSetForRequest(); // del
 	try {
 		if (this->_checkPort() > -1 && this->_checkPath() && this->_checkAutoIndex()) {
 			this->_setConfig();
+			this->_checkReturn();
 			this->_setRootPath();
 			this->_setCGI();
-			this->_checkReturn();
 			this->_checkAllowMethod();
 			this->_checkBodySize();
 			this->_setFileResponse(this->_config_root, this->_path);
@@ -463,137 +579,12 @@ void HttpResponse::printSetForResponse()
 		std::cout << value.first << " " << value.second << std::endl;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-std::string HttpResponse::_setResponseStream()
+void HttpResponse::printSetForCgi(const std::string &name_cgi)
 {
-	std::string contentRes = "";
-	std::ostringstream resStream;
-	std::map<std::string, std::string>::iterator it;
-
-	if (this->_config_cgi["is_cgi"] == "on")
-	{
-		int n = 0;
-		int fd[2];
-		int post[2];
-		char buffer[1024];
-		pid_t pid;
-		std::string path = this->_setArgvPath();
-		char *const argv[] = {
-			const_cast<char *>(this->_config_cgi["program"].data()),
-			const_cast<char *>(path.data()),
-			NULL};
-		std::string filename = this->_setENVArgv("FILENAME", this->_fileResponse);
-		std::string statusCode = this->_setENVArgv("STATUS_CODE", std::to_string(this->_statusCode));
-		std::string statusMessage = this->_setENVArgv("STATUS_MESSAGE", this->_status[this->_statusCode]);
-		std::string hostname = this->_setENVArgv("HOSTNAME", this->_serverName);
-		std::string port = this->_setENVArgv("PORT", this->_port);
-		std::string argvPath = this->_setENVArgv("PATH", this->_path);
-		std::string root_path = this->_setENVArgv("ROOT_PATH", this->_config_root);
-		std::string connection = this->_setENVArgv("CONNECTION", this->_connection);
-		std::string contentType = this->_setENVArgv("CONTENT_TYPE", this->_contentType);
-		std::string body = this->_setENVArgv("BODY", this->_body);
-		std::string filenameDelete = this->_setENVArgv("FILENAME_DELETE", this->_filenameDD);
-		std::string upfilename = this->_setENVArgv("UPLOAD_FILENAME", this->_filename);
-		std::string redirect = this->_setENVArgv("REDIRECT", this->_return);
-		char *envp[] = {
-			const_cast<char *>(filename.data()),
-			const_cast<char *>(statusCode.data()),
-			const_cast<char *>(statusMessage.data()),
-			const_cast<char *>(hostname.data()),
-			const_cast<char *>(port.data()),
-			const_cast<char *>(argvPath.data()),
-			const_cast<char *>(connection.data()),
-			const_cast<char *>(contentType.data()),
-			const_cast<char *>(root_path.data()),
-			const_cast<char *>(body.data()),
-			const_cast<char *>(filenameDelete.data()),
-			const_cast<char *>(upfilename.data()),
-			const_cast<char *>(redirect.data()),
-			NULL};
-		const char *path_cmd = this->_config_cgi["path_cmd"].c_str();
-
-		pipe(fd);
-		if (this->_method == "POST")
-		{
-			pipe(post);
-			write(post[1], this->_body.c_str(), this->_body.length());
-		}
-		pid = fork();
-		if (pid == 0)
-		{
-			close(fd[0]);
-			dup2(fd[1], 1);
-			close(fd[1]);
-			if (this->_method == "POST")
-			{
-				close(post[1]);
-				dup2(post[0], 0);
-				close(post[0]);
-			}
-			execve(path_cmd, argv, envp);
-		}
-		else
-		{
-			if (this->_method == "POST")
-			{
-				close(post[0]);
-				close(post[1]);
-			}
-			close(fd[1]);
-			waitpid(pid, NULL, 0);
-			contentRes = "";
-			while ((n = read(fd[0], buffer, 1024)) > 0)
-			{
-				buffer[n] = '\0';
-				contentRes += buffer;
-			}
-			close(fd[0]);
-		}
-	}
-	else {
-		if (this->_method == "DELETE")
-			contentRes = this->_methodDelete();
-		else if (this->_method == "POST" && this->_statusCode != 405 && this->_statusCode != 413)
-			contentRes = this->_methodPost();
-		else {
-			this->_checkFilenameDD();
-			std::ifstream ifs(this->_fileResponse);
-			std::string content((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
-			contentRes = content;
-		}
-
-		this->_setHeader("Content-Length:", std::to_string(contentRes.length()));
-		if (this->_statusCode != 301) {
-			this->_setHeader("Content-Type:", this->_contentType);
-			this->_setHeader("Location-Header:", "TH");
-		} else {
-			this->_setHeader("Location:", this->_return);
-		}
-
-		resStream << "HTTP/1.1 " << this->_statusCode << " " << this->_status[this->_statusCode] << "\r\n";
-		for (it = this->_header.begin(); it != this->_header.end(); it++) {
-			resStream << it->first << " " << it->second << "\r\n";
-		}
-		resStream << "\r\n";
-	}
-	resStream << contentRes;
-
-	return resStream.str();
+	std::cout << "this->_config_root: " << this->_config_root << std::endl;
+	std::cout << "this->_port: " << this->_port << std::endl;
+	std::cout << "this->_filenameDD: " << this->_filenameDD << std::endl;
+	std::cout << "this->_filename: " << this->_filename << std::endl;
+	std::cout << "this->_name: " << name_cgi << std::endl;
+	std::cout << "this->_config_cgi[root]: " << this->_config_cgi["root"] << std::endl;
 }

@@ -15,7 +15,7 @@ try:
 	utils.printHeaderBody(dic_header, body_field, utils.getEnvValue("STATUS_CODE"), utils.getEnvValue("STATUS_MESSAGE"))
 except (utils.InternalServerError,  FileNotFoundError):
 	status = utils.getEnvValue("STATUS_CODE")
-	with open(f"./page/error/{status}.html", "r") as file:
+	with open(f"./page/error/500.html", "r") as file:
 		err_page = file.read()
 		file.close()
 	dic_header = {
@@ -23,5 +23,5 @@ except (utils.InternalServerError,  FileNotFoundError):
 		"Content-Type" : utils.getEnvValue("CONTENT_TYPE"),
 		"Content-Length" : len(err_page) + 1,
 	}
-	utils.printHeaderBody(dic_header, err_page, utils.getEnvValue("STATUS_CODE"), utils.getEnvValue("STATUS_MESSAGE"))
+	utils.printHeaderBody(dic_header, err_page, "500", "Internal Server Error")
 	
