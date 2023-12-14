@@ -12,6 +12,7 @@ HttpHandle::HttpHandle(std::string &buffer) : _statusCode(0), _buffer(buffer), _
 	this->_header = this->_req->getHeader();
 	this->_body = this->_req->getBody();
 	this->_filename = this->_req->getFilename();
+	this->_statusCode = this->_req->getStatusCode();
 	this->_bodyChunk = this->_req->getBodyChunk();
 	if (this->_header.find("Content-Length") != this->_header.end())
 		this->_contentLength = ft_stod(this->_header["Content-Length"]);
