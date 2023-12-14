@@ -51,6 +51,7 @@ class HttpResponse : public Http
 		std::vector<std::string>	_spiltString(std::string &str, std::string const &delim);
 		// setting serve
 		int					_checkPort();
+		int					_checkServerName();
 		int					_checkPath();
 		int					_checkAutoIndex();
 		void				_setConfig();

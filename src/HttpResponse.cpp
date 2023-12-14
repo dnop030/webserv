@@ -140,6 +140,16 @@ int HttpResponse::_checkPort()
 	return (this->_config_ser);
 }
 
+int HttpResponse::_checkServerName()
+{
+	std::string server_name = this->_config->getServConfigVal(this->_config_ser, "server_name");
+
+	if (server_name.length() > 0 && server_name.compare(this->_serverName) != 0)
+		return (0);
+
+	return (1);
+}
+
 int HttpResponse::_checkPath()
 {
 	std::string 				tmp = this->_path;
@@ -514,7 +524,7 @@ std::string HttpResponse::returnResponse()
 {
 this->printSetForRequest(); // del
 	try {
-		if (this->_checkPort() > -1 && this->_checkPath() && this->_checkAutoIndex()) {
+		if (this->_checkPort() > -1 &&  this->_checkServerName() && this->_checkPath() && this->_checkAutoIndex()) {
 			this->_setConfig();
 			this->_checkReturn();
 			this->_setRootPath();
