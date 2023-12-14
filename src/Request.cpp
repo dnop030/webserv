@@ -215,7 +215,7 @@ void Request::checkMethod(std::string &str)
 	else if (str == "DELETE")
 		this->_method = "DELETE";
 	else
-		throw MethodNotAllowed();
+		throw NotImplement();
 }
 
 bool Request::isIPv4(std::string &str)
