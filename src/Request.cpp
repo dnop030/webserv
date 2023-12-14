@@ -31,6 +31,11 @@ Request::Request(std::string &buffer) : _buffer(buffer), _line(0), _buff_size(0)
 		this->_statusCode = 501;
 		std::cout << e.what() << std::endl;
 	}
+	catch (const MethodNotAllowed &e)
+	{
+		this->_statusCode = 405;
+		std::cout << e.what() << std::endl;
+	}
 }
 
 Request::Request(Request const &src) : Http(src), _buff_size(src._buff_size), _buffer(src._buffer), _method(src._method), _port(src._port), _hostname(src._hostname), _path(src._path), _fragment(src._fragment), _bodySize(src._bodySize), _statusCode(src._statusCode)
@@ -78,6 +83,11 @@ const char *Request::LengthRequired::what() const throw()
 const char *Request::NotImplement::what() const throw()
 {
 	return ("501 not implemented");
+}
+
+const char *Request::MethodNotAllowed::what() const throw()
+{
+	return ("405 method not allowed");
 }
 
 bool Request::endLine(std::string &buffer, std::string::size_type idx)
@@ -205,7 +215,7 @@ void Request::checkMethod(std::string &str)
 	else if (str == "DELETE")
 		this->_method = "DELETE";
 	else
-		throw NotImplement();
+		throw MethodNotAllowed();
 }
 
 bool Request::isIPv4(std::string &str)

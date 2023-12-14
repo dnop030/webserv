@@ -88,6 +88,12 @@ public:
 		virtual const char *what() const throw();
 	};
 
+	class MethodNotAllowed : public std::exception
+	{
+	public:
+		virtual const char *what() const throw();
+	};
+
 	void printLine(void);
 	void printMap(std::map<std::string, std::string> &map);
 
