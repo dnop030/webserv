@@ -17,7 +17,7 @@ ServHandle::~ServHandle(void)
 	delete this->_configServ;
 }
 
-void ServHandle::servCreate(char const *configFile)
+int ServHandle::servCreate(char const *configFile)
 {
 
 	std::cout << MAG << "servCreate" << reset << std::endl;
@@ -29,7 +29,12 @@ void ServHandle::servCreate(char const *configFile)
 	// if 0 then return
 
 	// validate server config here !!!!!!!!!!!
+	std::cout << "compare port" << std::endl;
+	if (ChkDupPort() == 1)
+		return (1);
+	std::cout << "aft compare port" << std::endl;
 
+	// create server in order to get Fd number
 	std::cout << MAG << "amout of serv config " << this->_configServ->getAmountServConfig() << reset << std::endl;
 	for (int i = 0; i < this->_configServ->getAmountServConfig(); i++)
 	{
@@ -42,7 +47,7 @@ void ServHandle::servCreate(char const *configFile)
 	if (this->_epoll_fd == -1)
 	{
 		std::cerr << RED << "Failed to create epoll file descriptor" << reset << std::endl;
-		exit(EXIT_FAILURE);
+		return (1);
 	}
 
 	// Add Fd of server into epoll instance
@@ -61,9 +66,11 @@ void ServHandle::servCreate(char const *configFile)
 	this->showMapFd();
 
 	// Need to fix -> using new method
-	this->_event_ret = (struct epoll_event *)calloc(MAXEVENTS, sizeof(struct epoll_event));
+	// this->_event_ret = (struct epoll_event *)calloc(MAXEVENTS, sizeof(struct epoll_event));
+	this->_event_ret = new struct epoll_event[MAXEVENTS];
 
 	this->_servRunning = true;
+	return (0);
 }
 
 void ServHandle::servStart(void)
@@ -224,7 +231,8 @@ void ServHandle::servStop(void)
 
 	if (this->_event_ret != NULL)
 	{
-		free(this->_event_ret);
+		// free(this->_event_ret);
+		delete[] this->_event_ret;
 		this->_event_ret = NULL;
 	}
 	// free(this->_event_ret);
@@ -433,7 +441,7 @@ void ServHandle::sockCliWr(int const &cliFd)
 		std::cout << GRN << "buffer as below" << reset << std::endl;
 		std::cout << GRN << it->second.c_str() << reset << std::endl;
 		send(cliFd, it->second.c_str(), it->second.size(), 0);
-		this->ConnectionClose();
+		this->ConnectionClose(cliFd);
 	}
 	else
 		std::cout << YEL << "[WARNING] Not found response for " << cliFd << reset << std::endl;
@@ -516,16 +524,44 @@ void ServHandle::ConnectionHandle(HttpHandle &http, int const &cliFd)
 		std::cout << GRN << "Connection is alive!!!!" << reset << std::endl;
 }
 
-void ServHandle::ConnectionClose(void)
+void ServHandle::ConnectionClose(int const &cliFd)
 {
-	std::map<int, std::string>::iterator it = this->_mapFd.begin();
+	// std::map<int, std::string>::iterator it = this->_mapFd.begin();
 
-	while (it != this->_mapFd.end())
-	{
-		if (it->second == "cc")
-			this->closeSock(it->first);
-		it++;
+	// while (it != this->_mapFd.end())
+	// {
+	// 	if (it->second == "cc")
+	// 		this->closeSock(it->first);
+	// 	it++;
+	// }
+	if (this->_mapFd[cliFd] == "cc") {
+		std::cout << RED << "found socket need to be closed" << reset << std::endl;
+		this->closeSock(cliFd);
 	}
 	std::cout << GRN << "Show MapFd in ConnectionClose()" << reset << std::endl;
 	this->showMapFd();
+}
+
+int ServHandle::ChkDupPort(void)
+{
+	std::string	cmp;
+	std::string	searcher;
+	// std::cout << RED << "Show amount config " << _configServ->getAmountServConfig() << reset << std::endl << std::endl;
+	// for (int i = 0; i < _configServ->getAmountServConfig(); i++) {
+	// 	std::cout << _configServ->getServConfigVal(i, "listen") << std::endl;
+	// }
+	for (int i = 0; i < (_configServ->getAmountServConfig() - 1); i++) {
+		// std::cout << _configServ->getServConfigVal(i, "listen") << std::endl;
+		cmp = _configServ->getServConfigVal(i, "listen");
+		for (int j = i + 1; j < _configServ->getAmountServConfig(); j++) {
+			// if (_configServ->getServConfigVal(i, "listen").compare(_configServ->getServConfigVal(j, "listen")) == 0)
+			// 	return (1);
+			searcher = _configServ->getServConfigVal(j, "listen");
+			if (cmp.compare(searcher) == 0) {
+				std::cout << "port " << cmp << " equal " << searcher << std::endl;
+				return (1);
+			}
+		}
+	}
+	return (0);
 }

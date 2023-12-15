@@ -30,12 +30,14 @@ int main(int argc, char **argv)
 		if (argc == 2)
 		{
 			std::cout << GRN << "Config file name " << argv[1] << reset << std::endl;
-			servManager.servCreate(argv[1]);
+			if (servManager.servCreate(argv[1]) == 1)
+				return (0);
 		}
 		else
 		{
 			std::cout << YEL << "Config file name Default config file" << reset << std::endl;
-			servManager.servCreate("config/webserv.conf");
+			if (servManager.servCreate("config/webserv.conf") == 1)
+				return (0);
 		}
 		servManager.servStart();
 	}
