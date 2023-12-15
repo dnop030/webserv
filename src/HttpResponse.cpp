@@ -232,14 +232,14 @@ void HttpResponse::_setRootPath()
 
 void HttpResponse::_setCGI()
 {
-	std::string 				config_cgi = this->_config->getServConfigVal(this->_config_ser, "location_back /cgi-bins/.py");
+	std::string 				config_cgi = this->_config->getServConfigVal(this->_config_ser, "location_back /cgi-bin/.py");
 	std::vector<std::string>	arr_cgi;
 	std::vector<std::string>	tmp;
 
 	if (config_cgi.length() > 0) {
 		this->_config_suffix_cgi = "py";
 	} if (config_cgi.length() == 0) {
-		config_cgi = this->_config->getServConfigVal(this->_config_ser, "location_back /cgi-bins/.php");
+		config_cgi = this->_config->getServConfigVal(this->_config_ser, "location_back /cgi-bin/.php");
 		this->_config_suffix_cgi = "php";
 	}
 
@@ -441,9 +441,10 @@ std::string HttpResponse::_setResponseStream()
 	std::ostringstream resStream;
 	std::map<std::string, std::string>::iterator it;
 
-	if (this->_config_cgi["is_cgi"] == "on")
+	if (this->_config_cgi["is_cgi"] == "on") {
 		contentRes = this->_cgi();
-	else {
+	} else {
+		std::cout << "server action" << std::endl;
 		if (this->_method == "DELETE")
 			contentRes = this->_methodDelete();
 		else if (this->_method == "POST" && this->_statusCode != 405 && this->_statusCode != 413)

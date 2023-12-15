@@ -12,7 +12,7 @@ try:
 	if (os.path.isfile(file_path)):
 		with open(file_path, "r") as file:
 			read_file = file.read()
-			file.close()
+		file.close()
 	else:
 		raise utils.InternalServerError
 	dic_header = {
