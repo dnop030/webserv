@@ -66,7 +66,8 @@ int ServHandle::servCreate(char const *configFile)
 	this->showMapFd();
 
 	// Need to fix -> using new method
-	this->_event_ret = (struct epoll_event *)calloc(MAXEVENTS, sizeof(struct epoll_event));
+	// this->_event_ret = (struct epoll_event *)calloc(MAXEVENTS, sizeof(struct epoll_event));
+	this->_event_ret = new struct epoll_event[MAXEVENTS];
 
 	this->_servRunning = true;
 	return (0);
@@ -230,7 +231,8 @@ void ServHandle::servStop(void)
 
 	if (this->_event_ret != NULL)
 	{
-		free(this->_event_ret);
+		// free(this->_event_ret);
+		delete[] this->_event_ret;
 		this->_event_ret = NULL;
 	}
 	// free(this->_event_ret);
