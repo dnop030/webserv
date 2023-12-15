@@ -47,7 +47,7 @@ private:
 	ServHandle(ServHandle const &r);
 	ServHandle &operator=(ServHandle const &r);
 
-	void createServ(std::string const &config);
+	int	createServ(std::string const &config);
 	void showMapFd(void);
 
 	void sockServRd(int const &servFd);

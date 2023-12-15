@@ -38,7 +38,8 @@ int ServHandle::servCreate(char const *configFile)
 	std::cout << MAG << "amout of serv config " << this->_configServ->getAmountServConfig() << reset << std::endl;
 	for (int i = 0; i < this->_configServ->getAmountServConfig(); i++)
 	{
-		this->createServ(this->_configServ->getServConfigVal(i, "listen"));
+		if (this->createServ(this->_configServ->getServConfigVal(i, "listen")) == 1)
+			return (1);
 	}
 
 	// epolll create
@@ -226,7 +227,7 @@ void ServHandle::servStop(void)
 	this->_tmpInt = close(this->_epoll_fd);
 	if (this->_tmpInt != 0)
 	{
-		perror("close when Server Stop ");
+		std::cout << RED << "close when Server Stop " << reset << std::endl;
 	}
 
 	if (this->_event_ret != NULL)
@@ -240,7 +241,7 @@ void ServHandle::servStop(void)
 	this->_servRunning = false;
 }
 
-void ServHandle::createServ(std::string const &config)
+int ServHandle::createServ(std::string const &config)
 {
 
 	int opt = 1;
@@ -253,29 +254,29 @@ void ServHandle::createServ(std::string const &config)
 
 	if ((this->_fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0)) < 0)
 	{
-		perror("socket failed");
-		exit(EXIT_FAILURE);
+		std::cout << RED << "socket failed" << reset << std::endl;
+		return (1);
 	}
 
 	// Forcefully attaching socket to the port
 	if (setsockopt(this->_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)))
 	{
-		perror("setsockopt");
-		exit(EXIT_FAILURE);
+		std::cout << RED << "setsockopt" << reset << std::endl;
+		return (1);
 	}
 
 	// Forcefully attaching socket to the port
 	if (bind(this->_fd, (struct sockaddr *)&(this->_address), sizeof(struct sockaddr)) < 0)
 	{
-		perror("bind failed");
-		exit(EXIT_FAILURE);
+		std::cout << RED << "bind failed" << reset << std::endl;
+		return (1);
 	}
 
 	// changing socket from active to passive
 	if (listen(this->_fd, 1024) < 0)
 	{
-		perror("listen");
-		exit(EXIT_FAILURE);
+		std::cout << RED << "listen" << reset << std::endl;
+		return (1);
 	}
 
 	// Add Fd into map
@@ -289,6 +290,7 @@ void ServHandle::createServ(std::string const &config)
 		std::cerr << std::endl
 				  << RED << "[ERROR] Found duplicate fd" << reset << std::endl;
 	}
+	return (0);
 }
 
 void ServHandle::showMapFd(void)
@@ -322,7 +324,7 @@ void ServHandle::sockServRd(int const &servFd)
 		}
 		else
 		{
-			perror("accept");
+			std::cout << RED << "accept failed" << reset << std::endl;
 			return;
 		}
 	}
@@ -331,7 +333,7 @@ void ServHandle::sockServRd(int const &servFd)
 	// if (fcntl(this->_infd, F_SETFL, flags | O_NONBLOCK) == -1) {
 	if (fcntl(this->_infd, F_SETFL, O_NONBLOCK) == -1)
 	{
-		perror("fcntl set");
+		std::cout << RED << "fcntl set" << reset << std::endl;
 		close(this->_infd);
 	}
 
@@ -341,8 +343,7 @@ void ServHandle::sockServRd(int const &servFd)
 	this->_tmpInt = epoll_ctl(this->_epoll_fd, EPOLL_CTL_ADD, this->_infd, &(this->_event));
 	if (this->_tmpInt == -1)
 	{
-		perror("epoll_ctl accept");
-		abort();
+		std::cout << RED << "epoll_ctl accept" << reset << std::endl;
 	}
 
 	// Add client Fd into map
@@ -475,13 +476,13 @@ void ServHandle::closeSock(int fd)
 	this->_tmpInt = epoll_ctl(this->_epoll_fd, EPOLL_CTL_DEL, fd, NULL);
 	if (this->_tmpInt != 0)
 	{
-		perror("epoll_ctl(EPOLL_CTL_DEL)");
+		std::cout << RED << "epoll_ctl(EPOLL_CTL_DEL)" << reset << std::endl;
 	}
 
 	this->_tmpInt = close(fd);
 	if (this->_tmpInt != 0)
 	{
-		perror("close ");
+		std::endl << RED "close " << reset << std::endl;
 	}
 }
 
