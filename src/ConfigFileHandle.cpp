@@ -87,7 +87,7 @@ int ConfigFileHandle::readConfigFile(char const *fileName)
 
 void ConfigFileHandle::showDetailConfigFile(void)
 {
-	for (int i = 0; i < this->_amountServConfigDetail; i++)
+	for (unsigned int i = 0; i < this->_amountServConfigDetail; i++)
 	{
 		this->_servConfig[i]->showDetail();
 		std::cout << std::endl;
