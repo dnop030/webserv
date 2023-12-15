@@ -1,4 +1,5 @@
 #include "ConfigFileHandle.hpp"
+#include <sys/types.h>
 
 ConfigFileHandle::ConfigFileHandle(void)
 {
@@ -18,7 +19,7 @@ ConfigFileHandle::~ConfigFileHandle(void)
 	}
 }
 
-void ConfigFileHandle::readConfigFile(char const *fileName)
+int ConfigFileHandle::readConfigFile(char const *fileName)
 {
 	// std::cout << MAG << "read Server Config File" << reset << std::endl;
 	std::ifstream ifs;
@@ -31,7 +32,7 @@ void ConfigFileHandle::readConfigFile(char const *fileName)
 		ifs.close();
 		std::cout << RED << fileName << " file not found or no permission. please input valid filename" << reset << std::endl;
 		// throw !!!!!!!!!!!!!!!!!!!!!!1
-		exit(1);
+		return (1);
 	}
 	else
 	{
@@ -81,6 +82,7 @@ void ConfigFileHandle::readConfigFile(char const *fileName)
 		}
 		ifs.close();
 	}
+	return (0);
 }
 
 void ConfigFileHandle::showDetailConfigFile(void)

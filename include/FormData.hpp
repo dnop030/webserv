@@ -11,7 +11,7 @@ class Request;
 class FormData
 {
 private:
-	std::vector<std::map<std::string, std::string>> _form;
+	std::vector<std::map<std::string, std::string> > _form;
 	Request *_req;
 	std::string *_split;
 

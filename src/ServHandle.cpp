@@ -21,7 +21,8 @@ int ServHandle::servCreate(char const *configFile)
 {
 
 	std::cout << MAG << "servCreate" << reset << std::endl;
-	this->_configServ->readConfigFile(configFile);
+	if (this->_configServ->readConfigFile(configFile) == 1)
+		return (1);
 
 	this->showMapFd();
 
