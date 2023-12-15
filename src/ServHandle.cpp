@@ -482,7 +482,7 @@ void ServHandle::closeSock(int fd)
 	this->_tmpInt = close(fd);
 	if (this->_tmpInt != 0)
 	{
-		std::endl << RED "close " << reset << std::endl;
+		std::cout << RED "close " << reset << std::endl;
 	}
 }
 
