@@ -60,7 +60,7 @@ private:
 	std::string generateHttpResponse(int statusCode, std::string const &statusMessage, std::string const &content);
 
 	void ConnectionHandle(HttpHandle &http, int const &cliFd);
-	void ConnectionClose(void);
+	void ConnectionClose(int const &cliFd);
 
 	int	ChkDupPort(void);
 

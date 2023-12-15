@@ -439,7 +439,7 @@ void ServHandle::sockCliWr(int const &cliFd)
 		std::cout << GRN << "buffer as below" << reset << std::endl;
 		std::cout << GRN << it->second.c_str() << reset << std::endl;
 		send(cliFd, it->second.c_str(), it->second.size(), 0);
-		this->ConnectionClose();
+		this->ConnectionClose(cliFd);
 	}
 	else
 		std::cout << YEL << "[WARNING] Not found response for " << cliFd << reset << std::endl;
@@ -522,15 +522,19 @@ void ServHandle::ConnectionHandle(HttpHandle &http, int const &cliFd)
 		std::cout << GRN << "Connection is alive!!!!" << reset << std::endl;
 }
 
-void ServHandle::ConnectionClose(void)
+void ServHandle::ConnectionClose(int const &cliFd)
 {
-	std::map<int, std::string>::iterator it = this->_mapFd.begin();
+	// std::map<int, std::string>::iterator it = this->_mapFd.begin();
 
-	while (it != this->_mapFd.end())
-	{
-		if (it->second == "cc")
-			this->closeSock(it->first);
-		it++;
+	// while (it != this->_mapFd.end())
+	// {
+	// 	if (it->second == "cc")
+	// 		this->closeSock(it->first);
+	// 	it++;
+	// }
+	if (this->_mapFd[cliFd] == "cc") {
+		std::cout << RED << "found socket need to be closed" << reset << std::endl;
+		this->closeSock(cliFd);
 	}
 	std::cout << GRN << "Show MapFd in ConnectionClose()" << reset << std::endl;
 	this->showMapFd();
