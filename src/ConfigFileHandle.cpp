@@ -38,7 +38,6 @@ int ConfigFileHandle::readConfigFile(char const *fileName)
 	{
 		int cntOpenBlacket = 0;
 		int cntCloseBlacket = 0;
-		int sndBlockConfig = 0;
 		int foundServKeyW = 0;
 		std::string tmpOneBlockServConfig;
 
@@ -72,7 +71,6 @@ int ConfigFileHandle::readConfigFile(char const *fileName)
 
 				cntOpenBlacket = 0;
 				cntCloseBlacket = 0;
-				sndBlockConfig = 0;
 				foundServKeyW = 0;
 				tmpOneBlockServConfig.clear();
 				this->_amountServConfigDetail++;
