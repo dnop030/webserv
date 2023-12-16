@@ -107,7 +107,7 @@ bool isHex(std::string &str)
 {
 	for (int i = 0; str[i] != '\0'; ++i)
 	{
-		if (!std::isdigit(str[i]) && ((str[i] < 'A' || str[i] > 'F') && (str[i]) < 'a' || str[i] > 'f'))
+		if (!std::isdigit(str[i]) && ((str[i] < 'A' || str[i] > 'F') && (str[i] < 'a' || str[i] > 'f')))
 			return (false);
 	}
 	return (true);
@@ -189,7 +189,7 @@ std::string ft_itoa(int num)
 
 std::string currentDate(void)
 {
-	std::time_t currentTime = std::time(nullptr);
+	std::time_t currentTime = std::time(NULL);
 	struct tm *localTime = std::gmtime(&currentTime);
 	std::string arr_mon[12] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 	std::string arr_day[7] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
@@ -206,7 +206,6 @@ std::string currentDate(void)
 	{
 		year = localTime->tm_year + 1900;
 		day = localTime->tm_mday;
-		localTime->tm_wday;
 		hour = (localTime->tm_hour + 7) % 12;
 		minute = localTime->tm_min;
 		second = localTime->tm_sec;

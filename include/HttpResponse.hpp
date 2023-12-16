@@ -3,6 +3,7 @@
 
 #include "Http.hpp"
 #include "ConfigFileHandle.hpp"
+#include "UtilsFunction.hpp"
 #include <fstream>
 #include <sstream>
 #include <unistd.h>

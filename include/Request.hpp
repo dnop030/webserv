@@ -4,6 +4,7 @@
 #include <vector>
 #include <cctype>
 #include <sstream>
+#include <cstdlib>
 #include "color.hpp"
 #include "FormData.hpp"
 #include "HttpHandle.hpp"
@@ -13,15 +14,15 @@
 class Request : public Http
 {
 private:
-	int _buff_size;
-	int _statusCode;
-	std::string::size_type _bodySize;
-	std::string _buffer;
 	std::vector<std::string> _line;
+	int _buff_size;
+	std::string _buffer;
 	std::string _method;
-	std::string _hostname;
 	std::string _port;
+	std::string _hostname;
 	std::string _path;
+	std::string::size_type _bodySize;
+	int _statusCode;
 	std::string _fragment;
 	std::map<std::string, std::string> _query;
 

@@ -190,12 +190,12 @@ void HttpResponse::_setConfig()
 	std::vector<std::string> arr_config_condition = this->_spiltString(this->_config_location, ";");
 	std::vector<std::string> tmp;
 
-	for (auto value : arr_config_condition) {
-		if (value.length() == 0)
+	for (long unsigned int i = 0; i < arr_config_condition.size(); i++) {
+		if (arr_config_condition[i].length() == 0)
 			continue;
-		tmp = this->_spiltString(value, " ");
+		tmp = this->_spiltString(arr_config_condition[i], " ");
 		if (tmp[0].compare("error_page") == 0)
-			this->_fileError[std::stoi(tmp[1])] = tmp[2];
+			this->_fileError[static_cast<int>(ft_stod(tmp[1]))] = tmp[2];
 		else if (tmp[0].compare("allow_method") == 0 || tmp[0].compare("index") == 0) {
 			std::string tmp_val = "";
 			for(int i = tmp.size() - 1; i > 0; i--)
@@ -208,7 +208,7 @@ void HttpResponse::_setConfig()
 
 void HttpResponse::_checkReturn()
 {
-	auto re = this->_all_config.find("return");
+	std::map<std::string, std::string>::iterator re = this->_all_config.find("return");
 
 	if (re != this->_all_config.end()) {
 		this->_return = re->second;
@@ -218,7 +218,7 @@ void HttpResponse::_checkReturn()
 
 void HttpResponse::_setRootPath()
 {
-	auto root = this->_all_config.find("root");
+	std::map<std::string, std::string>::iterator root = this->_all_config.find("root");
 
 	if (root == this->_all_config.end())
 		throw(500);
@@ -246,10 +246,10 @@ void HttpResponse::_setCGI()
 	if (config_cgi.length() > 0) {
 		arr_cgi = this->_spiltString(config_cgi, ";");
 
-		for (auto value : arr_cgi) {
-			if (value.length() == 0)
+		for (long unsigned int i = 0; i < arr_cgi.size(); i++) {
+			if (arr_cgi[i].length() == 0)
 				continue;
-			tmp = this->_spiltString(value, " ");
+			tmp = this->_spiltString(arr_cgi[i], " ");
 			if (tmp[0].compare("cgi_executor") == 0) {
 				this->_config_cgi["path_cmd"] = tmp[1];
 				std::size_t found = tmp[1].find_last_of("/");
@@ -262,7 +262,7 @@ void HttpResponse::_setCGI()
 
 void HttpResponse::_checkAllowMethod()
 {
-	auto method = this->_all_config.find("allow_method");
+	std::map<std::string, std::string>::iterator method = this->_all_config.find("allow_method");
 
 	if (method != this->_all_config.end()) {
 		if (method->second.find(this->_method) == std::string::npos)
@@ -272,9 +272,9 @@ void HttpResponse::_checkAllowMethod()
 
 void HttpResponse::_checkBodySize()
 {
-	auto body_size = this->_all_config.find("client_max_body_size");
+	std::map<std::string, std::string>::iterator body_size = this->_all_config.find("client_max_body_size");
 
-	if (this->_method == "POST" && body_size != this->_all_config.end() && std::stoi(body_size->second) < this->_body.length())
+	if (this->_method == "POST" && body_size != this->_all_config.end() && static_cast<long unsigned int>(ft_stod(body_size->second)) < this->_body.length())
 		throw(413);
 }
 
@@ -325,14 +325,14 @@ std::string HttpResponse::_methodPost()
 	if (stat(path_upload.c_str(), &statbuf) != 0)
 		mkdir(path_upload.c_str(), 0764);
 
-	ifs.open(path_file, std::ifstream::in);
+	ifs.open(path_file.c_str(), std::ifstream::in);
 	if (ifs.good()) {
 		ifs.close();
 		this->_statusCode = 400;
 
 		return "";
 	}
-	std::ofstream ofs(path_file);
+	std::ofstream ofs(path_file.c_str(), std::ofstream::out);
 	ofs << this->_body;
 	ofs.close();
 	this->_statusCode = 201;
@@ -375,7 +375,9 @@ std::string HttpResponse::_cgi()
 					NULL
 				};
 	std::string	filename = this->_setENVArgv("FILENAME", this->_fileResponse);
-	std::string	statusCode = this->_setENVArgv("STATUS_CODE", std::to_string(this->_statusCode));
+	std::stringstream ss;
+	ss << this->_statusCode;
+	std::string	statusCode = this->_setENVArgv("STATUS_CODE", ss.str());
 	std::string	statusMessage = this->_setENVArgv("STATUS_MESSAGE", this->_status[this->_statusCode]);
 	std::string	port = this->_setENVArgv("PORT", this->_port);
 	std::string	root_path = this->_setENVArgv("ROOT_PATH", this->_config_root);
@@ -451,12 +453,14 @@ std::string HttpResponse::_setResponseStream()
 			contentRes = this->_methodPost();
 		else {
 			this->_checkFilenameDD();
-			std::ifstream ifs(this->_fileResponse);
+			std::ifstream ifs(this->_fileResponse.c_str(), std::ifstream::in);
 			std::string content((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
 			contentRes = content;
 		}
 
-		this->_setHeader("Content-Length:", std::to_string(contentRes.length()));
+		std::stringstream ss;
+		ss << contentRes.length();
+		this->_setHeader("Content-Length:", ss.str());
 		if (this->_statusCode != 301) {
 			this->_setHeader("Connection:", this->_connection);
 			this->_setHeader("Content-Type:", this->_contentType);
@@ -579,15 +583,11 @@ void HttpResponse::printSetForResponse()
 	std::cout << "this->_contentType: " << this->_contentType << std::endl;
 	std::cout << "this->_fileResponse: " << this->_fileResponse << std::endl;
 	std::cout << "this->_all_config: " << std::endl;
-	for (auto value : this->_all_config)
-		std::cout << value.first << " " << value.second << std::endl;
 	std::cout << "this->_config_ser: " << this->_config_ser << std::endl;
 	std::cout << "this->_config_root: " << this->_config_root << std::endl;
 	std::cout << "this->_config_location: " << this->_config_location << std::endl;
 	std::cout << "this->_config_suffix_cgi: " << this->_config_suffix_cgi << std::endl;
 	std::cout << "this->_config_cgi: " << std::endl;
-	for (auto value : this->_config_cgi)
-		std::cout << value.first << " " << value.second << std::endl;
 }
 
 void HttpResponse::printSetForCgi(const std::string &name_cgi)

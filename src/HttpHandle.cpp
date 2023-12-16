@@ -19,13 +19,14 @@ HttpHandle::HttpHandle(std::string &buffer)
 	if (this->_header.find("Content-Length") != this->_header.end())
 		this->_contentLength = ft_stod(this->_header["Content-Length"]);
 	// necessary to check config file [reponse]
-	this->response.setServername(this->_hostname);
-	this->response.setPath(this->_path);
-	this->response.setPort(this->_port);
-	this->response.setMethod(this->_method);
-	this->response.setConnection(this->_header["Connection"]);
-	this->response.setBody(this->_body);
-	this->response.setFileName(this->_filename);
+	this->response = new HttpResponse();
+	this->response->setServername(this->_hostname);
+	this->response->setPath(this->_path);
+	this->response->setPort(this->_port);
+	this->response->setMethod(this->_method);
+	this->response->setConnection(this->_header["Connection"]);
+	this->response->setBody(this->_body);
+	this->response->setFileName(this->_filename);
 	// this->printLine();
 }
 
@@ -34,6 +35,7 @@ HttpHandle::~HttpHandle()
 	if (this->_req != NULL)
 	{
 		delete this->_req;
+		delete this->response;
 		this->_req = NULL;
 	}
 }

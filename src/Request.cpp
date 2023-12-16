@@ -1,6 +1,6 @@
 #include "Request.hpp"
 
-Request::Request(std::string &buffer) : _buffer(buffer), _line(0), _buff_size(0), _method(""), _port(""), _hostname(""), _path(""), _fragment(""), _bodySize(0), _statusCode(0)
+Request::Request(std::string &buffer) : _line(0), _buff_size(0), _buffer(buffer), _method(""), _port(""), _hostname(""), _path(""), _bodySize(0), _statusCode(0), _fragment("")
 {
 	try
 	{
@@ -33,7 +33,7 @@ Request::Request(std::string &buffer) : _buffer(buffer), _line(0), _buff_size(0)
 	}
 }
 
-Request::Request(Request const &src) : Http(src), _buff_size(src._buff_size), _buffer(src._buffer), _method(src._method), _port(src._port), _hostname(src._hostname), _path(src._path), _fragment(src._fragment), _bodySize(src._bodySize), _statusCode(src._statusCode)
+Request::Request(Request const &src) : Http(src), _buff_size(src._buff_size), _buffer(src._buffer), _method(src._method), _port(src._port), _hostname(src._hostname), _path(src._path), _bodySize(src._bodySize), _statusCode(src._statusCode), _fragment(src._fragment)
 {
 	*this = src;
 }
@@ -255,12 +255,15 @@ void Request::parsePort(std::string &dns)
 	if (start != std::string::npos)
 	{
 		this->_hostname = dns.substr(0, start);
-		if (end != std::string::npos)
-			this->_port = dns.substr(++start, --end - start);
+		if (end != std::string::npos) {
+			start++;
+			this->_port = dns.substr(start, --end - start);
+		}
 		else
 		{
 			end = getLastChar(dns);
-			this->_port = dns.substr(++start, end - start);
+			start++;
+			this->_port = dns.substr(start, end - start);
 		}
 	}
 	if (this->_port.empty() || !allDigit(this->_port))
@@ -292,12 +295,15 @@ void Request::parseQuery(std::string &dns)
 	std::string::size_type end = dns.find_first_of('#');
 	if (start != std::string::npos)
 	{
-		if (end != std::string::npos)
-			tmp = dns.substr(++start, --end - start);
+		if (end != std::string::npos) {
+			start++;
+			tmp = dns.substr(start, --end - start);
+		}
 		else
 		{
 			end = getLastChar(dns);
-			tmp = dns.substr(++start, end - start);
+			start++;
+			tmp = dns.substr(start, end - start);
 		}
 		std::string *query = ft_split(tmp, '&');
 		std::string *map = NULL;
@@ -345,7 +351,6 @@ void Request::parseFragment(std::string &dns)
 
 void Request::checkDNS(std::string &dns)
 {
-	std::string::size_type start = 0;
 	std::string::size_type end = getLastChar(dns) - 1;
 
 	if (!std::isalpha(dns[0]) || (!std::isalpha(dns[end]) && !std::isdigit(dns[end])))
@@ -526,7 +531,7 @@ void Request::parseHeader(void)
 			tmp[1] = "";
 		else
 			tmp[1] = this->_line[i].substr(end);
-		if (tmp == NULL || tmp[0] == "" || tmp[0][0] == ' ' || tmp[0][0] == '\t' || tmp[0].back() == ' ' || tmp[0].back() == '\t' || (tmp[1][0] != ' ' && tmp[1][0] != '\t'))
+		if (tmp == NULL || tmp[0] == "" || tmp[0][0] == ' ' || tmp[0][0] == '\t' || tmp[0][tmp[0].length() - 1] == ' ' || tmp[0][tmp[0].length() - 1] == '\t' || (tmp[1][0] != ' ' && tmp[1][0] != '\t'))
 			throw BadRequest();
 		if (std::isalpha(tmp[0][0]) && (tmp[0][0] < 'A' || tmp[0][0] > 'Z'))
 			tmp[0][0] -= 32;
@@ -599,7 +604,7 @@ void Request::parseBody(void)
 				throw BadRequest();
 			else if (len_flag % 2 != 0 && len > 0)
 			{
-				if (len != tmp.size())
+				if (static_cast<long unsigned int>(len) != tmp.size())
 					throw BadRequest();
 				this->_bodyChunk.push_back(tmp);
 				res.append(tmp);

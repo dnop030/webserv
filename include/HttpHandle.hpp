@@ -6,6 +6,8 @@
 #include "UtilsFunction.hpp"
 
 class Request;
+class HttpResponse;
+
 class HttpHandle
 {
 private:
@@ -37,5 +39,5 @@ public:
 	void printResponseHeader();
 
 	std::string getConnection();
-	HttpResponse response;
+	HttpResponse *response;
 };

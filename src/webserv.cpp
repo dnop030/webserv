@@ -11,7 +11,7 @@ ServHandle servManager;
 // Signal handler function
 void handle_sigint(int sig)
 {
-	std::cout << "Received SIGINT (Ctrl+C). Exiting..." << std::endl;
+	std::cout << "Received SIGINT (Ctrl+C). Exiting..." << sig << std::endl;
 	// You can perform cleanup or take other actions here
 	// exit(0); // Terminate the program
 	servManager.servStop();

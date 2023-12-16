@@ -37,7 +37,7 @@ int ServHandle::servCreate(char const *configFile)
 
 	// create server in order to get Fd number
 	std::cout << MAG << "amout of serv config " << this->_configServ->getAmountServConfig() << reset << std::endl;
-	for (int i = 0; i < this->_configServ->getAmountServConfig(); i++)
+	for (int unsigned i = 0; i < this->_configServ->getAmountServConfig(); i++)
 	{
 		if (this->createServ(this->_configServ->getServConfigVal(i, "listen")) == 1)
 			return (1);
@@ -365,7 +365,7 @@ void ServHandle::sockServRd(int const &servFd)
 
 void ServHandle::sockServWr(int const &servFd)
 {
-	std::cout << YEL << "[WARNING] Found some package on Server socket Need to send back" << reset << std::endl;
+	std::cout << YEL << "[WARNING] Found some package on Server socket Need to send back"<< servFd << reset << std::endl;
 }
 
 void ServHandle::sockCliRd(int const &cliFd)
@@ -388,7 +388,7 @@ void ServHandle::sockCliRd(int const &cliFd)
 
 	HttpHandle http(this->_bufferPack);
 	this->ConnectionHandle(http, cliFd);
-	http.response.setConfig(this->_configServ);
+	http.response->setConfig(this->_configServ);
 
 	// if the size of receive package = 0
 	// means client send some Flag ex. FIN
@@ -400,7 +400,7 @@ void ServHandle::sockCliRd(int const &cliFd)
 		{
 			// std::cout << GRN << "In sockCliRd response.returnResponse as below" << std::endl;
 			// std::cout << GRN <<  << std::endl;
-			this->_httpRespose.insert(std::pair<int, std::string>(cliFd, http.response.returnResponse()));
+			this->_httpRespose.insert(std::pair<int, std::string>(cliFd, http.response->returnResponse()));
 			// this->_httpRespose.insert(std::pair<int, std::string>(cliFd, this->generateHttpResponse(200, "Ok", "Hello from server")));
 		}
 		else
@@ -552,10 +552,10 @@ int ServHandle::ChkDupPort(void)
 	// for (int i = 0; i < _configServ->getAmountServConfig(); i++) {
 	// 	std::cout << _configServ->getServConfigVal(i, "listen") << std::endl;
 	// }
-	for (int i = 0; i < (_configServ->getAmountServConfig() - 1); i++) {
+	for (int unsigned i = 0; i < (_configServ->getAmountServConfig() - 1); i++) {
 		// std::cout << _configServ->getServConfigVal(i, "listen") << std::endl;
 		cmp = _configServ->getServConfigVal(i, "listen");
-		for (int j = i + 1; j < _configServ->getAmountServConfig(); j++) {
+		for (int unsigned j = i + 1; j < _configServ->getAmountServConfig(); j++) {
 			// if (_configServ->getServConfigVal(i, "listen").compare(_configServ->getServConfigVal(j, "listen")) == 0)
 			// 	return (1);
 			searcher = _configServ->getServConfigVal(j, "listen");
