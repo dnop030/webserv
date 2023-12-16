@@ -1,8 +1,11 @@
 #include "HttpHandle.hpp"
 
-HttpHandle::HttpHandle(std::string &buffer) : _statusCode(0), _buffer(buffer), _contentLength(0)
+HttpHandle::HttpHandle(std::string &buffer)
 {
+	this->_buffer = buffer;
 	this->_req = new Request(this->_buffer);
+	this->_statusCode = 0;
+	this->_contentLength = 0;
 	this->_method = this->_req->getMethod();
 	this->_hostname = this->_req->getHostname();
 	this->_port = this->_req->getPort();
@@ -35,8 +38,9 @@ HttpHandle::~HttpHandle()
 	}
 }
 
-HttpHandle::HttpHandle(HttpHandle const &src) : _buffer(src._buffer), _statusCode(src._statusCode), _req(src._req)
+HttpHandle::HttpHandle(HttpHandle const &src) : _buffer(src._buffer), _statusCode(src._statusCode)
 {
+	this->_req = src._req;
 	*this = src;
 }
 
@@ -99,7 +103,8 @@ void HttpHandle::printResponseHeader(void)
 	std::string tmp;
 	std::string date = currentDate();
 	addKey(this->_req->_respHeader, "Date", date);
-	std::vector<std::string> vec = {"Date", "Allow", "Location", "Connection", "Content-Type", "Content-Length", "Accept-Language", "Server", "Content-Location", "Last-Modified"};
+	static const std::string arr[] = {"Date", "Allow", "Location", "Connection", "Content-Type", "Content-Length", "Accept-Language", "Server", "Content-Location", "Last-Modified"};
+	std::vector<std::string> vec (arr, arr + sizeof(arr) / sizeof(arr[0]) );
 	for (std::vector<std::string>::iterator it = vec.begin(); it != vec.end(); ++it)
 		printKeyValue(this->_req->_respHeader, *it);
 }

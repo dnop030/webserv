@@ -155,7 +155,6 @@ void CheckHeader::checkDate(void)
 	this->_t.tm_min = min_tmp;
 	this->_t.tm_sec = sec_tmp;
 	this->_t.tm_isdst = 0;
-	time_t time = mktime(&this->_t);
 	if (this->_t.tm_year != y_tmp || this->_t.tm_mon != m_tmp || this->_t.tm_mday != d_tmp || this->_t.tm_hour != h_tmp || this->_t.tm_min != min_tmp || this->_t.tm_sec != sec_tmp)
 		throw BadRequest();
 }

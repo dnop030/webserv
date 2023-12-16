@@ -58,7 +58,7 @@ HttpResponse::~HttpResponse()
 
 int HttpResponse::_checkFileExits(const std::string &file_name)
 {
-	std::ifstream ifs(file_name);
+	std::ifstream ifs(file_name.c_str(), std::ifstream::in);
 
 	if (ifs.good()) {
 		ifs.close();
@@ -70,7 +70,7 @@ int HttpResponse::_checkFileExits(const std::string &file_name)
 
 void HttpResponse::_checkFile()
 {
-	std::ifstream ifs(this->_fileResponse);
+	std::ifstream ifs(this->_fileResponse.c_str(), std::ifstream::in);
 
 	(ifs.good()) ? ifs.close() : throw(404);
 }
@@ -87,18 +87,18 @@ std::string HttpResponse::_setENVArgv(std::string const &name, std::string const
 
 std::string HttpResponse::_searchIndex(std::string const &pathFile)
 {
-	auto index = this->_all_config.find("index");
+	std::map<std::string, std::string>::iterator index = this->_all_config.find("index");
 
 	if (index != this->_all_config.end()) {
 		std::vector<std::string> arr_index = this->_spiltString(index->second, " ");
 
-		for (auto value : arr_index) {
-			if (value.length() == 0)
+		for (long unsigned int i = 0; i < arr_index.size(); i++) {
+			if (arr_index[i].length() == 0)
 				continue;
-			std::ifstream ifs(pathFile + value);
+			std::ifstream ifs((pathFile + arr_index[i]).c_str(), std::ifstream::in);
 			if (ifs.good()) {
 				ifs.close();
-				return (pathFile + value);
+				return ((pathFile + arr_index[i]).c_str());
 			}
 		}
 	}

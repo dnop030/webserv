@@ -9,10 +9,10 @@ class Request;
 class HttpHandle
 {
 private:
+	std::string _buffer;
 	Request *_req;
 	int _statusCode;
 	double _contentLength;
-	std::string _buffer;
 	std::string _method;
 	std::string _hostname;
 	std::string _port;

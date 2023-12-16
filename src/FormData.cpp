@@ -1,7 +1,9 @@
 #include "FormData.hpp"
 
-FormData::FormData(Request &req) : _split(NULL), _req(NULL)
+FormData::FormData(Request &req)
 {
+	this->_split = NULL;
+	this->_req = NULL;
 	this->_req = new Request(req);
 	try
 	{
@@ -56,7 +58,7 @@ const char *FormData::BadRequest::what() const throw()
 
 void FormData::printForm()
 {
-	for (std::vector<std::map<std::string, std::string>>::iterator vec = this->_form.begin(); vec != this->_form.end(); ++vec)
+	for (std::vector<std::map<std::string, std::string> >::iterator vec = this->_form.begin(); vec != this->_form.end(); ++vec)
 	{
 		std::cout << "/////////// Map ////////////" << std::endl;
 		this->_req->printMap(*vec);
@@ -136,7 +138,6 @@ void FormData::getFromBound(std::vector<std::string> &chunk, std::string::size_t
 		return;
 	start += 2;
 	end = this->_req->_body.find(bound, start);
-	std::string::size_type tmp_size = end;
 	if (end == std::string::npos)
 	{
 		start = end;
@@ -167,7 +168,7 @@ void FormData::parseHeader(std::map<std::string, std::string> &map, std::string 
 		tmp[1] = "";
 	else
 		tmp[1] = line.substr(end);
-	if (tmp == NULL || tmp[0] == "" || tmp[0][0] == ' ' || tmp[0][0] == '\t' || tmp[0].back() == ' ' || tmp[0].back() == '\t' || (tmp[1][0] != ' ' && tmp[1][0] != '\t'))
+	if (tmp == NULL || tmp[0] == "" || tmp[0][0] == ' ' || tmp[0][0] == '\t' || tmp[0][tmp[0].length() - 1] == ' ' || tmp[0][tmp[0].length() - 1] == '\t' || (tmp[1][0] != ' ' && tmp[1][0] != '\t'))
 		throw BadRequest();
 	if (std::isalpha(tmp[0][0]) && (tmp[0][0] < 'A' || tmp[0][0] > 'Z'))
 		tmp[0][0] -= 32;
@@ -205,7 +206,6 @@ void FormData::checkContentType(void)
 	if (mime == NULL)
 		return;
 	std::string::size_type start = mime[1].find("=");
-	std::string::size_type end = 0;
 	if (mime[0] != "multipart/form-data" || start == std::string::npos)
 	{
 		delete[] mime;
